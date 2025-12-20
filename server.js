@@ -26,6 +26,78 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 // ===== INICIALIZAR BANCO DE DADOS =====
 db.initializeDatabase(); // Cria tabelas se não existirem~
 
+// ===== MIGRATION: CORRIGIR SCHEMA DA TABELA TASKS =====
+(async () => {
+    if (!db.isPostgres) {
+        console.log('⏭️ Pulando migration de tasks (não é PostgreSQL)');
+        return;
+    }
+
+    try {
+        console.log('🔄 Verificando schema da tabela tasks...');
+
+        // 1. Adicionar coluna title se não existir
+        const titleExists = await db.query(`
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'tasks' AND column_name = 'title'
+        `);
+
+        if (titleExists.length === 0) {
+            console.log('🔄 Adicionando coluna title...');
+            await db.query(`ALTER TABLE tasks ADD COLUMN title TEXT`);
+            console.log('✅ Coluna title adicionada');
+        }
+
+        // 2. Adicionar coluna description se não existir
+        const descExists = await db.query(`
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'tasks' AND column_name = 'description'
+        `);
+
+        if (descExists.length === 0) {
+            console.log('🔄 Adicionando coluna description...');
+            await db.query(`ALTER TABLE tasks ADD COLUMN description TEXT`);
+            console.log('✅ Coluna description adicionada');
+        }
+
+        // 3. Copiar dados de name para title (se title estiver vazio)
+        await db.query(`
+            UPDATE tasks
+            SET title = name
+            WHERE title IS NULL OR title = ''
+        `);
+
+        // 4. Remover constraint NOT NULL de name (se existir)
+        try {
+            await db.query(`ALTER TABLE tasks ALTER COLUMN name DROP NOT NULL`);
+            console.log('✅ Constraint NOT NULL removida da coluna name');
+        } catch (err) {
+            if (!err.message.includes('does not exist')) {
+                console.log('⚠️ Aviso:', err.message);
+            }
+        }
+
+        // 5. Atualizar valores de status para o novo padrão
+        await db.query(`
+            UPDATE tasks
+            SET status = CASE
+                WHEN status = 'pendente' THEN 'pending'
+                WHEN status = 'progresso' THEN 'in_progress'
+                WHEN status = 'concluido' OR status = 'concluída' THEN 'completed'
+                ELSE status
+            END
+            WHERE status IN ('pendente', 'progresso', 'concluido', 'concluída')
+        `);
+
+        console.log('✅ Schema da tabela tasks atualizado com sucesso!');
+
+    } catch (error) {
+        console.error('❌ Erro ao atualizar schema de tasks:', error.message);
+    }
+})();
+
 // ===== MIGRATION: ADICIONAR CAMPO TELEGRAM =====
 (async () => {
     try {
@@ -206,31 +278,41 @@ app.get('/Tela_TesteEmail.html', (req, res) => {
 app.get('/api/tasks', async (req, res) => {
     try {
         const userId = req.query.user_id || req.headers['x-user-id'];
-        
+
         if (!userId) {
-            return res.status(401).json({ 
-                success: false, 
-                error: 'Usuário não identificado' 
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não identificado'
             });
         }
-        
+
         const rows = await db.query(
             "SELECT * FROM tasks WHERE user_id = ? ORDER BY created_at DESC",
             [userId]
         );
-        
+
         console.log(`📥 ${rows.length} tarefas carregadas para usuário ${userId}`);
-        
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             tasks: rows,
-            total: rows.length 
+            total: rows.length
         });
     } catch (err) {
         console.error('❌ Erro ao buscar tarefas:', err);
-        res.status(500).json({ 
-            success: false, 
-            error: err.message 
+        console.error('Detalhes:', err.message);
+
+        let errorMessage = err.message;
+
+        if (err.message.includes('Connection terminated')) {
+            errorMessage = 'Connection terminated unexpectedly';
+        } else if (err.message.includes('ECONNREFUSED')) {
+            errorMessage = 'Banco de dados indisponível';
+        }
+
+        res.status(500).json({
+            success: false,
+            error: errorMessage
         });
     }
 });
@@ -299,11 +381,11 @@ app.post('/api/tasks', async (req, res) => {
 
     try {
         let info;
-        
+
         if (db.isPostgres) {
             // PostgreSQL retorna o ID diretamente
             const result = await db.query(
-                `INSERT INTO tasks (user_id, title, description, status, priority) 
+                `INSERT INTO tasks (user_id, title, description, status, priority)
                  VALUES (?, ?, ?, ?, ?) RETURNING id`,
                 [user_id, title, description, status, priority]
             );
@@ -311,12 +393,12 @@ app.post('/api/tasks', async (req, res) => {
         } else {
             // SQLite usa lastInsertRowid
             info = await db.run(
-                `INSERT INTO tasks (user_id, title, description, status, priority) 
+                `INSERT INTO tasks (user_id, title, description, status, priority)
                  VALUES (?, ?, ?, ?, ?)`,
                 [user_id, title, description, status, priority]
             );
         }
-        
+
         console.log(`✅ Tarefa criada para usuário ${user_id}:`, title);
 
         // Se a tarefa for urgente, notifica via Telegram
@@ -333,9 +415,21 @@ app.post('/api/tasks', async (req, res) => {
         });
     } catch (err) {
         console.error('❌ Erro ao criar tarefa:', err);
+        console.error('Detalhes:', err.message);
+        console.error('Stack:', err.stack);
+
+        let errorMessage = 'Erro ao salvar tarefa no banco';
+
+        if (err.message.includes('Connection terminated')) {
+            errorMessage = 'Erro de conexão com o banco. Tente novamente em instantes.';
+        } else if (err.message.includes('ECONNREFUSED')) {
+            errorMessage = 'Banco de dados indisponível';
+        }
+
         res.status(500).json({
             success: false,
-            error: 'Erro ao salvar tarefa no banco'
+            error: errorMessage,
+            details: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
     }
 });

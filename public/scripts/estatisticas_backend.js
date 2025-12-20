@@ -4,7 +4,9 @@
 // ==========================================
 
 // Usar variável global existente ou definir se não existir
-const STATS_API_URL = window.API_URL || 'https://basetestenura-3.onrender.com';
+const STATS_API_URL = window.API_URL || (window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : window.location.origin);
 
 /**
  * Busca o usuário logado do sistema de autenticação
