@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Nura - Gestão Inteligente de Tarefas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../css/TelaPrincipal.css">
+  <link rel="stylesheet" href="../css/darkmode.css">
+</head>
+
+<body>
+
+<!-- Navegação profissional e criativa -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="navbar-left">
+        <a class="navbar-brand" href="#">
+          <div class="brand-icon">N</div>
+          <span>Nura</span>
+        </a>
+      </div>
+      
+      <button class="navbar-toggler" type="button" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="navbar-nav" id="navMenu">
+        <li class="nav-item">
+          <a class="nav-link active" href="Tela_Inicial.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="Tela_Gerenciamento.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+            Projetos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="Tela_Ajustes.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 1v6m0 6v6m5.66-13l-4.24 4.24m0 5.52L17.66 23M23 12h-6m-6 0H1m13.66 5.66l-4.24-4.24m0-5.52L6.34 1"></path>
+            </svg>
+            Configurações
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="Tela_TesteEmail.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            Notificações
+          </a>
+        </li>
+      </ul>
+      
+      <div class="navbar-right">
+        <button class="btn-nav btn-nav-secondary" id="darkModeToggle" title="Alternar modo escuro">
+          <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <button class="btn-nav btn-nav-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+        </button>
+        <button class="btn-nav btn-nav-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section - Design Moderno e Dinâmico -->
+  <section class="hero">
+    <div class="hero-background">
+      <div class="hero-pattern"></div>
+      <div class="hero-gradient"></div>
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+      </div>
+    </div>
+    
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-pulse"></span>
+          Gestão Inteligente
+        </div>
+        <h1>
+          Maximize sua produtividade 
+          <span class="gradient-text">com IA</span>
+        </h1>
+        <p>Organize tarefas, automatize rotinas e alcance seus objetivos com eficiência.</p>
+        
+        <div class="hero-cta">
+          <button class="btn btn-hero-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Começar Agora
+          </button>
+          <button class="btn btn-hero-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            Ver Demo
+          </button>
+        </div>
+        
+        <!-- CARDS DE ESTATÍSTICAS COM IDs -->
+        <div class="hero-stats">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-success">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number" id="tarefas-ativas">0</div>
+              <div class="stat-label">Tarefas Ativas</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-primary">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number" id="percentual-concluidas">0%</div>
+              <div class="stat-label">Concluídas Hoje</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-warning">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number" id="tarefas-andamento">0</div>
+              <div class="stat-label">Em Andamento</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gerenciamento de Tarefas - Layout Profissional -->
+  <section class="container my-5">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Tarefas</h2>
+        <p class="section-subtitle">Gerencie suas atividades diárias</p>
+      </div>
+      <button class="btn btn-primary" id="btnAdicionar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Nova Tarefa
+      </button>
+    </div>
+
+    <!-- Bloco de adicionar tarefa -->
+    <div id="blocoTarefas" class="escondido">
+      <textarea id="textareaTarefa" placeholder="Descreva sua tarefa..."></textarea>
+      <div class="action-buttons">
+        <button class="btn btn-secondary" id="btnCancelar">Cancelar</button>
+        <button class="btn btn-success" id="btnSalvar">Salvar Tarefa</button>
+      </div>
+    </div>
+
+    <!-- Lista de tarefas -->
+    <div id="listaTarefas" class="list-group">
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 11l3 3L22 4"></path>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+        </svg>
+        <h3>Nenhuma tarefa cadastrada</h3>
+        <p>Comece criando sua primeira tarefa para organizar seu dia</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Assistente IA - Design Clean e Moderno -->
+  <section class="container my-5">
+    <div class="ai-assistant-card">
+      <!-- Header -->
+      <div class="ai-assistant-header">
+        <div class="ai-assistant-header-left">
+          <div class="ai-assistant-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="ai-assistant-title">Assistente IA</h2>
+            <p class="ai-assistant-subtitle">Geração de rotinas</p>
+          </div>
+        </div>
+        <div class="ai-assistant-status">
+          <span class="ai-status-dot"></span>
+          Online
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="ai-assistant-body">
+        <!-- Campo de atividades -->
+        <div class="ai-field">
+          <label class="ai-field-label">Descreva suas atividades</label>
+          <textarea 
+            class="ai-field-textarea" 
+            id="descricaoRotina"
+            placeholder="Ex: Revisar relatórios, reunião com equipe, responder emails..."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <!-- Horários (SEM ÍCONES) -->
+        <div class="ai-field">
+          <label class="ai-field-label">Horário de trabalho</label>
+          <div class="ai-time-grid">
+            <div class="ai-time-field">
+              <span class="ai-time-label">INÍCIO</span>
+              <input type="time" class="ai-time-input" id="horaInicioRotina" value="08:00">
+            </div>
+
+            <div class="ai-time-separator">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14"/>
+                <path d="M12 5l7 7-7 7"/>
+              </svg>
+            </div>
+
+            <div class="ai-time-field">
+              <span class="ai-time-label">TÉRMINO</span>
+              <input type="time" class="ai-time-input" id="horaFimRotina" value="18:00">
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão -->
+        <button class="ai-generate-button" onclick="gerarRotinaInteligente()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          Gerar Rotina
+        </button>
+
+        <!-- Resultado -->
+        <div id="resultadoRotina" class="ai-result" style="display: none;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section - Profissional -->
+  <section class="container my-6">
+    <div class="section-header-center">
+      <h2 class="section-title">Recursos</h2>
+      <p class="section-subtitle">Ferramentas poderosas para sua produtividade</p>
+    </div>
+
+    <div class="row">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <h3 class="feature-title">Gestão de Projetos</h3>
+        <p class="feature-description">Organize e acompanhe o progresso de seus projetos em um único lugar</p>
+        <a href="Tela_Gerenciamento.html" class="feature-link">
+          Acessar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">Personalização</h3>
+        <p class="feature-description">Ajuste o sistema de acordo com suas preferências e workflow</p>
+        <a href="Tela_Ajustes.html" class="feature-link">
+          Configurar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">Notificações</h3>
+        <p class="feature-description">Receba alertas e resumos diários sobre suas tarefas pendentes</p>
+        <a href="Tela_TesteEmail.html" class="feature-link">
+          Gerenciar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section Moderna -->
+  <section class="container my-6">
+    <div class="section-header-center">
+      <h2 class="section-title">Planos</h2>
+      <p class="section-subtitle">Escolha o plano ideal para seu perfil</p>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <h3>Free</h3>
+          <div class="pricing-price">
+            <span class="currency">R$</span>
+            <span class="amount">0</span>
+            <span class="period">/mês</span>
+          </div>
+        </div>
+        <ul class="pricing-features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Até 10 tarefas
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Sincronização básica
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Suporte por email
+          </li>
+        </ul>
+        <button class="pricing-btn">Plano Atual</button>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="featured-badge">Popular</div>
+        <div class="pricing-header">
+          <h3>Pro</h3>
+          <div class="pricing-price">
+            <span class="currency">R$</span>
+            <span class="amount">29</span>
+            <span class="period">/mês</span>
+          </div>
+        </div>
+        <ul class="pricing-features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Tarefas ilimitadas
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Sincronização em tempo real
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Sugestões de IA
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Suporte prioritário
+          </li>
+        </ul>
+        <button class="pricing-btn primary">Upgrade</button>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <h3>Premium</h3>
+          <div class="pricing-price">
+            <span class="currency">R$</span>
+            <span class="amount">99</span>
+            <span class="period">/mês</span>
+          </div>
+        </div>
+        <ul class="pricing-features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Tudo do Pro
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            IA avançada
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Relatórios personalizados
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Suporte 24/7 VIP
+          </li>
+        </ul>
+        <button class="pricing-btn">Fazer Upgrade</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Profissional -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3>Nura</h3>
+          <p>Gestão inteligente de tarefas</p>
+        </div>
+        <div class="footer-links">
+          <a href="#">Termos de Uso</a>
+          <a href="#">Privacidade</a>
+          <a href="#">Suporte</a>
+          <a href="#">Documentação</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Nura. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../scripts/aiSettings.js"></script>
+  <script src="../scripts/darkMode.js"></script>
+  <script src="../scripts/sincro_telas.js"></script>
+  <script src="../scripts/settings.js"></script>
+  <script src="../scripts/auth.js"></script>
+  <script src="../scripts/estatisticas_backend.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' http://localhost:3000 https://basetestenura-3.onrender.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Nura.ia</title>
+    <link rel="stylesheet" href="../css/style.css">     
+</head>
+
+<body>
+    <main>
+        <section id="logins">
+            <div id="imagem"></div>
+            
+            <div id="text">
+                <h1>Bem-vindo de volta</h1>
+                <p class="subtitle">Entre com suas credenciais</p>
+                
+                <form id="login-form">
+                    <p id="usu">
+                        <label for="iusuario">Usuário ou E-mail</label>
+                        <input type="text" name="email" id="iusuario" placeholder="Digite seu usuário" required minlength="3">
+                    </p>
+
+                    <p id="sen">
+                        <label for="isenha">Senha</label>
+                        <input type="password" name="senha" id="isenha" placeholder="Digite sua senha" required minlength="8">
+                        <a href="#" class="forgot-password">Esqueceu a senha?</a>
+                    </p>
+
+                    <p id="enviar">
+                        <input type="submit" value="Entrar" id="ienviar">
+                    </p>
+                    
+                    <div id="login-message" style="text-align: center; margin-top: 10px; display: none; padding: 10px; border-radius: 5px;"></div>
+                </form>
+            </div>
+
+            <footer>
+                <p>Ainda não tem uma conta?</p>
+                <a href="Tela_CriaConta.html"><strong>Crie uma gratuitamente</strong></a>
+            </footer>
+        </section>
+    </main>
+
+    <script src="../scripts/login.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+# Dependências
+node_modules/
+
+# Arquivos de ambiente (NUNCA COMITAR!)
+.env
+
+# Banco de dados local
+*.db
+nura.db
+database.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Build
+dist/
+build/
+
+# Executáveis
+*.exe
+ngrok.exe
+ngrok.zip

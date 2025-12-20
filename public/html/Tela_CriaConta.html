@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta - Nura.ia</title>
+    <link rel="stylesheet" href="../css/stylecriaCont.css">
+</head>
+
+<body>
+    <main>
+        <section id="logins">
+            <div id="imagem"></div>
+            
+            <div id="text">
+                <h1>Criar sua conta</h1>
+                <p class="subtitle">Preencha os campos abaixo</p>
+                
+                <form action="Tela_Inicial.html" method="get">
+                    <p id="usu">
+                        <label for="iusuario">Nome de Usuário</label>
+                        <input type="text" name="usuario" id="iusuario" placeholder="Digite seu usuário" required minlength="3">
+                    </p>
+
+                    <p id="email">
+                        <label for="iemail">E-mail</label>
+                        <input type="email" name="email" id="iemail" placeholder="Digite seu e-mail" required>
+                    </p>
+
+                    <p id="sen">
+                        <label for="isenha">Senha</label>
+                        <input type="password" name="senha" id="isenha" placeholder="Digite sua senha" required minlength="8">
+                    </p>
+
+                    <p id="enviar">
+                        <input type="submit" value="Criar Conta" id="ienviar">
+                    </p>
+                </form>
+            </div>
+
+            <footer>
+                <p>Já tem uma conta?</p>
+                <a href="Tela_Login.html"><strong>Faça login</strong></a>
+            </footer>
+        </section>
+    </main>
+
+    <script>
+        // Adiciona efeito de loading ao submeter
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btn = document.getElementById('ienviar');
+            btn.classList.add('loading');
+        });
+
+        // Animação suave nos inputs
+        const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

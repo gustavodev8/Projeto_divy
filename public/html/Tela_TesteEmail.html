@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Teste de Email - Nura</title>
+    <link rel="stylesheet" href="../css/Ajustes.css">
+    <style>
+        /* Estilos específicos para a página de teste */
+        .test-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .test-header {
+            background: linear-gradient(135deg, #49a09d 0%, #5f9ea0 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .test-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .test-card {
+            background: #2a2a2a;
+        }
+
+        .test-card h3 {
+            color: #49a09d;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .test-section {
+            margin-bottom: 20px;
+        }
+
+        .test-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e5e5;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode .test-input {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            border-color: #333;
+        }
+
+        .test-btn {
+            background: #49a09d;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .test-btn:hover {
+            background: #3d8884;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(73, 160, 157, 0.3);
+        }
+
+        .test-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .test-btn.secondary {
+            background: #667eea;
+        }
+
+        .test-btn.secondary:hover {
+            background: #5568d3;
+        }
+
+        .test-btn.danger {
+            background: #e74c3c;
+        }
+
+        .test-btn.danger:hover {
+            background: #c0392b;
+        }
+
+        .result-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .result-box.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result-box.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result-box.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .result-box pre {
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #49a09d;
+        }
+
+        body.dark-mode .status-item {
+            background: #1a1a1a;
+        }
+
+        .status-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        body.dark-mode .status-label {
+            color: #999;
+        }
+
+        .status-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        body.dark-mode .status-value {
+            color: #e0e0e0;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #49a09d;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .nav-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #49a09d;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .nav-back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <a href="Tela_Inicial.html" class="nav-back">← Voltar para Inicial</a>
+        
+        <div class="test-header">
+            <h1>🧪 Teste de Notificações por Email</h1>
+            <p>Sistema de envio automático de resumos diários</p>
+        </div>
+
+        <!-- Status do Sistema -->
+        <div class="test-card">
+            <h3>⚙️ Status do Sistema</h3>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-label">Servidor</div>
+                    <div class="status-value" id="serverStatus">Verificando...</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">SendGrid</div>
+                    <div class="status-value" id="sendgridStatus">Verificando...</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Tarefas no Sistema</div>
+                    <div class="status-value" id="taskCount">0</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Seu User ID</div>
+                    <div class="status-value" id="currentUserId">-</div>
+                </div>
+            </div>
+            <button class="test-btn secondary" onclick="verificarStatus()">
+                🔄 Atualizar Status
+            </button>
+        </div>
+
+        <!-- Teste 1: Enviar para você -->
+        <div class="test-card">
+            <h3>📧 Teste 1: Enviar Email para Você</h3>
+            <p>Envia um resumo das suas tarefas pendentes para o seu email.</p>
+            
+            <button class="test-btn" onclick="enviarParaMim()" id="btnEnviarMim">
+                📨 Enviar Email para Mim
+            </button>
+            
+            <div id="result1" class="result-box"></div>
+        </div>
+
+        <!-- Teste 2: Criar tarefas de teste -->
+        <div class="test-card">
+            <h3>📝 Teste 2: Criar Tarefas de Teste</h3>
+            <p>Cria 3 tarefas com diferentes prioridades para testar o email.</p>
+            
+            <button class="test-btn secondary" onclick="criarTarefasTeste()" id="btnCriarTarefas">
+                ➕ Criar 3 Tarefas de Teste
+            </button>
+            
+            <div id="result2" class="result-box"></div>
+        </div>
+
+        <!-- Teste 3: Ver suas tarefas -->
+        <div class="test-card">
+            <h3>📋 Teste 3: Ver Suas Tarefas</h3>
+            <p>Lista todas as suas tarefas pendentes.</p>
+            
+            <button class="test-btn secondary" onclick="verMinhasTarefas()" id="btnVerTarefas">
+                👁️ Ver Minhas Tarefas
+            </button>
+            
+            <div id="result3" class="result-box"></div>
+        </div>
+
+        <!-- Teste 4: Enviar para todos -->
+        <div class="test-card">
+            <h3>📬 Teste 4: Enviar para Todos (Cuidado!)</h3>
+            <p>⚠️ <strong>Atenção!</strong> Isso enviará emails para TODOS os usuários cadastrados.</p>
+            
+            <button class="test-btn danger" onclick="enviarParaTodos()" id="btnEnviarTodos">
+                📬 Enviar para Todos os Usuários
+            </button>
+            
+            <div id="result4" class="result-box"></div>
+        </div>
+
+        <!-- Informações -->
+        <div class="test-card">
+            <h3>ℹ️ Informações</h3>
+            <ul style="line-height: 1.8;">
+                <li>O cron job está configurado para enviar emails automaticamente às <strong>07:58</strong> todo dia</li>
+                <li>Apenas usuários com tarefas pendentes recebem emails</li>
+                <li>Verifique também a pasta de <strong>SPAM</strong> se o email não chegar</li>
+                <li>O email pode demorar 1-2 minutos para chegar</li>
+                <li>Acesse <a href="https://app.sendgrid.com/email_activity" target="_blank">SendGrid Activity</a> para ver logs detalhados</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : 'https://basetestenura-3.onrender.com';
+
+        let currentUser = null;
+
+        // Carregar usuário ao iniciar
+        window.addEventListener('DOMContentLoaded', () => {
+            const userData = localStorage.getItem('nura_user');
+            if (userData) {
+                currentUser = JSON.parse(userData);
+                document.getElementById('currentUserId').textContent = currentUser.id;
+            } else {
+                showError('Você precisa estar logado! Redirecionando...');
+                setTimeout(() => {
+                    window.location.href = 'Tela_Login.html';
+                }, 2000);
+            }
+            
+            verificarStatus();
+        });
+
+        // Verificar status
+        async function verificarStatus() {
+            try {
+                const response = await fetch(`${API_URL}/api/status`);
+                const data = await response.json();
+
+                document.getElementById('serverStatus').textContent = '✅ Online';
+                document.getElementById('sendgridStatus').textContent = 
+                    data.gemini === '✅ Configurada' ? '✅ OK' : '❌ Erro';
+                
+                if (currentUser) {
+                    const tasksResponse = await fetch(`${API_URL}/api/tasks?user_id=${currentUser.id}`);
+                    const tasksData = await tasksResponse.json();
+                    document.getElementById('taskCount').textContent = tasksData.total || 0;
+                }
+
+            } catch (error) {
+                document.getElementById('serverStatus').textContent = '❌ Offline';
+                console.error('Erro:', error);
+            }
+        }
+
+        // Teste 1: Enviar para mim
+        async function enviarParaMim() {
+            if (!currentUser) {
+                showResult('result1', 'error', '❌ Erro', 'Você precisa estar logado!');
+                return;
+            }
+
+            const btn = document.getElementById('btnEnviarMim');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div> Enviando...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/enviar-resumo-teste`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: currentUser.id })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showResult('result1', 'success', '✅ Sucesso!', 
+                        `Email enviado para ${data.user.email}\n` +
+                        `Tarefas pendentes: ${data.taskCount || 0}\n\n` +
+                        `Verifique sua caixa de entrada (e SPAM) em 1-2 minutos.`,
+                        data
+                    );
+                } else {
+                    showResult('result1', 'error', '❌ Erro', data.error || 'Erro desconhecido', data);
+                }
+
+            } catch (error) {
+                showResult('result1', 'error', '❌ Erro de Conexão', error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📨 Enviar Email para Mim';
+            }
+        }
+
+        // Teste 2: Criar tarefas
+        async function criarTarefasTeste() {
+            if (!currentUser) {
+                showResult('result2', 'error', '❌ Erro', 'Você precisa estar logado!');
+                return;
+            }
+
+            const btn = document.getElementById('btnCriarTarefas');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div> Criando...';
+
+            const tarefas = [
+                {
+                    user_id: currentUser.id,
+                    title: '🔴 URGENTE: Finalizar relatório',
+                    description: 'Prazo hoje às 18h',
+                    priority: 'high',
+                    status: 'pending'
+                },
+                {
+                    user_id: currentUser.id,
+                    title: '🟡 Responder emails importantes',
+                    description: 'Cliente ABC aguardando retorno',
+                    priority: 'medium',
+                    status: 'pending'
+                },
+                {
+                    user_id: currentUser.id,
+                    title: '🟢 Ler artigo sobre IA',
+                    description: 'Artigo interessante salvo',
+                    priority: 'low',
+                    status: 'pending'
+                }
+            ];
+
+            let criadas = 0;
+            let erros = 0;
+
+            try {
+                for (const tarefa of tarefas) {
+                    const response = await fetch(`${API_URL}/api/tasks`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(tarefa)
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        criadas++;
+                    } else {
+                        erros++;
+                    }
+                }
+
+                if (criadas > 0) {
+                    showResult('result2', 'success', '✅ Tarefas Criadas!', 
+                        `✅ Criadas: ${criadas}\n❌ Erros: ${erros}\n\nAgora você pode enviar um email de teste!`
+                    );
+                    verificarStatus(); // Atualizar contador
+                } else {
+                    showResult('result2', 'error', '❌ Erro', 'Nenhuma tarefa foi criada');
+                }
+
+            } catch (error) {
+                showResult('result2', 'error', '❌ Erro de Conexão', error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '➕ Criar 3 Tarefas de Teste';
+            }
+        }
+
+        // Teste 3: Ver tarefas
+        async function verMinhasTarefas() {
+            if (!currentUser) {
+                showResult('result3', 'error', '❌ Erro', 'Você precisa estar logado!');
+                return;
+            }
+
+            const btn = document.getElementById('btnVerTarefas');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div> Carregando...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/tasks?user_id=${currentUser.id}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const pendentes = data.tasks.filter(t => t.status !== 'completed');
+                    
+                    let mensagem = `Total de tarefas: ${data.total}\n`;
+                    mensagem += `Tarefas pendentes: ${pendentes.length}\n\n`;
+                    
+                    if (pendentes.length > 0) {
+                        mensagem += 'Últimas tarefas pendentes:\n';
+                        pendentes.slice(0, 5).forEach(t => {
+                            const emoji = t.priority === 'high' ? '🔴' : t.priority === 'medium' ? '🟡' : '🟢';
+                            mensagem += `${emoji} ${t.title}\n`;
+                        });
+                    } else {
+                        mensagem += 'Você não tem tarefas pendentes.\n';
+                        mensagem += 'Crie algumas tarefas de teste primeiro!';
+                    }
+
+                    showResult('result3', 'info', '📋 Suas Tarefas', mensagem, data.tasks);
+                } else {
+                    showResult('result3', 'error', '❌ Erro', data.error || 'Erro ao buscar tarefas');
+                }
+
+            } catch (error) {
+                showResult('result3', 'error', '❌ Erro de Conexão', error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '👁️ Ver Minhas Tarefas';
+            }
+        }
+
+        // Teste 4: Enviar para todos
+        async function enviarParaTodos() {
+            if (!confirm('⚠️ ATENÇÃO!\n\nIsso enviará emails para TODOS os usuários cadastrados no sistema.\n\nTem certeza que deseja continuar?')) {
+                return;
+            }
+
+            const btn = document.getElementById('btnEnviarTodos');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div> Enviando...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/enviar-resumo-todos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showResult('result4', 'success', '✅ Processo Concluído!', 
+                        `📨 Enviados: ${data.enviados}\n` +
+                        `➖ Sem tarefas: ${data.semTarefas}\n` +
+                        `❌ Erros: ${data.erros}\n` +
+                        `👥 Total de usuários: ${data.total}`,
+                        data
+                    );
+                } else {
+                    showResult('result4', 'error', '❌ Erro', data.error || 'Erro desconhecido', data);
+                }
+
+            } catch (error) {
+                showResult('result4', 'error', '❌ Erro de Conexão', error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📬 Enviar para Todos os Usuários';
+            }
+        }
+
+        // Função auxiliar para mostrar resultados
+        function showResult(elementId, type, title, message, data = null) {
+            const element = document.getElementById(elementId);
+            element.className = `result-box ${type}`;
+            element.style.display = 'block';
+            
+            let html = `<h4 style="margin: 0 0 10px 0;">${title}</h4>`;
+            html += `<p style="white-space: pre-line; margin: 0;">${message}</p>`;
+            
+            if (data && typeof data === 'object') {
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            
+            element.innerHTML = html;
+        }
+
+        // Função auxiliar para mostrar erro
+        function showError(message) {
+            alert('❌ ' + message);
+        }
+    </script>
+</body>
+</html>

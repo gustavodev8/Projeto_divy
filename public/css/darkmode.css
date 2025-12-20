@@ -1,0 +1,418 @@
+/* ===== MODO ESCURO - ATUALIZADO (SEM ÍCONES NOS CAMPOS DE HORÁRIO) ===== */
+/* Adicione este arquivo DEPOIS do TelaPrincipal.css */
+
+/* Garantir que TODOS os elementos usem as variáveis */
+body.dark-mode {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Navbar escura */
+body.dark-mode .navbar {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-bottom-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .navbar-brand {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .brand-icon {
+  color: #ffffff !important;
+}
+
+body.dark-mode .nav-link {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .nav-link:hover {
+  color: #f1f5f9 !important;
+  background: rgba(51, 65, 85, 0.5) !important;
+}
+
+body.dark-mode .nav-link.active {
+  color: #ffffff !important;
+}
+
+body.dark-mode .btn-nav {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .btn-nav:hover {
+  background: rgba(51, 65, 85, 0.8) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Navbar toggler (hamburguer) */
+body.dark-mode .navbar-toggler span {
+  background: #cbd5e1 !important;
+}
+
+/* Navbar mobile dropdown */
+body.dark-mode .navbar-nav {
+  background: rgba(30, 41, 59, 0.98) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Hero Section Escuro */
+body.dark-mode .hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #146551 100%) !important;
+}
+
+body.dark-mode .hero h1 {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .hero p {
+  color: rgba(241, 245, 249, 0.85) !important;
+}
+
+body.dark-mode .hero-badge {
+  background: rgba(30, 41, 59, 0.7) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .stat-card {
+  background: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .stat-number {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .stat-label {
+  color: #cbd5e1 !important;
+}
+
+/* Section Headers */
+body.dark-mode .section-header,
+body.dark-mode .section-header-center {
+  background: rgba(30, 41, 59, 0.7) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .section-title {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .section-subtitle {
+  color: #cbd5e1 !important;
+}
+
+/* Cards de Tarefas */
+body.dark-mode #blocoTarefas {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode #blocoTarefas textarea {
+  background: rgba(15, 23, 42, 0.5) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode #blocoTarefas textarea::placeholder {
+  color: #64748b !important;
+}
+
+body.dark-mode #blocoTarefas textarea:focus {
+  background: rgba(15, 23, 42, 0.7) !important;
+}
+
+/* Lista de Tarefas */
+body.dark-mode .list-group-item {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .list-group-item:hover {
+  background: rgba(30, 41, 59, 0.95) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .list-group-item span,
+body.dark-mode .task-title {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .task-badge,
+body.dark-mode .task-tag {
+  background: rgba(20, 101, 81, 0.2) !important;
+  color: #14b8a6 !important;
+}
+
+body.dark-mode .task-info {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .task-checkbox {
+  border-color: #64748b !important;
+  background: rgba(15, 23, 42, 0.5) !important;
+}
+
+body.dark-mode .task-action-btn {
+  color: #64748b !important;
+}
+
+body.dark-mode .task-action-btn:hover {
+  background: rgba(51, 65, 85, 0.5) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Empty State */
+body.dark-mode .empty-state {
+  background: rgba(30, 41, 59, 0.7) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .empty-state h3 {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .empty-state p {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .empty-state svg {
+  color: rgba(20, 101, 81, 0.3) !important;
+}
+
+/* Assistente IA */
+body.dark-mode .assistente-ia-card,
+body.dark-mode .ai-assistant-card {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .ai-header,
+body.dark-mode .ai-assistant-header {
+  background: rgba(20, 101, 81, 0.2) !important;
+  border-bottom-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .ai-title,
+body.dark-mode .ai-assistant-title {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .ai-subtitle,
+body.dark-mode .ai-assistant-subtitle {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .ai-badge,
+body.dark-mode .ai-assistant-status {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .assistente-content,
+body.dark-mode .ai-assistant-body {
+  background: rgba(15, 23, 42, 0.3) !important;
+}
+
+body.dark-mode .ai-label,
+body.dark-mode .ai-field-label {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .ai-textarea,
+body.dark-mode .ai-field-textarea {
+  background: rgba(15, 23, 42, 0.5) !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .ai-textarea::placeholder,
+body.dark-mode .ai-field-textarea::placeholder {
+  color: #64748b !important;
+}
+
+body.dark-mode .ai-textarea:focus,
+body.dark-mode .ai-field-textarea:focus {
+  background: rgba(15, 23, 42, 0.7) !important;
+  border-color: #146551 !important;
+}
+
+/* ===== CAMPOS DE HORÁRIO - DARK MODE (SEM ÍCONES) ===== */
+body.dark-mode .ai-time-label,
+body.dark-mode .time-label {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .ai-time-input {
+  background: rgba(15, 23, 42, 0.5) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .ai-time-input:hover {
+  border-color: rgba(20, 101, 81, 0.5) !important;
+}
+
+body.dark-mode .ai-time-input:focus {
+  background: rgba(15, 23, 42, 0.7) !important;
+  border-color: #146551 !important;
+}
+
+/* Ícone removido */
+body.dark-mode .ai-time-icon {
+  display: none !important;
+}
+
+body.dark-mode .ai-time-separator {
+  color: #64748b !important;
+}
+
+body.dark-mode .ai-time-separator svg {
+  color: #64748b !important;
+}
+
+body.dark-mode .time-inputs-wrapper {
+  background: rgba(15, 23, 42, 0.3) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .time-separator {
+  color: #64748b !important;
+}
+
+/* Resultado IA */
+body.dark-mode .ai-result {
+  background: rgba(15, 23, 42, 0.5) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Feature Cards */
+body.dark-mode .feature-card {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .feature-card:hover {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-color: rgba(20, 101, 81, 0.4) !important;
+}
+
+body.dark-mode .feature-title {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .feature-description {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .feature-link {
+  color: #14b8a6 !important;
+}
+
+/* Pricing Cards */
+body.dark-mode .pricing-card {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .pricing-card:hover {
+  background: rgba(30, 41, 59, 0.95) !important;
+}
+
+body.dark-mode .pricing-card.featured {
+  border-color: #146551 !important;
+}
+
+body.dark-mode .pricing-header {
+  border-bottom-color: rgba(20, 101, 81, 0.3) !important;
+}
+
+body.dark-mode .pricing-header h3 {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .amount {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .currency,
+body.dark-mode .period {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .pricing-features li {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .pricing-btn {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(20, 101, 81, 0.4) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .pricing-btn:hover {
+  border-color: #146551 !important;
+  color: #14b8a6 !important;
+}
+
+/* Botões */
+body.dark-mode .btn-secondary {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(20, 101, 81, 0.3) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .btn-secondary:hover {
+  background: rgba(51, 65, 85, 0.9) !important;
+}
+
+/* Footer */
+body.dark-mode footer {
+  background: #0f172a !important;
+}
+
+body.dark-mode .footer-brand h3 {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .footer-brand p {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .footer-links a {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .footer-links a:hover {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .footer-bottom p {
+  color: #94a3b8 !important;
+}
+
+/* Padrões de fundo - ajustar opacidade */
+body.dark-mode::before {
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 39px,
+      rgba(20, 101, 81, 0.08) 39px,
+      rgba(20, 101, 81, 0.08) 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 79px,
+      rgba(20, 101, 81, 0.05) 79px,
+      rgba(20, 101, 81, 0.05) 80px
+    ) !important;
+}
+
+body.dark-mode::after {
+  background-image: radial-gradient(circle, rgba(20, 101, 81, 0.1) 1px, transparent 1px) !important;
+}
