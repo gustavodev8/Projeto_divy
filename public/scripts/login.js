@@ -1,4 +1,6 @@
-const API_URL = 'https://basetestenura-3.onrender.com';
+const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : window.location.origin;
 
 // ===== FUNÇÃO DE LOGIN =====
 async function login(event) {

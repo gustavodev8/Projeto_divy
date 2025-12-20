@@ -19,8 +19,42 @@ function inicializarBot() {
         return null;
     }
 
+    // Em desenvolvimento, só ativa se ENABLE_TELEGRAM_DEV=true
+    const isDev = process.env.NODE_ENV === 'development';
+    const enableInDev = process.env.ENABLE_TELEGRAM_DEV === 'true';
+
+    if (isDev && !enableInDev) {
+        console.log('⚠️ Bot do Telegram desativado em desenvolvimento (mude ENABLE_TELEGRAM_DEV=true no .env para ativar)');
+        return null;
+    }
+
     try {
-        bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
+        bot = new TelegramBot(TELEGRAM_TOKEN, {
+            polling: {
+                interval: 300,
+                autoStart: true,
+                params: {
+                    timeout: 10
+                }
+            }
+        });
+
+        // Suprimir erros de polling duplicado (quando múltiplas instâncias estão rodando)
+        bot.on('polling_error', (error) => {
+            if (error.code === 'ETELEGRAM' && error.message.includes('409 Conflict')) {
+                // Silenciosamente ignorar - outra instância está rodando
+                console.log('⚠️ Outra instância do bot já está rodando - desativando polling local');
+                // Parar polling desta instância
+                try {
+                    bot.stopPolling();
+                } catch (e) {
+                    // Ignorar erro ao parar polling
+                }
+            } else {
+                console.error('❌ Erro no Telegram bot:', error.message);
+            }
+        });
+
         console.log('✅ Bot do Telegram inicializado com sucesso!');
 
         configurarComandos();

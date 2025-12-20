@@ -3,7 +3,7 @@
 
 const AI_SETTINGS_API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:3000'
-    : 'https://basetestenura-3.onrender.com';
+    : window.location.origin;
 
 // Configurações padrão
 let aiSettings = {
@@ -178,7 +178,7 @@ async function generateTaskDescription(taskTitle) {
     try {
         console.log(`🤖 Solicitando descrição IA para: "${taskTitle}"`);
 
-        const response = await fetch('https://basetestenura-3.onrender.com/api/ai/generate-description', {
+        const response = await fetch(`${AI_SETTINGS_API_URL}/api/ai/generate-description`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -1,9 +1,9 @@
 // ===== SISTEMA DE CONFIGURAÇÕES NURA COM BANCO DE DADOS =====
 // Arquivo: public/scripts/settings.js
 
-const SETTINGS_API_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:3000' 
-    : 'https://basetestenura-3.onrender.com';
+const SETTINGS_API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : window.location.origin;
 
 let currentUserId = null;
 
