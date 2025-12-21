@@ -23,9 +23,6 @@ app.use(express.json()); // Permite receber JSON no body
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-// ===== INICIALIZAR BANCO DE DADOS =====
-db.initializeDatabase(); // Cria tabelas se não existirem~
-
 // ===== MIGRATION: CORRIGIR SCHEMA DA TABELA TASKS =====
 (async () => {
     if (!db.isPostgres) {
@@ -79,7 +76,28 @@ db.initializeDatabase(); // Cria tabelas se não existirem~
             }
         }
 
-        // 5. Atualizar valores de status para o novo padrão
+        // 5. Remover constraint CHECK antiga de status
+        try {
+            await db.query(`ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_status_check`);
+            console.log('✅ Constraint CHECK antiga removida');
+        } catch (err) {
+            console.log('⚠️ Aviso ao remover constraint:', err.message);
+        }
+
+        // 6. Adicionar nova constraint CHECK com valores atualizados
+        try {
+            await db.query(`
+                ALTER TABLE tasks ADD CONSTRAINT tasks_status_check
+                CHECK (status IN ('pending', 'in_progress', 'completed', 'pendente', 'progresso', 'concluido', 'concluída'))
+            `);
+            console.log('✅ Nova constraint CHECK adicionada com valores novos e antigos');
+        } catch (err) {
+            if (!err.message.includes('already exists')) {
+                console.log('⚠️ Aviso ao adicionar constraint:', err.message);
+            }
+        }
+
+        // 7. Atualizar valores de status para o novo padrão
         await db.query(`
             UPDATE tasks
             SET status = CASE
@@ -90,6 +108,18 @@ db.initializeDatabase(); // Cria tabelas se não existirem~
             END
             WHERE status IN ('pendente', 'progresso', 'concluido', 'concluída')
         `);
+
+        // 8. Remover constraint CHECK antiga de priority se existir e adicionar nova
+        try {
+            await db.query(`ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_priority_check`);
+            await db.query(`
+                ALTER TABLE tasks ADD CONSTRAINT tasks_priority_check
+                CHECK (priority IN ('low', 'medium', 'high'))
+            `);
+            console.log('✅ Constraint de priority atualizada');
+        } catch (err) {
+            console.log('⚠️ Aviso ao atualizar priority constraint:', err.message);
+        }
 
         console.log('✅ Schema da tabela tasks atualizado com sucesso!');
 
@@ -182,6 +212,78 @@ db.initializeDatabase(); // Cria tabelas se não existirem~
         }
     } catch (error) {
         console.error('❌ Erro ao adicionar colunas de IA:', error.message);
+    }
+})();
+
+// ===== MIGRATION: CRIAR TABELA DE LISTAS =====
+(async () => {
+    if (!db.isPostgres) {
+        console.log('⏭️ Pulando migration de lists (não é PostgreSQL)');
+        return;
+    }
+
+    try {
+        console.log('🔄 Verificando tabela lists...');
+
+        // Verificar se a tabela existe
+        const tableExists = await db.query(`
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_name = 'lists'
+            );
+        `);
+
+        if (!tableExists[0].exists) {
+            console.log('🔄 Criando tabela lists...');
+
+            await db.query(`
+                CREATE TABLE lists (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    name VARCHAR(255) NOT NULL,
+                    emoji VARCHAR(10) DEFAULT '📋',
+                    color VARCHAR(7) DEFAULT '#146551',
+                    is_default BOOLEAN DEFAULT FALSE,
+                    position INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                );
+            `);
+
+            console.log('✅ Tabela lists criada');
+
+            // Criar índice para performance
+            await db.query(`
+                CREATE INDEX idx_lists_user_id ON lists(user_id);
+            `);
+
+            console.log('✅ Índice criado para lists');
+        } else {
+            console.log('✅ Tabela lists já existe');
+        }
+
+        // Adicionar coluna list_id na tabela tasks se não existir
+        const listIdExists = await db.query(`
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'tasks' AND column_name = 'list_id'
+        `);
+
+        if (listIdExists.length === 0) {
+            console.log('🔄 Adicionando coluna list_id na tabela tasks...');
+
+            await db.query(`
+                ALTER TABLE tasks
+                ADD COLUMN list_id INTEGER,
+                ADD CONSTRAINT fk_tasks_list FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE SET NULL;
+            `);
+
+            console.log('✅ Coluna list_id adicionada à tabela tasks');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao criar tabela lists:', error.message);
     }
 })();
 
@@ -559,6 +661,264 @@ app.delete('/api/tasks/:id', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'Erro ao excluir tarefa do banco'
+        });
+    }
+});
+
+// ===== API - GERENCIAMENTO DE LISTAS =====
+
+// GET - Listar todas as listas do usuário
+app.get('/api/lists', async (req, res) => {
+    try {
+        const userId = req.query.user_id || req.headers['x-user-id'];
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não identificado'
+            });
+        }
+
+        const lists = await db.query(
+            "SELECT * FROM lists WHERE user_id = ? ORDER BY position ASC, created_at ASC",
+            [userId]
+        );
+
+        console.log(`📋 ${lists.length} listas carregadas para usuário ${userId}`);
+
+        res.json({
+            success: true,
+            lists: lists,
+            total: lists.length
+        });
+
+    } catch (err) {
+        console.error('❌ Erro ao buscar listas:', err);
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
+// POST - Criar nova lista
+app.post('/api/lists', async (req, res) => {
+    try {
+        const { name, emoji, color } = req.body;
+        const userId = req.body.user_id || req.headers['x-user-id'];
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não identificado'
+            });
+        }
+
+        if (!name || name.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                error: 'Nome da lista é obrigatório'
+            });
+        }
+
+        // Buscar última posição
+        const lastPosition = await db.get(
+            "SELECT MAX(position) as max_pos FROM lists WHERE user_id = ?",
+            [userId]
+        );
+
+        const newPosition = (lastPosition?.max_pos || 0) + 1;
+
+        let info;
+
+        if (db.isPostgres) {
+            const result = await db.query(
+                `INSERT INTO lists (user_id, name, emoji, color, position)
+                 VALUES (?, ?, ?, ?, ?) RETURNING id`,
+                [userId, name, emoji || '📋', color || '#146551', newPosition]
+            );
+            info = { lastInsertRowid: result[0].id };
+        } else {
+            info = await db.run(
+                `INSERT INTO lists (user_id, name, emoji, color, position)
+                 VALUES (?, ?, ?, ?, ?)`,
+                [userId, name, emoji || '📋', color || '#146551', newPosition]
+            );
+        }
+
+        console.log(`✅ Lista "${name}" criada para usuário ${userId}`);
+
+        res.json({
+            success: true,
+            message: 'Lista criada com sucesso!',
+            listId: info.lastInsertRowid
+        });
+
+    } catch (err) {
+        console.error('❌ Erro ao criar lista:', err);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao criar lista'
+        });
+    }
+});
+
+// PUT - Atualizar lista
+app.put('/api/lists/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, emoji, color, position } = req.body;
+        const userId = req.headers['x-user-id'];
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não identificado'
+            });
+        }
+
+        const updates = [];
+        const values = [];
+
+        if (name !== undefined) {
+            updates.push('name = ?');
+            values.push(name);
+        }
+        if (emoji !== undefined) {
+            updates.push('emoji = ?');
+            values.push(emoji);
+        }
+        if (color !== undefined) {
+            updates.push('color = ?');
+            values.push(color);
+        }
+        if (position !== undefined) {
+            updates.push('position = ?');
+            values.push(position);
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Nenhum campo para atualizar'
+            });
+        }
+
+        values.push(id);
+        values.push(userId);
+
+        const sql = `UPDATE lists SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?`;
+        await db.run(sql, values);
+
+        console.log(`✅ Lista ${id} atualizada`);
+
+        res.json({
+            success: true,
+            message: 'Lista atualizada com sucesso!'
+        });
+
+    } catch (err) {
+        console.error('❌ Erro ao atualizar lista:', err);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao atualizar lista'
+        });
+    }
+});
+
+// DELETE - Excluir lista
+app.delete('/api/lists/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.headers['x-user-id'];
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não identificado'
+            });
+        }
+
+        // Verificar se a lista existe
+        const list = await db.get(
+            "SELECT * FROM lists WHERE id = ? AND user_id = ?",
+            [id, userId]
+        );
+
+        if (!list) {
+            return res.status(404).json({
+                success: false,
+                error: 'Lista não encontrada'
+            });
+        }
+
+        // Não permitir excluir lista padrão
+        if (list.is_default) {
+            return res.status(400).json({
+                success: false,
+                error: 'Não é possível excluir a lista padrão'
+            });
+        }
+
+        // Remover list_id das tarefas associadas
+        await db.run(
+            "UPDATE tasks SET list_id = NULL WHERE list_id = ?",
+            [id]
+        );
+
+        // Excluir lista
+        await db.run(
+            "DELETE FROM lists WHERE id = ? AND user_id = ?",
+            [id, userId]
+        );
+
+        console.log(`✅ Lista "${list.name}" excluída`);
+
+        res.json({
+            success: true,
+            message: 'Lista excluída com sucesso!'
+        });
+
+    } catch (err) {
+        console.error('❌ Erro ao excluir lista:', err);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao excluir lista'
+        });
+    }
+});
+
+// GET - Buscar tarefas de uma lista específica
+app.get('/api/lists/:id/tasks', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.query.user_id || req.headers['x-user-id'];
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não identificado'
+            });
+        }
+
+        const tasks = await db.query(
+            "SELECT * FROM tasks WHERE list_id = ? AND user_id = ? ORDER BY created_at DESC",
+            [id, userId]
+        );
+
+        console.log(`📋 ${tasks.length} tarefas da lista ${id}`);
+
+        res.json({
+            success: true,
+            tasks: tasks,
+            total: tasks.length
+        });
+
+    } catch (err) {
+        console.error('❌ Erro ao buscar tarefas da lista:', err);
+        res.status(500).json({
+            success: false,
+            error: err.message
         });
     }
 });

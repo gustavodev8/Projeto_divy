@@ -72,10 +72,6 @@ async function run(text, params = []) {
     }
 }
 
-async function initializeDatabase() {
-    // ... seu código de inicialização
-}
-
 function close() {
     if (pool) {
         pool.end();
@@ -87,7 +83,6 @@ module.exports = {
     query,
     get,
     run,
-    initializeDatabase,
     close,
     isPostgres
 };
