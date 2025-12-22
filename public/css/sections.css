@@ -1,0 +1,318 @@
+/* ===== NURA - SEÇÕES (TICKTICK STYLE) ===== */
+
+/* Seção container */
+.task-section {
+    margin-bottom: 1.5rem;
+}
+
+/* Header da seção */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 0.5rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
+    user-select: none;
+}
+
+.section-header:hover {
+    background: var(--surface-hover, #f5f7f9);
+}
+
+.section-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-chevron {
+    color: var(--text-muted, #9ca3af);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.task-section.collapsed .section-chevron {
+    transform: rotate(-90deg);
+}
+
+.section-emoji {
+    font-size: 1rem;
+}
+
+.section-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary, #6b7280);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.section-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 0.375rem;
+    background: var(--surface-secondary, #f0f1f3);
+    color: var(--text-muted, #9ca3af);
+    border-radius: 9px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+}
+
+/* Ações da seção */
+.section-actions {
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.section-header:hover .section-actions {
+    opacity: 1;
+}
+
+.section-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    color: var(--text-muted, #9ca3af);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.section-action-btn:hover {
+    background: var(--surface-active, #e5e7eb);
+    color: var(--text-primary, #1a1d21);
+}
+
+.section-action-btn.btn-delete:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Container das tarefas na seção */
+.section-tasks {
+    padding-left: 0.5rem;
+    min-height: 40px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.task-section.collapsed .section-tasks {
+    display: none;
+}
+
+/* Estado vazio */
+.section-empty {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-muted, #9ca3af);
+    font-size: 0.8125rem;
+    border: 2px dashed var(--border-light, #e5e7eb);
+    border-radius: 8px;
+    margin: 0.5rem 0;
+}
+
+/* Drag & drop */
+.task-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+}
+
+.section-tasks.drag-over {
+    background: var(--nura-primary-soft, rgba(20, 101, 81, 0.06));
+    border: 2px dashed var(--nura-primary, #146551);
+}
+
+/* Botão adicionar seção */
+.add-section-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 1rem;
+    background: transparent;
+    border: 2px dashed var(--border-light, #e5e7eb);
+    border-radius: 8px;
+    color: var(--text-muted, #9ca3af);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.add-section-btn:hover {
+    border-color: var(--nura-primary, #146551);
+    color: var(--nura-primary, #146551);
+    background: var(--nura-primary-soft, rgba(20, 101, 81, 0.04));
+}
+
+/* Modal de seção */
+.section-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+.section-modal {
+    background: var(--surface-main, #ffffff);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-light, #e5e7eb);
+}
+
+.section-modal-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary, #1a1d21);
+}
+
+.section-modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    font-size: 1.5rem;
+    color: var(--text-muted, #9ca3af);
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.section-modal-close:hover {
+    background: var(--surface-hover, #f5f7f9);
+    color: var(--text-primary, #1a1d21);
+}
+
+.section-modal-body {
+    padding: 1.5rem;
+}
+
+.section-modal-field {
+    margin-bottom: 1rem;
+}
+
+.section-modal-field:last-child {
+    margin-bottom: 0;
+}
+
+.section-modal-field label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-secondary, #6b7280);
+    margin-bottom: 0.5rem;
+}
+
+.section-modal-field input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-light, #e5e7eb);
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    color: var(--text-primary, #1a1d21);
+    background: var(--surface-main, #ffffff);
+    transition: border-color 0.15s ease;
+}
+
+.section-modal-field input:focus {
+    outline: none;
+    border-color: var(--nura-primary, #146551);
+}
+
+.section-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem 1.5rem;
+}
+
+.section-modal-actions button {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.section-modal-actions .btn-cancel {
+    background: var(--surface-secondary, #f0f1f3);
+    border: none;
+    color: var(--text-secondary, #6b7280);
+}
+
+.section-modal-actions .btn-cancel:hover {
+    background: var(--surface-active, #e5e7eb);
+}
+
+.section-modal-actions .btn-save {
+    background: var(--nura-primary, #146551);
+    border: none;
+    color: white;
+}
+
+.section-modal-actions .btn-save:hover {
+    background: var(--nura-primary-hover, #0f4f3e);
+}
+
+/* Dark mode */
+.dark-mode .section-header:hover {
+    background: var(--surface-hover, #2a2a2a);
+}
+
+.dark-mode .section-empty {
+    border-color: var(--border-light, #333);
+}
+
+.dark-mode .add-section-btn {
+    border-color: var(--border-light, #333);
+}
+
+.dark-mode .section-modal {
+    background: var(--surface-main, #1a1a1a);
+}
+
+.dark-mode .section-modal-field input {
+    background: var(--surface-secondary, #222);
+    border-color: var(--border-light, #333);
+}

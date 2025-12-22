@@ -287,6 +287,78 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     }
 })();
 
+// ===== MIGRATION: CRIAR TABELA DE SEÇÕES =====
+(async () => {
+    if (!db.isPostgres) {
+        console.log('⏭️ Pulando migration de sections (não é PostgreSQL)');
+        return;
+    }
+
+    try {
+        console.log('🔄 Verificando tabela sections...');
+
+        const tableExists = await db.query(`
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_name = 'sections'
+            );
+        `);
+
+        if (!tableExists[0].exists) {
+            console.log('🔄 Criando tabela sections...');
+
+            await db.query(`
+                CREATE TABLE sections (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    name VARCHAR(255) NOT NULL,
+                    emoji VARCHAR(10) DEFAULT '📁',
+                    position INTEGER DEFAULT 0,
+                    is_collapsed BOOLEAN DEFAULT FALSE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                );
+            `);
+
+            await db.query(`CREATE INDEX idx_sections_user_id ON sections(user_id);`);
+            console.log('✅ Tabela sections criada');
+        }
+
+        // Adicionar coluna section_id na tabela tasks
+        const sectionIdExists = await db.query(`
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'tasks' AND column_name = 'section_id'
+        `);
+
+        if (sectionIdExists.length === 0) {
+            console.log('🔄 Adicionando coluna section_id na tabela tasks...');
+            await db.query(`
+                ALTER TABLE tasks
+                ADD COLUMN section_id INTEGER,
+                ADD CONSTRAINT fk_tasks_section FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE SET NULL;
+            `);
+            console.log('✅ Coluna section_id adicionada');
+        }
+
+        // Adicionar coluna position na tabela tasks
+        const positionExists = await db.query(`
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'tasks' AND column_name = 'position'
+        `);
+
+        if (positionExists.length === 0) {
+            await db.query(`ALTER TABLE tasks ADD COLUMN position INTEGER DEFAULT 0`);
+            console.log('✅ Coluna position adicionada às tasks');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao criar tabela sections:', error.message);
+    }
+})();
+
 // ===== INICIALIZAR BOT DO TELEGRAM =====
 inicializarBot(); // Inicia o bot do Telegram com todos os comandos e notificações
 
@@ -920,6 +992,121 @@ app.get('/api/lists/:id/tasks', async (req, res) => {
             success: false,
             error: err.message
         });
+    }
+});
+
+// ===== API - GERENCIAMENTO DE SEÇÕES =====
+
+// GET - Listar seções do usuário
+app.get('/api/sections', async (req, res) => {
+    try {
+        const userId = req.query.user_id || req.headers['x-user-id'];
+        if (!userId) return res.status(401).json({ success: false, error: 'Usuário não identificado' });
+
+        const sections = await db.query(
+            "SELECT * FROM sections WHERE user_id = ? ORDER BY position ASC",
+            [userId]
+        );
+
+        res.json({ success: true, sections });
+    } catch (err) {
+        console.error('❌ Erro ao buscar seções:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// POST - Criar seção
+app.post('/api/sections', async (req, res) => {
+    try {
+        const { name, emoji } = req.body;
+        const userId = req.body.user_id || req.headers['x-user-id'];
+
+        if (!userId) return res.status(401).json({ success: false, error: 'Usuário não identificado' });
+        if (!name) return res.status(400).json({ success: false, error: 'Nome é obrigatório' });
+
+        const lastPos = await db.get("SELECT MAX(position) as max_pos FROM sections WHERE user_id = ?", [userId]);
+        const position = (lastPos?.max_pos || 0) + 1;
+
+        const result = await db.query(
+            `INSERT INTO sections (user_id, name, emoji, position) VALUES (?, ?, ?, ?) RETURNING id`,
+            [userId, name, emoji || '📁', position]
+        );
+
+        console.log(`✅ Seção "${name}" criada`);
+        res.json({ success: true, sectionId: result[0].id });
+    } catch (err) {
+        console.error('❌ Erro ao criar seção:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// PUT - Atualizar seção
+app.put('/api/sections/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, emoji, position, is_collapsed } = req.body;
+        const userId = req.body.user_id || req.headers['x-user-id'];
+
+        if (!userId) return res.status(401).json({ success: false, error: 'Usuário não identificado' });
+
+        const updates = [];
+        const values = [];
+
+        if (name !== undefined) { updates.push('name = ?'); values.push(name); }
+        if (emoji !== undefined) { updates.push('emoji = ?'); values.push(emoji); }
+        if (position !== undefined) { updates.push('position = ?'); values.push(position); }
+        if (is_collapsed !== undefined) { updates.push('is_collapsed = ?'); values.push(is_collapsed); }
+
+        if (updates.length === 0) return res.status(400).json({ success: false, error: 'Nada para atualizar' });
+
+        values.push(id, userId);
+        await db.run(`UPDATE sections SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?`, values);
+
+        res.json({ success: true, message: 'Seção atualizada' });
+    } catch (err) {
+        console.error('❌ Erro ao atualizar seção:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// DELETE - Excluir seção
+app.delete('/api/sections/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.query.user_id || req.headers['x-user-id'];
+
+        if (!userId) return res.status(401).json({ success: false, error: 'Usuário não identificado' });
+
+        // Move tarefas da seção para "sem seção"
+        await db.run("UPDATE tasks SET section_id = NULL WHERE section_id = ?", [id]);
+        await db.run("DELETE FROM sections WHERE id = ? AND user_id = ?", [id, userId]);
+
+        res.json({ success: true, message: 'Seção excluída' });
+    } catch (err) {
+        console.error('❌ Erro ao excluir seção:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// PUT - Mover tarefa para seção
+app.put('/api/tasks/:id/move', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { section_id, position } = req.body;
+        const userId = req.body.user_id || req.headers['x-user-id'];
+
+        if (!userId) return res.status(401).json({ success: false, error: 'Usuário não identificado' });
+
+        await db.run(
+            "UPDATE tasks SET section_id = ?, position = ? WHERE id = ? AND user_id = ?",
+            [section_id, position || 0, id, userId]
+        );
+
+        console.log(`✅ Tarefa ${id} movida para seção ${section_id}`);
+        res.json({ success: true, message: 'Tarefa movida' });
+    } catch (err) {
+        console.error('❌ Erro ao mover tarefa:', err);
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 

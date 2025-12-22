@@ -440,44 +440,52 @@ async function changeTaskStatus(taskId, newStatus) {
 }
 
 // ===== CRIAR ELEMENTO DE TAREFA (LISTA) =====
+// ===== CRIAR ELEMENTO DE TAREFA (LISTA) =====
 function createTaskElement(task) {
     const taskDiv = document.createElement('div');
     const isCompleted = task.status === 'completed' || task.status === 'concluido' || task.status === 'concluída';
     
-    taskDiv.className = `list-group-item d-flex justify-content-between align-items-center ${isCompleted ? 'completed-task' : ''}`;
+    taskDiv.className = `task-item ${isCompleted ? 'completed' : ''}`;
     taskDiv.setAttribute('data-task-id', task.id);
     taskDiv.setAttribute('data-task-status', isCompleted ? 'completed' : 'pending');
-    taskDiv.setAttribute('data-task-priority', task.priority || 'medium');
+    taskDiv.setAttribute('data-priority', task.priority || 'medium');
 
     const taskTitle = task.title || task.name || 'Tarefa sem nome';
 
-    const statusIcon = isCompleted ? '✅' : 
-                      task.status === 'in_progress' || task.status === 'progresso' ? '🔄' : '⏳';
-
     taskDiv.innerHTML = `
-        <div class="task-content" style="flex: 1;">
-            <div class="d-flex justify-content-between align-items-center w-100">
-                <div style="flex: 1;">
-                    <h5 class="mb-1 ${isCompleted ? 'text-decoration-line-through text-muted' : ''}" style="font-size: 1.25rem; font-weight: 500;">
-                        ${statusIcon} ${taskTitle}
-                    </h5>
-                    ${task.description ? `<p class="text-muted mb-0" style="font-size: 0.95rem;">${task.description}</p>` : ''}
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-outline-success" onclick="toggleTaskFromHome(${task.id})" title="${isCompleted ? 'Reabrir tarefa' : 'Concluir tarefa'}" style="font-size: 1.1rem; padding: 0.5rem 1rem;">
-                        ${isCompleted ? '↶' : '✓'}
-                    </button>
-                    <button class="btn btn-outline-danger" onclick="deleteTaskFromHome(${task.id})" title="Excluir tarefa" style="font-size: 1.3rem; padding: 0.4rem 0.9rem;">
-                        ×
-                    </button>
-                </div>
+        <label class="task-checkbox">
+            <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleTaskFromHome(${task.id})">
+            <span class="checkmark"></span>
+        </label>
+        <div class="task-content">
+            <p class="task-title">${taskTitle}</p>
+            ${task.description ? `<p class="task-subtitle">${task.description}</p>` : ''}
+            <div class="task-meta">
+                ${task.priority && task.priority !== 'none' ? `
+                    <span class="task-tag priority-${task.priority}">
+                        ${task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Média' : 'Baixa'}
+                    </span>
+                ` : ''}
             </div>
+        </div>
+        <div class="task-actions">
+            <button class="task-action-btn" onclick="editarTarefa(${task.id})" title="Editar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+            </button>
+            <button class="task-action-btn btn-delete" onclick="deleteTaskFromHome(${task.id})" title="Excluir">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
         </div>
     `;
 
     return taskDiv;
 }
-
 // ===== APLICAR FILTROS DE CONFIGURAÇÃO =====
 function applyTaskFilters() {
     if (!window.nuraSettingsFunctions) {
