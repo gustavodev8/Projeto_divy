@@ -288,6 +288,7 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 })();
 
 // ===== MIGRATION: CRIAR TABELA DE SEÇÕES =====
+// ===== MIGRATION: CRIAR TABELA DE SEÇÕES (COMPLETA) =====
 (async () => {
     if (!db.isPostgres) {
         console.log('⏭️ Pulando migration de sections (não é PostgreSQL)');
@@ -315,47 +316,194 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
                     emoji VARCHAR(10) DEFAULT '📁',
                     position INTEGER DEFAULT 0,
                     is_collapsed BOOLEAN DEFAULT FALSE,
+                    list_id INTEGER,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE
                 );
             `);
 
             await db.query(`CREATE INDEX idx_sections_user_id ON sections(user_id);`);
-            console.log('✅ Tabela sections criada');
-        }
+            await db.query(`CREATE INDEX idx_sections_list_id ON sections(list_id);`);
+            console.log('✅ Tabela sections criada com todas as colunas');
+        } else {
+            console.log('✅ Tabela sections já existe, verificando colunas...');
 
-        // Adicionar coluna section_id na tabela tasks
-        const sectionIdExists = await db.query(`
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_name = 'tasks' AND column_name = 'section_id'
-        `);
-
-        if (sectionIdExists.length === 0) {
-            console.log('🔄 Adicionando coluna section_id na tabela tasks...');
-            await db.query(`
-                ALTER TABLE tasks
-                ADD COLUMN section_id INTEGER,
-                ADD CONSTRAINT fk_tasks_section FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE SET NULL;
+            // Verificar e adicionar colunas faltantes
+            const columns = await db.query(`
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'sections'
             `);
-            console.log('✅ Coluna section_id adicionada');
+
+            const existingColumns = columns.map(c => c.column_name);
+
+            // Adicionar emoji se não existir
+            if (!existingColumns.includes('emoji')) {
+                try {
+                    console.log('🔄 Adicionando coluna emoji...');
+                    await db.query(`ALTER TABLE sections ADD COLUMN emoji VARCHAR(10) DEFAULT '📁'`);
+                    console.log('✅ Coluna emoji adicionada');
+                } catch (err) {
+                    if (!err.message.includes('already exists')) {
+                        console.error('⚠️ Erro ao adicionar emoji:', err.message);
+                    }
+                }
+            }
+
+            // Adicionar is_collapsed se não existir
+            if (!existingColumns.includes('is_collapsed')) {
+                try {
+                    console.log('🔄 Adicionando coluna is_collapsed...');
+                    await db.query(`ALTER TABLE sections ADD COLUMN is_collapsed BOOLEAN DEFAULT FALSE`);
+                    console.log('✅ Coluna is_collapsed adicionada');
+                } catch (err) {
+                    if (!err.message.includes('already exists')) {
+                        console.error('⚠️ Erro ao adicionar is_collapsed:', err.message);
+                    }
+                }
+            }
+
+            // Adicionar list_id se não existir
+            if (!existingColumns.includes('list_id')) {
+                try {
+                    console.log('🔄 Adicionando coluna list_id...');
+                    await db.query(`ALTER TABLE sections ADD COLUMN list_id INTEGER`);
+                    
+                    // Tentar adicionar constraint separadamente
+                    try {
+                        await db.query(`
+                            ALTER TABLE sections
+                            ADD CONSTRAINT fk_sections_list 
+                            FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE;
+                        `);
+                    } catch (constraintErr) {
+                        if (!constraintErr.message.includes('already exists')) {
+                            console.log('⚠️ Constraint já existe ou não pôde ser criada');
+                        }
+                    }
+                    
+                    await db.query(`CREATE INDEX IF NOT EXISTS idx_sections_list_id ON sections(list_id);`);
+                    console.log('✅ Coluna list_id adicionada');
+                } catch (err) {
+                    if (!err.message.includes('already exists')) {
+                        console.error('⚠️ Erro ao adicionar list_id:', err.message);
+                    }
+                }
+            }
+
+            console.log('✅ Todas as colunas verificadas em sections');
         }
 
-        // Adicionar coluna position na tabela tasks
-        const positionExists = await db.query(`
+        // Adicionar coluna section_id na tabela tasks se não existir
+        const taskColumns = await db.query(`
             SELECT column_name
             FROM information_schema.columns
-            WHERE table_name = 'tasks' AND column_name = 'position'
+            WHERE table_name = 'tasks'
         `);
 
-        if (positionExists.length === 0) {
-            await db.query(`ALTER TABLE tasks ADD COLUMN position INTEGER DEFAULT 0`);
-            console.log('✅ Coluna position adicionada às tasks');
+        const existingTaskColumns = taskColumns.map(c => c.column_name);
+
+        if (!existingTaskColumns.includes('section_id')) {
+            try {
+                console.log('🔄 Adicionando coluna section_id na tabela tasks...');
+                await db.query(`ALTER TABLE tasks ADD COLUMN section_id INTEGER`);
+                
+                try {
+                    await db.query(`
+                        ALTER TABLE tasks
+                        ADD CONSTRAINT fk_tasks_section 
+                        FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE SET NULL;
+                    `);
+                } catch (constraintErr) {
+                    if (!constraintErr.message.includes('already exists')) {
+                        console.log('⚠️ Constraint fk_tasks_section já existe');
+                    }
+                }
+                
+                console.log('✅ Coluna section_id adicionada às tasks');
+            } catch (err) {
+                if (!err.message.includes('already exists')) {
+                    console.error('⚠️ Erro ao adicionar section_id:', err.message);
+                }
+            }
+        }
+
+        // Adicionar coluna position na tabela tasks se não existir
+        if (!existingTaskColumns.includes('position')) {
+            try {
+                await db.query(`ALTER TABLE tasks ADD COLUMN position INTEGER DEFAULT 0`);
+                console.log('✅ Coluna position adicionada às tasks');
+            } catch (err) {
+                if (!err.message.includes('already exists')) {
+                    console.error('⚠️ Erro ao adicionar position:', err.message);
+                }
+            }
+        }
+
+        console.log('✅ Sistema de seções configurado completamente!');
+
+    } catch (error) {
+        console.error('❌ Erro ao criar/atualizar tabela sections:', error.message);
+    }
+})();
+
+// ===== MIGRATION: ADICIONAR COLUNA EMOJI EM SECTIONS =====
+(async () => {
+    if (!db.isPostgres) {
+        console.log('⏭️ Pulando migration de emoji (não é PostgreSQL)');
+        return;
+    }
+
+    try {
+        console.log('🔄 Verificando coluna emoji na tabela sections...');
+
+        const emojiExists = await db.query(`
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'sections' AND column_name = 'emoji'
+        `);
+
+        if (emojiExists.length === 0) {
+            console.log('🔄 Adicionando coluna emoji na tabela sections...');
+            await db.query(`ALTER TABLE sections ADD COLUMN emoji VARCHAR(10) DEFAULT '📁'`);
+            console.log('✅ Coluna emoji adicionada à tabela sections');
+        } else {
+            console.log('✅ Coluna emoji já existe em sections');
         }
 
     } catch (error) {
-        console.error('❌ Erro ao criar tabela sections:', error.message);
+        console.error('❌ Erro ao adicionar coluna emoji:', error.message);
+    }
+})();
+
+// ===== MIGRATION: ADICIONAR COLUNA IS_COLLAPSED EM SECTIONS =====
+(async () => {
+    if (!db.isPostgres) {
+        console.log('⏭️ Pulando migration de is_collapsed (não é PostgreSQL)');
+        return;
+    }
+
+    try {
+        console.log('🔄 Verificando coluna is_collapsed na tabela sections...');
+
+        const isCollapsedExists = await db.query(`
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'sections' AND column_name = 'is_collapsed'
+        `);
+
+        if (isCollapsedExists.length === 0) {
+            console.log('🔄 Adicionando coluna is_collapsed na tabela sections...');
+            await db.query(`ALTER TABLE sections ADD COLUMN is_collapsed BOOLEAN DEFAULT FALSE`);
+            console.log('✅ Coluna is_collapsed adicionada à tabela sections');
+        } else {
+            console.log('✅ Coluna is_collapsed já existe em sections');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao adicionar coluna is_collapsed:', error.message);
     }
 })();
 
@@ -1015,31 +1163,34 @@ app.get('/api/sections', async (req, res) => {
     }
 });
 
-// POST - Criar seção
+// POST - Criar seção (COM LISTA)
 app.post('/api/sections', async (req, res) => {
     try {
-        const { name, emoji } = req.body;
+        const { name, emoji, list_id } = req.body; // ✅ list_id agora é aceito
         const userId = req.body.user_id || req.headers['x-user-id'];
 
         if (!userId) return res.status(401).json({ success: false, error: 'Usuário não identificado' });
         if (!name) return res.status(400).json({ success: false, error: 'Nome é obrigatório' });
 
-        const lastPos = await db.get("SELECT MAX(position) as max_pos FROM sections WHERE user_id = ?", [userId]);
+        const lastPos = await db.get(
+            "SELECT MAX(position) as max_pos FROM sections WHERE user_id = ?" + (list_id ? " AND list_id = ?" : ""),
+            list_id ? [userId, list_id] : [userId]
+        );
+        
         const position = (lastPos?.max_pos || 0) + 1;
 
         const result = await db.query(
-            `INSERT INTO sections (user_id, name, emoji, position) VALUES (?, ?, ?, ?) RETURNING id`,
-            [userId, name, emoji || '📁', position]
+            `INSERT INTO sections (user_id, name, emoji, position, list_id) VALUES (?, ?, ?, ?, ?) RETURNING id`,
+            [userId, name, emoji || '📁', position, list_id || null]
         );
 
-        console.log(`✅ Seção "${name}" criada`);
+        console.log(`✅ Seção "${name}" criada${list_id ? ` (lista ${list_id})` : ''}`);
         res.json({ success: true, sectionId: result[0].id });
     } catch (err) {
         console.error('❌ Erro ao criar seção:', err);
         res.status(500).json({ success: false, error: err.message });
     }
 });
-
 // PUT - Atualizar seção
 app.put('/api/sections/:id', async (req, res) => {
     try {

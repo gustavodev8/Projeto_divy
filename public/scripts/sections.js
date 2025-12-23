@@ -7,42 +7,72 @@ const SECTIONS_API = window.location.hostname === 'localhost'
 // Variável global para seções (draggedTask está no sincro_telas.js)
 window.userSections = [];
 
-// ===== CARREGAR SEÇÕES =====
-async function loadSections() {
+// ===== CARREGAR SEÇÕES (COM FILTRO DE LISTA) =====
+async function loadSections(listId = null) {
     const user = getCurrentUser();
-    if (!user) return;
+    if (!user) {
+        console.warn('⚠️ Usuário não identificado ao carregar seções');
+        return;
+    }
 
     try {
-        const response = await fetch(`${SECTIONS_API}?user_id=${user.id}`);
+        // Se listId for fornecido, carregar apenas seções dessa lista
+        const url = listId 
+            ? `${SECTIONS_API}?user_id=${user.id}&list_id=${listId}`
+            : `${SECTIONS_API}?user_id=${user.id}`;
+
+        console.log('📡 Carregando seções:', url);
+
+        const response = await fetch(url, {
+            headers: { 'x-user-id': user.id.toString() }
+        });
+
         const data = await response.json();
 
         if (data.success) {
             window.userSections = data.sections;
-            console.log(`📁 ${window.userSections.length} seções carregadas`);
+            console.log(`✅ ${window.userSections.length} seções carregadas${listId ? ` (lista ${listId})` : ''}`);
+        } else {
+            console.error('❌ Erro ao carregar seções:', data.error);
+            window.userSections = [];
         }
     } catch (error) {
         console.error('❌ Erro ao carregar seções:', error);
+        window.userSections = [];
     }
 }
 
-// ===== CRIAR SEÇÃO =====
-async function createSection(name, emoji = '📁') {
+// ===== CRIAR SEÇÃO (COM LISTA) =====
+async function createSection(name, emoji = '📁', listId = null) {
     const user = getCurrentUser();
     if (!user) return null;
+
+    // Se não especificar lista, usar a lista atual
+    const targetListId = listId || window.currentListId;
 
     try {
         const response = await fetch(SECTIONS_API, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: user.id, name, emoji })
+            headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.id.toString()
+            },
+            body: JSON.stringify({ 
+                user_id: user.id, 
+                name, 
+                emoji,
+                list_id: targetListId 
+            })
         });
 
         const data = await response.json();
 
         if (data.success) {
             showNotification(`✅ Seção "${name}" criada!`);
-            await loadSections();
-            renderAllTasks();
+            await loadSections(window.currentListId);
+            if (typeof renderAllTasks === 'function') {
+                renderAllTasks();
+            }
             return data.sectionId;
         }
     } catch (error) {
@@ -62,15 +92,18 @@ async function deleteSection(sectionId) {
 
     try {
         const response = await fetch(`${SECTIONS_API}/${sectionId}?user_id=${user.id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { 'x-user-id': user.id.toString() }
         });
 
         const data = await response.json();
 
         if (data.success) {
             showNotification('🗑️ Seção excluída');
-            await loadSections();
-            renderAllTasks();
+            await loadSections(window.currentListId);
+            if (typeof renderAllTasks === 'function') {
+                renderAllTasks();
+            }
         }
     } catch (error) {
         console.error('❌ Erro ao excluir seção:', error);
@@ -90,8 +123,14 @@ async function toggleSectionCollapse(sectionId) {
     try {
         await fetch(`${SECTIONS_API}/${sectionId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: user.id, is_collapsed: newState })
+            headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.id.toString()
+            },
+            body: JSON.stringify({ 
+                user_id: user.id, 
+                is_collapsed: newState 
+            })
         });
 
         section.is_collapsed = newState;
@@ -152,7 +191,10 @@ async function submitEditSection(sectionId) {
     try {
         const response = await fetch(`${SECTIONS_API}/${sectionId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.id.toString()
+            },
             body: JSON.stringify({ user_id: user.id, name, emoji })
         });
 
@@ -160,8 +202,10 @@ async function submitEditSection(sectionId) {
 
         if (data.success) {
             showNotification('✅ Seção atualizada!');
-            await loadSections();
-            renderAllTasks();
+            await loadSections(window.currentListId);
+            if (typeof renderAllTasks === 'function') {
+                renderAllTasks();
+            }
             document.querySelector('.section-modal-overlay')?.remove();
         }
     } catch (error) {

@@ -1,5 +1,5 @@
 /* ========================================
-   SISTEMA DE TAREFAS - COM KANBAN E SEÇÕES
+   SISTEMA DE TAREFAS - COM KANBAN, SEÇÕES E LISTAS
    Arquivo: sincro_telas.js
    ======================================== */
 
@@ -9,6 +9,7 @@ const API_URL = window.location.hostname === 'localhost'
 
 let homeTasks = [];
 let currentUser = null;
+let currentListTasks = []; // Cache de tarefas filtradas por lista
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', async function() {
@@ -31,12 +32,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         await window.nuraSettingsFunctions.loadSettingsFromDatabase();
     }
     
-    // Carregar seções primeiro
-    if (typeof loadSections === 'function') {
-        await loadSections();
+    // 1. Carregar listas primeiro
+    if (typeof loadLists === 'function') {
+        await loadLists();
+        console.log('📋 Listas carregadas, lista atual:', window.currentListId);
     }
     
-    loadAndDisplayTasksFromDatabase();
+    // 2. Carregar seções da lista atual (APÓS listas serem carregadas)
+    if (typeof loadSections === 'function' && window.currentListId) {
+        await loadSections(window.currentListId);
+        console.log('📁 Seções da lista', window.currentListId, 'carregadas');
+    }
+    
+    // 3. Carregar tarefas
+    await loadAndDisplayTasksFromDatabase();
 });
 
 // ===== INICIALIZAR SISTEMA DE TAREFAS =====
@@ -82,7 +91,8 @@ function initializeTaskSystem() {
                 description: 'Tarefa criada na página inicial',
                 status: 'pending',
                 priority: 'medium',
-                user_id: currentUser.id
+                user_id: currentUser.id,
+                list_id: window.currentListId || null
             };
 
             console.log('📤 Enviando tarefa:', tarefaData);
@@ -133,7 +143,7 @@ function initializeTaskSystem() {
     }
 }
 
-// ===== CARREGAR TAREFAS DO USUÁRIO =====
+// ===== CARREGAR TAREFAS DO USUÁRIO (COM FILTRO DE LISTA) =====
 async function loadAndDisplayTasksFromDatabase() {
     if (!currentUser) {
         console.error('❌ Usuário não identificado!');
@@ -150,8 +160,16 @@ async function loadAndDisplayTasksFromDatabase() {
             homeTasks = data.tasks;
             console.log(`✅ ${homeTasks.length} tarefas carregadas`);
             
+            // Filtrar tarefas pela lista atual
+            filterTasksByCurrentList();
+            
             renderAllTasks();
             applyTaskFilters();
+            
+            // Atualizar contadores das listas
+            if (typeof updateListTaskCounts === 'function') {
+                updateListTaskCounts();
+            }
         } else {
             console.error('❌ Erro:', data.error);
             showEmptyState();
@@ -162,6 +180,22 @@ async function loadAndDisplayTasksFromDatabase() {
     }
 }
 
+// ===== FILTRAR TAREFAS PELA LISTA ATUAL =====
+function filterTasksByCurrentList() {
+    if (!window.currentListId) {
+        // Se não há lista selecionada, mostrar todas
+        currentListTasks = homeTasks;
+        console.log('📋 Mostrando todas as tarefas (sem filtro de lista)');
+        return;
+    }
+
+    currentListTasks = homeTasks.filter(task => {
+        return task.list_id === window.currentListId;
+    });
+
+    console.log(`📋 ${currentListTasks.length} tarefas da lista ${window.currentListId}`);
+}
+
 // ===== RENDERIZAR TAREFAS (LISTA OU KANBAN) =====
 function renderAllTasks() {
     const container = document.getElementById('listaTarefas');
@@ -170,7 +204,7 @@ function renderAllTasks() {
         return;
     }
 
-    if (homeTasks.length === 0) {
+    if (currentListTasks.length === 0) {
         showEmptyState();
         return;
     }
@@ -200,19 +234,27 @@ function renderListView(container) {
     container.style.flexDirection = '';
     container.style.gap = '';
 
+    // Usar tarefas filtradas pela lista
+    const tasksToRender = currentListTasks.length > 0 ? currentListTasks : [];
+
     // Verificar se tem seções para usar o novo sistema
     if (typeof window.userSections !== 'undefined' && window.userSections && window.userSections.length > 0) {
         console.log('📁 Renderizando com seções...');
-        renderTasksWithSections(container);
+        renderTasksWithSections(container, tasksToRender);
         return;
     }
 
     // Fallback: renderização sem seções (ordenada por prioridade)
     console.log('📋 Renderizando lista simples...');
     
+    if (tasksToRender.length === 0) {
+        showEmptyState();
+        return;
+    }
+    
     const priorityOrder = { high: 1, medium: 2, low: 3 };
     
-    const sortedTasks = [...homeTasks].sort((a, b) => {
+    const sortedTasks = [...tasksToRender].sort((a, b) => {
         const aCompleted = a.status === 'completed' || a.status === 'concluido' || a.status === 'concluída';
         const bCompleted = b.status === 'completed' || b.status === 'concluido' || b.status === 'concluída';
         
@@ -253,8 +295,10 @@ function renderListView(container) {
 }
 
 // ===== RENDERIZAR TAREFAS COM SEÇÕES =====
-function renderTasksWithSections(container) {
+function renderTasksWithSections(container, tasksToRender = null) {
     if (!container) return;
+
+    const tasks = tasksToRender || currentListTasks;
 
     container.innerHTML = '';
     container.className = 'tasks-container';
@@ -263,7 +307,7 @@ function renderTasksWithSections(container) {
     const tasksBySection = {};
     const tasksWithoutSection = [];
 
-    homeTasks.forEach(task => {
+    tasks.forEach(task => {
         if (task.section_id) {
             if (!tasksBySection[task.section_id]) {
                 tasksBySection[task.section_id] = [];
@@ -526,7 +570,8 @@ function renderKanbanView(container) {
         completed: { title: '✅ Concluído', color: '#2ecc71', tasks: [] }
     };
 
-    homeTasks.forEach(task => {
+    // Usar tarefas filtradas
+    currentListTasks.forEach(task => {
         let status = task.status.toLowerCase();
         
         if (status === 'concluída' || status === 'concluido') {
@@ -690,6 +735,7 @@ async function changeTaskStatus(taskId, newStatus) {
             const task = homeTasks.find(t => t.id === taskId);
             if (task) task.status = newStatus;
             
+            filterTasksByCurrentList();
             renderAllTasks();
             applyTaskFilters();
             
@@ -833,6 +879,7 @@ async function toggleTaskFromHome(id) {
         
         if (result.success) {
             task.status = newStatus;
+            filterTasksByCurrentList();
             renderAllTasks();
             applyTaskFilters();
             showNotification(newStatus === 'completed' ? '✅ Tarefa concluída!' : '⏳ Tarefa reaberta!');
@@ -864,9 +911,15 @@ async function deleteTaskFromHome(id) {
         
         if (result.success) {
             homeTasks = homeTasks.filter(t => t.id !== id);
+            filterTasksByCurrentList();
             renderAllTasks();
             applyTaskFilters();
             showNotification('🗑️ Tarefa excluída!');
+            
+            // Atualizar contadores
+            if (typeof updateListTaskCounts === 'function') {
+                updateListTaskCounts();
+            }
         }
     } catch (error) {
         console.error('❌ Erro:', error);
@@ -948,6 +1001,7 @@ async function submitEditTask(id) {
             }
             
             document.querySelector('.section-modal-overlay')?.remove();
+            filterTasksByCurrentList();
             renderAllTasks();
             showNotification('✅ Tarefa atualizada!');
         }
@@ -968,7 +1022,7 @@ function showEmptyState() {
                 <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                 <path d="M9 14l2 2 4-4"></path>
             </svg>
-            <h3 class="empty-state-title">Nenhuma tarefa ainda</h3>
+            <h3 class="empty-state-title">Nenhuma tarefa nesta lista</h3>
             <p class="empty-state-text">Clique em "Adicionar Tarefa" para começar</p>
         </div>
     `;
@@ -1100,7 +1154,8 @@ async function salvarTarefasDaRotina(rotinaTexto) {
                     description: 'Importado da rotina IA',
                     priority: priority,
                     status: 'pending',
-                    user_id: currentUser.id
+                    user_id: currentUser.id,
+                    list_id: window.currentListId || null
                 };
 
                 try {
@@ -1179,5 +1234,7 @@ window.forceApplyHighlights = forceApplyHighlights;
 window.editarTarefa = editarTarefa;
 window.submitEditTask = submitEditTask;
 window.moveTaskToSection = moveTaskToSection;
+window.filterTasksByCurrentList = filterTasksByCurrentList;
+window.loadAndDisplayTasksFromDatabase = loadAndDisplayTasksFromDatabase;
 
-console.log('✅ sincro_telas.js carregado com sistema de seções!');
+console.log('✅ sincro_telas.js carregado com sistema de listas e seções!');
