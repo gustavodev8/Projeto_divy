@@ -478,6 +478,35 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     }
 })();
 
+// ===== MIGRATION: ADICIONAR DUE_DATE EM TASKS =====
+(async () => {
+    if (!db.isPostgres) {
+        console.log('⏭️ Pulando migration de due_date (não é PostgreSQL)');
+        return;
+    }
+
+    try {
+        console.log('🔄 Verificando coluna due_date na tabela tasks...');
+
+        const dueDateExists = await db.query(`
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'tasks' AND column_name = 'due_date'
+        `);
+
+        if (dueDateExists.length === 0) {
+            console.log('🔄 Adicionando coluna due_date...');
+            await db.query(`ALTER TABLE tasks ADD COLUMN due_date DATE`);
+            console.log('✅ Coluna due_date adicionada');
+        } else {
+            console.log('✅ Coluna due_date já existe');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao adicionar due_date:', error.message);
+    }
+})();
+
 // ===== MIGRATION: ADICIONAR COLUNA IS_COLLAPSED EM SECTIONS =====
 (async () => {
     if (!db.isPostgres) {
@@ -504,6 +533,35 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
     } catch (error) {
         console.error('❌ Erro ao adicionar coluna is_collapsed:', error.message);
+    }
+})();
+
+// ===== MIGRATION: ADICIONAR UPDATED_AT EM SECTIONS (SE JÁ NÃO EXISTE) =====
+(async () => {
+    if (!db.isPostgres) {
+        console.log('⏭️ Pulando migration de updated_at (não é PostgreSQL)');
+        return;
+    }
+
+    try {
+        console.log('🔄 Verificando coluna updated_at na tabela sections...');
+
+        const updatedAtExists = await db.query(`
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'sections' AND column_name = 'updated_at'
+        `);
+
+        if (updatedAtExists.length === 0) {
+            console.log('🔄 Adicionando coluna updated_at...');
+            await db.query(`ALTER TABLE sections ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+            console.log('✅ Coluna updated_at adicionada');
+        } else {
+            console.log('✅ Coluna updated_at já existe');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao adicionar updated_at:', error.message);
     }
 })();
 
@@ -679,159 +737,214 @@ app.get('/api/tasks/:id', async (req, res) => {
 
 // POST - Criar nova tarefa
 app.post('/api/tasks', async (req, res) => {
-    console.log('📥 Dados recebidos:', req.body);
+    console.log('📥 POST /api/tasks - Criar tarefa');
     
-    const title = req.body.title || req.body.name;
-    const description = req.body.description || '';
-    const status = req.body.status || 'pending';
-    const priority = req.body.priority || 'medium';
-    const user_id = req.body.user_id;
+    const { title, description, due_date, priority, status, user_id, list_id, section_id } = req.body;
 
-    if (!user_id) {
-        return res.status(401).json({ 
-            success: false, 
-            error: 'Usuário não identificado' 
-        });
-    }
-
-    if (!title) {
+    if (!title || !user_id) {
         return res.status(400).json({ 
             success: false, 
-            error: 'Título da tarefa é obrigatório'
+            error: 'Título e usuário são obrigatórios' 
         });
     }
 
     try {
-        let info;
-
         if (db.isPostgres) {
-            // PostgreSQL retorna o ID diretamente
-            const result = await db.query(
-                `INSERT INTO tasks (user_id, title, description, status, priority)
-                 VALUES (?, ?, ?, ?, ?) RETURNING id`,
-                [user_id, title, description, status, priority]
-            );
-            info = { lastInsertRowid: result[0].id };
+            // ✅ PostgreSQL
+            const query = `
+                INSERT INTO tasks (
+                    title, description, due_date, priority, status, 
+                    user_id, list_id, section_id, created_at
+                ) 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+                RETURNING *
+            `;
+
+            const result = await db.query(query, [
+                title, 
+                description || null, 
+                due_date || null, 
+                priority || 'medium', 
+                status || 'pending', 
+                user_id,
+                list_id || null,
+                section_id || null
+            ]);
+
+            const task = result[0];
+            console.log('✅ Tarefa criada:', task);
+
+            res.json({ success: true, task: task, id: task.id });
+
         } else {
-            // SQLite usa lastInsertRowid
-            info = await db.run(
-                `INSERT INTO tasks (user_id, title, description, status, priority)
-                 VALUES (?, ?, ?, ?, ?)`,
-                [user_id, title, description, status, priority]
-            );
+            // ✅ SQLite
+            const query = `
+                INSERT INTO tasks (
+                    title, description, due_date, priority, status, 
+                    user_id, list_id, section_id, created_at
+                ) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            `;
+
+            const result = await db.query(query, [
+                title, 
+                description || null, 
+                due_date || null, 
+                priority || 'medium', 
+                status || 'pending', 
+                user_id,
+                list_id || null,
+                section_id || null
+            ]);
+
+            const task = await db.query('SELECT * FROM tasks WHERE id = ?', [result.lastID]);
+
+            res.json({ success: true, task: task[0], id: result.lastID });
         }
 
-        console.log(`✅ Tarefa criada para usuário ${user_id}:`, title);
-
-        // Se a tarefa for urgente, notifica via Telegram
-        if (priority === 'high') {
-            notificarNovaTarefaUrgente(user_id, title).catch(err => {
-                console.log('⚠️ Não foi possível enviar notificação do Telegram:', err.message);
-            });
-        }
-
-        res.json({
-            success: true,
-            message: 'Tarefa criada com sucesso!',
-            taskId: info.lastInsertRowid
-        });
-    } catch (err) {
-        console.error('❌ Erro ao criar tarefa:', err);
-        console.error('Detalhes:', err.message);
-        console.error('Stack:', err.stack);
-
-        let errorMessage = 'Erro ao salvar tarefa no banco';
-
-        if (err.message.includes('Connection terminated')) {
-            errorMessage = 'Erro de conexão com o banco. Tente novamente em instantes.';
-        } else if (err.message.includes('ECONNREFUSED')) {
-            errorMessage = 'Banco de dados indisponível';
-        }
-
-        res.status(500).json({
-            success: false,
-            error: errorMessage,
-            details: process.env.NODE_ENV === 'development' ? err.message : undefined
-        });
+    } catch (error) {
+        console.error('❌ Erro ao criar tarefa:', error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// PUT - Atualizar tarefa existente
+// PUT - Atualizar tarefa
 app.put('/api/tasks/:id', async (req, res) => {
+    const taskId = req.params.id;
+    const updates = req.body;
+    
+    console.log('📝 PUT /api/tasks/' + taskId);
+    console.log('   Body:', updates);
+
+    if (!updates.user_id) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'user_id é obrigatório' 
+        });
+    }
+
     try {
-        const { id } = req.params;
-        const { title, description, status, priority, user_id } = req.body;
-        
-        if (!user_id) {
-            return res.status(401).json({
-                success: false,
-                error: 'Usuário não identificado'
-            });
-        }
-        
-        console.log(`🔄 Atualizando tarefa ${id} do usuário ${user_id}`);
-        
-        // Verifica se a tarefa pertence ao usuário
-        const taskExists = await db.get(
-            "SELECT id FROM tasks WHERE id = ? AND user_id = ?",
-            [id, user_id]
-        );
-        
-        if (!taskExists) {
-            return res.status(404).json({
-                success: false,
-                error: 'Tarefa não encontrada'
-            });
-        }
-        
-        // Monta SQL dinâmico baseado nos campos enviados
-        const updates = [];
+        const fields = [];
         const values = [];
-        
-        if (title !== undefined) {
-            updates.push('title = ?');
-            values.push(title);
+
+        if (db.isPostgres) {
+            // ✅ PostgreSQL - $1, $2, $3...
+            let paramCount = 1;
+
+            if (updates.title !== undefined) {
+                fields.push(`title = $${paramCount++}`);
+                values.push(updates.title);
+            }
+            if (updates.description !== undefined) {
+                fields.push(`description = $${paramCount++}`);
+                values.push(updates.description);
+            }
+            if (updates.due_date !== undefined) {
+                fields.push(`due_date = $${paramCount++}`);
+                values.push(updates.due_date);
+            }
+            if (updates.priority !== undefined) {
+                fields.push(`priority = $${paramCount++}`);
+                values.push(updates.priority);
+            }
+            if (updates.status !== undefined) {
+                fields.push(`status = $${paramCount++}`);
+                values.push(updates.status);
+            }
+            if (updates.section_id !== undefined) {
+                fields.push(`section_id = $${paramCount++}`);
+                values.push(updates.section_id);
+            }
+            if (updates.list_id !== undefined) {
+                fields.push(`list_id = $${paramCount++}`);
+                values.push(updates.list_id);
+            }
+
+            if (fields.length === 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    error: 'Nenhum campo para atualizar' 
+                });
+            }
+
+            values.push(taskId);
+            values.push(updates.user_id);
+
+            const query = `
+                UPDATE tasks 
+                SET ${fields.join(', ')} 
+                WHERE id = $${paramCount++} AND user_id = $${paramCount}
+                RETURNING *
+            `;
+
+            const result = await db.query(query, values);
+
+            if (result.length === 0) {
+                return res.status(404).json({ 
+                    success: false, 
+                    error: 'Tarefa não encontrada' 
+                });
+            }
+
+            res.json({ success: true, task: result[0] });
+
+        } else {
+            // ✅ SQLite - ?, ?, ?...
+            if (updates.title !== undefined) {
+                fields.push('title = ?');
+                values.push(updates.title);
+            }
+            if (updates.description !== undefined) {
+                fields.push('description = ?');
+                values.push(updates.description);
+            }
+            if (updates.due_date !== undefined) {
+                fields.push('due_date = ?');
+                values.push(updates.due_date);
+            }
+            if (updates.priority !== undefined) {
+                fields.push('priority = ?');
+                values.push(updates.priority);
+            }
+            if (updates.status !== undefined) {
+                fields.push('status = ?');
+                values.push(updates.status);
+            }
+            if (updates.section_id !== undefined) {
+                fields.push('section_id = ?');
+                values.push(updates.section_id);
+            }
+            if (updates.list_id !== undefined) {
+                fields.push('list_id = ?');
+                values.push(updates.list_id);
+            }
+
+            if (fields.length === 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    error: 'Nenhum campo para atualizar' 
+                });
+            }
+
+            values.push(taskId);
+            values.push(updates.user_id);
+
+            const query = `
+                UPDATE tasks 
+                SET ${fields.join(', ')} 
+                WHERE id = ? AND user_id = ?
+            `;
+
+            await db.query(query, values);
+
+            const task = await db.query('SELECT * FROM tasks WHERE id = ?', [taskId]);
+
+            res.json({ success: true, task: task[0] });
         }
-        if (description !== undefined) {
-            updates.push('description = ?');
-            values.push(description);
-        }
-        if (status !== undefined) {
-            updates.push('status = ?');
-            values.push(status);
-        }
-        if (priority !== undefined) {
-            updates.push('priority = ?');
-            values.push(priority);
-        }
-        
-        if (updates.length === 0) {
-            return res.status(400).json({
-                success: false,
-                error: 'Nenhum campo para atualizar'
-            });
-        }
-        
-        values.push(id);
-        values.push(user_id);
-        
-        const sql = `UPDATE tasks SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`;
-        const result = await db.run(sql, values);
-        
-        console.log('✅ Tarefa atualizada!');
-        
-        res.json({
-            success: true,
-            message: 'Tarefa atualizada com sucesso!',
-            changes: result.changes
-        });
-        
-    } catch (err) {
-        console.error('❌ Erro ao atualizar tarefa:', err);
-        res.status(500).json({
-            success: false,
-            error: 'Erro ao atualizar tarefa no banco'
-        });
+
+    } catch (error) {
+        console.error('❌ Erro ao atualizar tarefa:', error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
@@ -925,60 +1038,51 @@ app.get('/api/lists', async (req, res) => {
 app.post('/api/lists', async (req, res) => {
     try {
         const { name, emoji, color } = req.body;
-        const userId = req.body.user_id || req.headers['x-user-id'];
+        const user_id = req.body.user_id || req.headers['x-user-id']; // ✅ ADICIONAR ESTA LINHA
 
-        if (!userId) {
-            return res.status(401).json({
-                success: false,
-                error: 'Usuário não identificado'
-            });
+        console.log('📋 Criando lista para usuário:', user_id);
+        console.log('   - Nome:', name);
+        console.log('   - Emoji:', emoji);
+        console.log('   - Cor:', color);
+
+        if (!user_id) {
+            return res.status(401).json({ success: false, error: 'Usuário não identificado' });
         }
 
-        if (!name || name.trim() === '') {
-            return res.status(400).json({
-                success: false,
-                error: 'Nome da lista é obrigatório'
-            });
+        if (!name) {
+            return res.status(400).json({ success: false, error: 'Nome da lista é obrigatório' });
         }
 
-        // Buscar última posição
-        const lastPosition = await db.get(
+        // Buscar posição da última lista
+        const lastPos = await db.get(
             "SELECT MAX(position) as max_pos FROM lists WHERE user_id = ?",
-            [userId]
+            [user_id]
+        );
+        
+        const position = (lastPos?.max_pos || 0) + 1;
+
+        // Inserir nova lista
+        const result = await db.query(
+            `INSERT INTO lists (user_id, name, emoji, color, is_default, position)
+             VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
+            [user_id, name, emoji || '📋', color || '#146551', false, position]
         );
 
-        const newPosition = (lastPosition?.max_pos || 0) + 1;
+        const listId = result[0].id;
 
-        let info;
+        console.log(`✅ Lista "${name}" criada com ID ${listId}`);
 
-        if (db.isPostgres) {
-            const result = await db.query(
-                `INSERT INTO lists (user_id, name, emoji, color, position)
-                 VALUES (?, ?, ?, ?, ?) RETURNING id`,
-                [userId, name, emoji || '📋', color || '#146551', newPosition]
-            );
-            info = { lastInsertRowid: result[0].id };
-        } else {
-            info = await db.run(
-                `INSERT INTO lists (user_id, name, emoji, color, position)
-                 VALUES (?, ?, ?, ?, ?)`,
-                [userId, name, emoji || '📋', color || '#146551', newPosition]
-            );
-        }
-
-        console.log(`✅ Lista "${name}" criada para usuário ${userId}`);
-
-        res.json({
-            success: true,
-            message: 'Lista criada com sucesso!',
-            listId: info.lastInsertRowid
+        res.json({ 
+            success: true, 
+            listId: listId,
+            message: 'Lista criada com sucesso' 
         });
 
-    } catch (err) {
-        console.error('❌ Erro ao criar lista:', err);
-        res.status(500).json({
-            success: false,
-            error: 'Erro ao criar lista'
+    } catch (error) {
+        console.error('❌ Erro ao criar lista:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
         });
     }
 });
@@ -988,7 +1092,7 @@ app.put('/api/lists/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { name, emoji, color, position } = req.body;
-        const userId = req.headers['x-user-id'];
+        const user_id = req.body.user_id || req.headers['x-user-id'];
 
         if (!userId) {
             return res.status(401).json({
@@ -1050,7 +1154,7 @@ app.put('/api/lists/:id', async (req, res) => {
 app.delete('/api/lists/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.headers['x-user-id'];
+        const user_id = req.query.user_id || req.headers['x-user-id'];
 
         if (!userId) {
             return res.status(401).json({
@@ -1147,76 +1251,171 @@ app.get('/api/lists/:id/tasks', async (req, res) => {
 
 // GET - Listar seções do usuário
 app.get('/api/sections', async (req, res) => {
+    const userId = req.query.user_id;
+    const listId = req.query.list_id;  // ✅ IMPORTANTE
+
+    console.log('📂 GET /api/sections');
+    console.log('   user_id:', userId);
+    console.log('   list_id:', listId);
+
+    if (!userId) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'user_id é obrigatório' 
+        });
+    }
+
     try {
-        const userId = req.query.user_id || req.headers['x-user-id'];
-        if (!userId) return res.status(401).json({ success: false, error: 'Usuário não identificado' });
+        let query, params;
 
-        const sections = await db.query(
-            "SELECT * FROM sections WHERE user_id = ? ORDER BY position ASC",
-            [userId]
-        );
+        if (db.isPostgres) {
+            // ✅ PostgreSQL - filtrar por lista
+            if (listId) {
+                query = 'SELECT * FROM sections WHERE user_id = $1 AND list_id = $2 ORDER BY position ASC';
+                params = [userId, listId];
+            } else {
+                query = 'SELECT * FROM sections WHERE user_id = $1 AND list_id IS NULL ORDER BY position ASC';
+                params = [userId];
+            }
+        } else {
+            // ✅ SQLite - filtrar por lista
+            if (listId) {
+                query = 'SELECT * FROM sections WHERE user_id = ? AND list_id = ? ORDER BY position ASC';
+                params = [userId, listId];
+            } else {
+                query = 'SELECT * FROM sections WHERE user_id = ? AND list_id IS NULL ORDER BY position ASC';
+                params = [userId];
+            }
+        }
 
-        res.json({ success: true, sections });
-    } catch (err) {
-        console.error('❌ Erro ao buscar seções:', err);
-        res.status(500).json({ success: false, error: err.message });
+        const sections = await db.query(query, params);
+
+        console.log(`✅ ${sections.length} seções carregadas para lista ${listId || 'null'}`);
+
+        res.json({ 
+            success: true, 
+            sections: sections 
+        });
+
+    } catch (error) {
+        console.error('❌ Erro ao carregar seções:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
     }
 });
-
 // POST - Criar seção (COM LISTA)
 app.post('/api/sections', async (req, res) => {
+    const { name, user_id, list_id, position } = req.body;
+
+    console.log('📂 POST /api/sections - Criar seção');
+    console.log('   name:', name);
+    console.log('   user_id:', user_id);
+    console.log('   list_id:', list_id);  // ✅ IMPORTANTE
+    console.log('   position:', position);
+
+    if (!name || !user_id) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Nome e usuário são obrigatórios' 
+        });
+    }
+
     try {
-        const { name, emoji, list_id } = req.body; // ✅ list_id agora é aceito
-        const userId = req.body.user_id || req.headers['x-user-id'];
+        if (db.isPostgres) {
+            // ✅ PostgreSQL
+            const result = await db.query(`
+                INSERT INTO sections (name, user_id, list_id, position, created_at)
+                VALUES ($1, $2, $3, $4, NOW())
+                RETURNING *
+            `, [name, user_id, list_id || null, position || 0]);
 
-        if (!userId) return res.status(401).json({ success: false, error: 'Usuário não identificado' });
-        if (!name) return res.status(400).json({ success: false, error: 'Nome é obrigatório' });
+            const section = result[0];
+            console.log('✅ Seção criada:', section);
 
-        const lastPos = await db.get(
-            "SELECT MAX(position) as max_pos FROM sections WHERE user_id = ?" + (list_id ? " AND list_id = ?" : ""),
-            list_id ? [userId, list_id] : [userId]
-        );
-        
-        const position = (lastPos?.max_pos || 0) + 1;
+            res.json({ 
+                success: true, 
+                section: section 
+            });
 
-        const result = await db.query(
-            `INSERT INTO sections (user_id, name, emoji, position, list_id) VALUES (?, ?, ?, ?, ?) RETURNING id`,
-            [userId, name, emoji || '📁', position, list_id || null]
-        );
+        } else {
+            // ✅ SQLite
+            const result = await db.query(`
+                INSERT INTO sections (name, user_id, list_id, position, created_at)
+                VALUES (?, ?, ?, ?, datetime('now'))
+            `, [name, user_id, list_id || null, position || 0]);
 
-        console.log(`✅ Seção "${name}" criada${list_id ? ` (lista ${list_id})` : ''}`);
-        res.json({ success: true, sectionId: result[0].id });
-    } catch (err) {
-        console.error('❌ Erro ao criar seção:', err);
-        res.status(500).json({ success: false, error: err.message });
+            const section = await db.query(
+                'SELECT * FROM sections WHERE id = ?',
+                [result.lastID]
+            );
+
+            res.json({ 
+                success: true, 
+                section: section[0] 
+            });
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao criar seção:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
     }
 });
 // PUT - Atualizar seção
 app.put('/api/sections/:id', async (req, res) => {
     try {
-        const { id } = req.params;
-        const { name, emoji, position, is_collapsed } = req.body;
+        const sectionId = req.params.id;
+        const { name, emoji, is_collapsed } = req.body;
         const userId = req.body.user_id || req.headers['x-user-id'];
 
-        if (!userId) return res.status(401).json({ success: false, error: 'Usuário não identificado' });
+        if (!userId) {
+            return res.status(401).json({ success: false, error: 'Usuário não identificado' });
+        }
 
+        // Construir query dinamicamente baseado nos campos recebidos
         const updates = [];
-        const values = [];
+        const params = [];
 
-        if (name !== undefined) { updates.push('name = ?'); values.push(name); }
-        if (emoji !== undefined) { updates.push('emoji = ?'); values.push(emoji); }
-        if (position !== undefined) { updates.push('position = ?'); values.push(position); }
-        if (is_collapsed !== undefined) { updates.push('is_collapsed = ?'); values.push(is_collapsed); }
+        if (name !== undefined) {
+            updates.push('name = ?');
+            params.push(name);
+        }
 
-        if (updates.length === 0) return res.status(400).json({ success: false, error: 'Nada para atualizar' });
+        if (emoji !== undefined) {
+            updates.push('emoji = ?');
+            params.push(emoji);
+        }
 
-        values.push(id, userId);
-        await db.run(`UPDATE sections SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?`, values);
+        if (is_collapsed !== undefined) {
+            updates.push('is_collapsed = ?');
+            params.push(is_collapsed);
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ success: false, error: 'Nenhum campo para atualizar' });
+        }
+
+        // Adicionar WHERE params
+        params.push(sectionId);
+        params.push(userId);
+
+        const query = `UPDATE sections SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`;
+
+        console.log('🔄 Atualizando seção:', sectionId);
+        console.log('   Query:', query);
+        console.log('   Params:', params);
+
+        await db.run(query, params);
 
         res.json({ success: true, message: 'Seção atualizada' });
-    } catch (err) {
-        console.error('❌ Erro ao atualizar seção:', err);
-        res.status(500).json({ success: false, error: err.message });
+
+    } catch (error) {
+        console.error('❌ Erro ao atualizar seção:', error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
@@ -1739,180 +1938,157 @@ Responda APENAS com a descrição, sem introduções ou explicações adicionais
     }
 });
 
-// ===== API - CONFIGURAÇÕES DO USUÁRIO =====
+// ===== API - CONFIGURAÇÕES DO USUÁRIO (CORREÇÃO FINAL - TIPOS CORRETOS) =====
 
 // GET - Carregar configurações do usuário
 app.get('/api/settings/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    
+    console.log('⚙️ GET /api/settings/' + userId);
+
     try {
-        const { userId } = req.params;
-        const headerUserId = req.headers['x-user-id'];
+        let result;
         
-        // Verifica se o usuário está acessando suas próprias configurações
-        if (userId !== headerUserId) {
-            return res.status(403).json({
-                success: false,
-                error: 'Acesso negado'
-            });
+        if (db.isPostgres) {
+            result = await db.query(
+                'SELECT * FROM user_settings WHERE user_id = $1',
+                [userId]
+            );
+        } else {
+            result = await db.query(
+                'SELECT * FROM user_settings WHERE user_id = ?',
+                [userId]
+            );
         }
-        
-        const settings = await db.get(
-            'SELECT * FROM user_settings WHERE user_id = ?',
-            [userId]
-        );
-        
-        if (settings) {
-            // Formata nomes das colunas para camelCase
-            const formattedSettings = {
-                hideCompleted: settings.hide_completed,
-                highlightUrgent: settings.highlight_urgent,
-                autoSuggestions: settings.auto_suggestions,
-                detailLevel: settings.detail_level,
-                darkMode: settings.dark_mode,
-                primaryColor: settings.primary_color,
-                currentPlan: settings.current_plan,
-                planRenewalDate: settings.plan_renewal_date,
-                viewMode: settings.view_mode || 'lista',
-                emailNotifications: settings.email_notifications !== false,
-                weeklyReport: settings.weekly_report !== false,
-                aiDescriptionsEnabled: settings.ai_descriptions_enabled !== false,
-                aiDetailLevel: settings.ai_detail_level || 'medio',
-                aiOptimizationEnabled: settings.ai_optimization_enabled !== false
+
+        if (result && result.length > 0) {
+            const row = result[0];
+            
+            // ✅ CONVERTER TIPOS CORRETAMENTE
+            // PostgreSQL e SQLite podem retornar INTEGER (0/1) ou BOOLEAN (true/false)
+            const settings = {
+                hideCompleted: row.hide_completed === 1 || row.hide_completed === true,
+                showDetails: row.show_details === 1 || row.show_details === true,
+                highlightUrgent: row.highlight_urgent === 1 || row.highlight_urgent === true,
+                autoSuggestions: row.auto_suggestions === 1 || row.auto_suggestions === true,
+                detailLevel: row.detail_level || 'medio',
+                darkMode: row.dark_mode === 1 || row.dark_mode === true,
+                viewMode: row.view_mode || 'lista'
             };
             
-            res.json({
-                success: true,
-                settings: formattedSettings
-            });
+            console.log('✅ Settings carregados:', settings);
+            
+            res.json({ success: true, settings });
         } else {
-            res.status(404).json({
-                success: false,
-                error: 'Configurações não encontradas'
+            console.log('⚠️ Nenhuma configuração encontrada, retornando padrões');
+            res.json({ 
+                success: true, 
+                settings: {
+                    hideCompleted: false,
+                    showDetails: true,
+                    highlightUrgent: false,
+                    autoSuggestions: false,
+                    detailLevel: 'medio',
+                    darkMode: false,
+                    viewMode: 'lista'
+                }
             });
         }
-    } catch (err) {
-        console.error('❌ Erro ao carregar configurações:', err);
-        res.status(500).json({
-            success: false,
-            error: 'Erro ao carregar configurações'
-        });
+    } catch (error) {
+        console.error('❌ Erro ao carregar settings:', error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
 // POST - Salvar ou atualizar TODAS as configurações
 app.post('/api/settings/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const settings = req.body.settings || req.body;
+    
+    console.log('💾 POST /api/settings/' + userId);
+    console.log('   Settings recebidos:', settings);
+    console.log('   Tipo de banco:', db.isPostgres ? 'PostgreSQL' : 'SQLite');
+
     try {
-        const { userId } = req.params;
-        const { settings } = req.body;
-        const headerUserId = req.headers['x-user-id'];
-
-        console.log('📥 POST /api/settings/' + userId);
-        console.log('Settings recebidos:', JSON.stringify(settings, null, 2));
-
-        if (userId !== headerUserId) {
-            return res.status(403).json({
-                success: false,
-                error: 'Acesso negado'
-            });
-        }
-
-        if (!settings || typeof settings !== 'object') {
-            return res.status(400).json({
-                success: false,
-                error: 'Configurações inválidas'
-            });
-        }
-
-        // Verifica se já existe configuração para este usuário
-        const existing = await db.get(
-            'SELECT id FROM user_settings WHERE user_id = ?',
-            [userId]
-        );
-
-        console.log('Registro existente:', existing ? 'Sim' : 'Não');
+        // ✅ CONVERTER BOOLEAN → INTEGER (0 ou 1) para AMBOS os bancos
+        const hideCompleted = settings.hideCompleted ? 1 : 0;
+        const showDetails = settings.showDetails !== false ? 1 : 0; // padrão 1
+        const highlightUrgent = settings.highlightUrgent ? 1 : 0;
+        const autoSuggestions = settings.autoSuggestions ? 1 : 0;
+        const darkMode = settings.darkMode ? 1 : 0;
+        const detailLevel = settings.detailLevel || 'medio';
+        const viewMode = settings.viewMode || 'lista';
         
-        if (existing) {
-            // Atualiza configurações existentes
-            // Converter booleanos para 0 ou 1 para SQLite
-            const result = await db.run(
-                `UPDATE user_settings SET
-                    hide_completed = ?,
-                    highlight_urgent = ?,
-                    auto_suggestions = ?,
-                    detail_level = ?,
-                    dark_mode = ?,
-                    primary_color = ?,
-                    current_plan = ?,
-                    plan_renewal_date = ?,
-                    view_mode = ?,
-                    email_notifications = ?,
-                    weekly_report = ?,
-                    ai_descriptions_enabled = ?,
-                    ai_detail_level = ?,
-                    ai_optimization_enabled = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE user_id = ?`,
-                [
-                    settings.hideCompleted ? 1 : 0,
-                    settings.highlightUrgent !== false ? 1 : 0,
-                    settings.autoSuggestions !== false ? 1 : 0,
-                    settings.detailLevel || 'Médio',
-                    settings.darkMode ? 1 : 0,
-                    settings.primaryColor || '#49a09d',
-                    settings.currentPlan || 'pro',
-                    settings.planRenewalDate || '30 de dezembro de 2025',
-                    settings.viewMode || 'lista',
-                    settings.emailNotifications !== false ? 1 : 0,
-                    settings.weeklyReport !== false ? 1 : 0,
-                    settings.aiDescriptionsEnabled !== false ? 1 : 0,
-                    settings.aiDetailLevel || 'medio',
-                    settings.aiOptimizationEnabled !== false ? 1 : 0,
-                    userId
-                ]
-            );
+        if (db.isPostgres) {
+            // ✅ PostgreSQL - UPSERT com INTEGER
+            const query = `
+                INSERT INTO user_settings (
+                    user_id, hide_completed, show_details, highlight_urgent,
+                    auto_suggestions, detail_level, dark_mode, view_mode
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                ON CONFLICT (user_id) 
+                DO UPDATE SET
+                    hide_completed = EXCLUDED.hide_completed,
+                    show_details = EXCLUDED.show_details,
+                    highlight_urgent = EXCLUDED.highlight_urgent,
+                    auto_suggestions = EXCLUDED.auto_suggestions,
+                    detail_level = EXCLUDED.detail_level,
+                    dark_mode = EXCLUDED.dark_mode,
+                    view_mode = EXCLUDED.view_mode
+            `;
 
-            console.log(`✅ Configurações atualizadas para usuário ${userId}`);
+            const params = [
+                userId,
+                hideCompleted,      // INTEGER
+                showDetails,        // INTEGER
+                highlightUrgent,    // INTEGER
+                autoSuggestions,    // INTEGER
+                detailLevel,        // VARCHAR
+                darkMode,           // INTEGER
+                viewMode            // VARCHAR
+            ];
+            
+            console.log('📤 Params PostgreSQL:', params);
+            
+            await db.query(query, params);
+            
+            console.log('✅ Settings salvos no PostgreSQL');
+            
         } else {
-            // Cria novas configurações
-            // Converter booleanos para 0 ou 1 para SQLite
-            const result = await db.run(
-                `INSERT INTO user_settings
-                (user_id, hide_completed, highlight_urgent, auto_suggestions, detail_level, dark_mode, primary_color, current_plan, plan_renewal_date, view_mode, email_notifications, weekly_report, ai_descriptions_enabled, ai_detail_level, ai_optimization_enabled)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    userId,
-                    settings.hideCompleted ? 1 : 0,
-                    settings.highlightUrgent !== false ? 1 : 0,
-                    settings.autoSuggestions !== false ? 1 : 0,
-                    settings.detailLevel || 'Médio',
-                    settings.darkMode ? 1 : 0,
-                    settings.primaryColor || '#49a09d',
-                    settings.currentPlan || 'pro',
-                    settings.planRenewalDate || '30 de dezembro de 2025',
-                    settings.viewMode || 'lista',
-                    settings.emailNotifications !== false ? 1 : 0,
-                    settings.weeklyReport !== false ? 1 : 0,
-                    settings.aiDescriptionsEnabled !== false ? 1 : 0,
-                    settings.aiDetailLevel || 'medio',
-                    settings.aiOptimizationEnabled !== false ? 1 : 0
-                ]
-            );
-
-            console.log(`✅ Configurações criadas para usuário ${userId}`);
+            // ✅ SQLite - INSERT OR REPLACE com INTEGER
+            const query = `
+                INSERT OR REPLACE INTO user_settings (
+                    user_id, hide_completed, show_details, highlight_urgent,
+                    auto_suggestions, detail_level, dark_mode, view_mode
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            
+            const params = [
+                userId,
+                hideCompleted,
+                showDetails,
+                highlightUrgent,
+                autoSuggestions,
+                detailLevel,
+                darkMode,
+                viewMode
+            ];
+            
+            console.log('📤 Params SQLite:', params);
+            
+            await db.query(query, params);
+            
+            console.log('✅ Settings salvos no SQLite');
         }
-        
-        res.json({
-            success: true,
-            message: 'Configurações salvas com sucesso'
-        });
-        
-    } catch (err) {
-        console.error('❌ Erro ao salvar configurações:', err);
-        console.error('Detalhes do erro:', err.message);
-        console.error('Stack:', err.stack);
-        res.status(500).json({
-            success: false,
-            error: 'Erro ao salvar configurações',
-            details: err.message
+
+        res.json({ success: true, message: 'Configurações salvas' });
+
+    } catch (error) {
+        console.error('❌ Erro ao salvar settings:', error);
+        console.error('Stack:', error.stack);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message
         });
     }
 });
@@ -1931,18 +2107,16 @@ app.put('/api/settings/:userId/:setting', async (req, res) => {
             });
         }
         
-        // Mapeia nomes frontend (camelCase) para backend (snake_case)
         const settingMap = {
             hideCompleted: 'hide_completed',
+            showDetails: 'show_details',
             highlightUrgent: 'highlight_urgent',
             autoSuggestions: 'auto_suggestions',
             detailLevel: 'detail_level',
             darkMode: 'dark_mode',
-            primaryColor: 'primary_color',
-            currentPlan: 'current_plan',
-            planRenewalDate: 'plan_renewal_date',
             viewMode: 'view_mode',
-            emailNotifications: 'email_notifications' // ✅ ADICIONADO
+            primaryColor: 'primary_color',
+            emailNotifications: 'email_notifications'
         };
         
         const dbSetting = settingMap[setting];
@@ -1954,28 +2128,39 @@ app.put('/api/settings/:userId/:setting', async (req, res) => {
             });
         }
         
-        const sql = `UPDATE user_settings SET ${dbSetting} = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`;
+        // ✅ CONVERTER BOOLEAN → INTEGER se for um campo booleano
+        let dbValue = value;
+        const booleanFields = ['hide_completed', 'show_details', 'highlight_urgent', 
+                                'auto_suggestions', 'dark_mode', 'email_notifications'];
         
-        const result = await db.run(sql, [value, userId]);
-        
-        if (result.changes > 0) {
-            console.log(`✅ ${setting} atualizado para ${value}`);
-            res.json({
-                success: true,
-                message: `${setting} atualizado`
-            });
-        } else {
-            res.status(404).json({
-                success: false,
-                error: 'Usuário não encontrado'
-            });
+        if (booleanFields.includes(dbSetting)) {
+            dbValue = value ? 1 : 0;
         }
+        
+        let query, params;
+        
+        if (db.isPostgres) {
+            query = `UPDATE user_settings SET ${dbSetting} = $1, updated_at = NOW() WHERE user_id = $2`;
+            params = [dbValue, userId];
+        } else {
+            query = `UPDATE user_settings SET ${dbSetting} = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`;
+            params = [dbValue, userId];
+        }
+        
+        await db.query(query, params);
+        
+        console.log(`✅ ${setting} atualizado para ${value} (DB: ${dbValue})`);
+        
+        res.json({
+            success: true,
+            message: `${setting} atualizado`
+        });
         
     } catch (err) {
         console.error('❌ Erro ao atualizar configuração:', err);
         res.status(500).json({
             success: false,
-            error: 'Erro ao atualizar configuração'
+            error: err.message
         });
     }
 });
@@ -2099,6 +2284,354 @@ setInterval(() => {
 }, 14 * 60 * 1000); // 14 minutos
 
 console.log('🔄 Keep-alive ativado: Servidor não vai dormir');
+
+// ===== FUNÇÃO: DETERMINAR PRIORIDADE AUTOMÁTICA =====
+function determinarPrioridadeAutomatica(titulo, descricao) {
+    const texto = (titulo + ' ' + descricao).toLowerCase();
+    
+    const palavrasAlta = [
+        'urgente', 'importante', 'crítico', 'prazo', 'deadline', 
+        'reunião', 'apresentação', 'entrega', 'cliente', 'projeto',
+        'trabalho', 'estudo', 'prova', 'exame', 'compromisso',
+        'pagamento', 'conta', 'vencimento', 'médico', 'saúde',
+        'emergência', 'imediato', 'asap', 'hoje'
+    ];
+    
+    const palavrasBaixa = [
+        'descanso', 'relaxar', 'lazer', 'pausa', 'intervalo',
+        'lanche', 'café', 'alongamento', 'caminhada', 'hobby',
+        'série', 'jogo', 'música', 'leitura', 'entretenimento',
+        'talvez', 'eventualmente', 'depois', 'quando der'
+    ];
+    
+    for (const palavra of palavrasAlta) {
+        if (texto.includes(palavra)) {
+            return 'high';
+        }
+    }
+    
+    for (const palavra of palavrasBaixa) {
+        if (texto.includes(palavra)) {
+            return 'low';
+        }
+    }
+    
+    return 'medium';
+}
+
+// ===== ROTAS DE SUBTAREFAS =====
+
+// GET - Buscar todas as subtarefas de uma tarefa
+// GET - Buscar todas as subtarefas de uma tarefa
+app.get('/subtasks/:taskId', async (req, res) => {
+    const { taskId } = req.params;
+    
+    try {
+        console.log(`📋 Buscando subtarefas da tarefa ${taskId}`);
+        
+        let result;
+        
+        if (db.isPostgres) {
+            result = await db.query(
+                `SELECT * FROM subtasks 
+                 WHERE task_id = $1 
+                 ORDER BY position ASC, created_at ASC`,
+                [taskId]
+            );
+        } else {
+            result = await db.query(
+                `SELECT * FROM subtasks 
+                 WHERE task_id = ? 
+                 ORDER BY position ASC, created_at ASC`,
+                [taskId]
+            );
+        }
+        
+        const subtasks = result || [];
+        console.log(`✅ ${subtasks.length} subtarefas encontradas`);
+        
+        res.json(subtasks);
+        
+    } catch (error) {
+        console.error('❌ Erro ao buscar subtarefas:', error);
+        res.status(500).json({ error: 'Erro ao buscar subtarefas' });
+    }
+});
+
+// POST - Criar nova subtarefa
+// POST - Criar nova subtarefa
+app.post('/subtasks', async (req, res) => {
+    const { task_id, title, position } = req.body;
+    
+    if (!task_id || !title) {
+        return res.status(400).json({ error: 'task_id e title são obrigatórios' });
+    }
+    
+    try {
+        console.log(`💾 Criando subtarefa: "${title}" para tarefa ${task_id}`);
+        
+        let result;
+        
+        if (db.isPostgres) {
+            result = await db.query(
+                `INSERT INTO subtasks (task_id, title, position, completed) 
+                 VALUES ($1, $2, $3, $4) 
+                 RETURNING *`,
+                [task_id, title, position || 0, false]
+            );
+        } else {
+            result = await db.query(
+                `INSERT INTO subtasks (task_id, title, position, completed) 
+                 VALUES (?, ?, ?, ?)`,
+                [task_id, title, position || 0, false]
+            );
+            
+            // SQLite não tem RETURNING, buscar o registro
+            const lastId = result.lastID;
+            result = await db.query('SELECT * FROM subtasks WHERE id = ?', [lastId]);
+        }
+        
+        const newSubtask = result[0] || result;
+        console.log('✅ Subtarefa criada:', newSubtask);
+        
+        res.status(201).json(newSubtask);
+        
+    } catch (error) {
+        console.error('❌ Erro ao criar subtarefa:', error);
+        res.status(500).json({ error: 'Erro ao criar subtarefa' });
+    }
+});
+
+// PUT - Atualizar subtarefa
+// PUT - Atualizar subtarefa
+app.put('/subtasks/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, completed, position } = req.body;
+    
+    try {
+        console.log(`✏️ Atualizando subtarefa ${id}`);
+        
+        const updates = [];
+        const values = [];
+        let paramCount = 1;
+        
+        if (db.isPostgres) {
+            // PostgreSQL
+            if (title !== undefined) {
+                updates.push(`title = $${paramCount++}`);
+                values.push(title);
+            }
+            
+            if (completed !== undefined) {
+                updates.push(`completed = $${paramCount++}`);
+                values.push(completed);
+            }
+            
+            if (position !== undefined) {
+                updates.push(`position = $${paramCount++}`);
+                values.push(position);
+            }
+            
+            if (updates.length === 0) {
+                return res.status(400).json({ error: 'Nenhum campo para atualizar' });
+            }
+            
+            updates.push(`updated_at = CURRENT_TIMESTAMP`);
+            values.push(id);
+            
+            const query = `
+                UPDATE subtasks 
+                SET ${updates.join(', ')} 
+                WHERE id = $${paramCount} 
+                RETURNING *
+            `;
+            
+            const result = await db.query(query, values);
+            
+            if (!result || result.length === 0) {
+                return res.status(404).json({ error: 'Subtarefa não encontrada' });
+            }
+            
+            const updatedSubtask = result[0];
+            console.log('✅ Subtarefa atualizada:', updatedSubtask);
+            
+            res.json(updatedSubtask);
+            
+        } else {
+            // SQLite
+            if (title !== undefined) {
+                updates.push('title = ?');
+                values.push(title);
+            }
+            
+            if (completed !== undefined) {
+                updates.push('completed = ?');
+                values.push(completed ? 1 : 0);
+            }
+            
+            if (position !== undefined) {
+                updates.push('position = ?');
+                values.push(position);
+            }
+            
+            if (updates.length === 0) {
+                return res.status(400).json({ error: 'Nenhum campo para atualizar' });
+            }
+            
+            values.push(id);
+            
+            const query = `UPDATE subtasks SET ${updates.join(', ')} WHERE id = ?`;
+            
+            await db.query(query, values);
+            
+            const result = await db.query('SELECT * FROM subtasks WHERE id = ?', [id]);
+            
+            res.json(result[0]);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao atualizar subtarefa:', error);
+        res.status(500).json({ error: 'Erro ao atualizar subtarefa' });
+    }
+});
+
+// DELETE - Deletar subtarefa
+// DELETE - Deletar subtarefa
+app.delete('/subtasks/:id', async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        console.log(`🗑️ Deletando subtarefa ${id}`);
+        
+        let result;
+        
+        if (db.isPostgres) {
+            result = await db.query(
+                'DELETE FROM subtasks WHERE id = $1 RETURNING *',
+                [id]
+            );
+        } else {
+            result = await db.query(
+                'DELETE FROM subtasks WHERE id = ?',
+                [id]
+            );
+        }
+        
+        if (!result || (Array.isArray(result) && result.length === 0)) {
+            return res.status(404).json({ error: 'Subtarefa não encontrada' });
+        }
+        
+        console.log('✅ Subtarefa deletada');
+        res.json({ message: 'Subtarefa deletada com sucesso' });
+        
+    } catch (error) {
+        console.error('❌ Erro ao deletar subtarefa:', error);
+        res.status(500).json({ error: 'Erro ao deletar subtarefa' });
+    }
+});
+
+// POST - Gerar conteúdo com IA (genérico)
+// POST - Gerar conteúdo com IA (genérico)
+app.post('/gemini/generate', async (req, res) => {
+    try {
+        const { prompt } = req.body;
+        
+        if (!prompt) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Prompt é obrigatório' 
+            });
+        }
+        
+        console.log('🤖 Gerando com Gemini...');
+        
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        console.log('✅ Texto gerado com sucesso');
+        
+        res.json({ 
+            success: true,
+            text 
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro no Gemini:', error);
+        res.status(500).json({ 
+            success: false,
+            error: error.message 
+        });
+    }
+});
+
+// ===== ROTA: TAREFAS CONCLUÍDAS (MAIS DE 7 DIAS) =====
+app.get('/api/tasks/completed/old', async (req, res) => {
+    const { user_id } = req.query;
+    
+    if (!user_id) {
+        return res.status(400).json({ error: 'user_id é obrigatório' });
+    }
+    
+    try {
+        console.log('📋 Buscando tarefas concluídas antigas do usuário:', user_id);
+        
+        // Calcular data de 7 dias atrás
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const query = `
+            SELECT t.*, l.name as list_name, l.color as list_color
+            FROM tasks t
+            LEFT JOIN lists l ON t.list_id = l.id
+            WHERE t.user_id = ? 
+            AND t.status = 'completed'
+            AND (t.completed_at < ? OR (t.completed_at IS NULL AND t.updated_at < ?))
+            ORDER BY COALESCE(t.completed_at, t.updated_at) DESC
+        `;
+        
+        const [tasks] = await db.promise().query(query, [user_id, sevenDaysAgo, sevenDaysAgo]);
+        
+        console.log(`✅ ${tasks.length} tarefas concluídas antigas encontradas`);
+        res.json(tasks);
+        
+    } catch (error) {
+        console.error('❌ Erro ao buscar tarefas concluídas antigas:', error);
+        res.status(500).json({ error: 'Erro ao buscar tarefas concluídas antigas' });
+    }
+});
+
+// ===== ROTA: TODAS AS TAREFAS CONCLUÍDAS =====
+app.get('/api/tasks/completed', async (req, res) => {
+    const { user_id } = req.query;
+    
+    if (!user_id) {
+        return res.status(400).json({ error: 'user_id é obrigatório' });
+    }
+    
+    try {
+        console.log('📋 Buscando todas tarefas concluídas do usuário:', user_id);
+        
+        const query = `
+            SELECT t.*, l.name as list_name, l.color as list_color
+            FROM tasks t
+            LEFT JOIN lists l ON t.list_id = l.id
+            WHERE t.user_id = ? 
+            AND t.status = 'completed'
+            ORDER BY COALESCE(t.completed_at, t.updated_at) DESC
+        `;
+        
+        const [tasks] = await db.promise().query(query, [user_id]);
+        
+        console.log(`✅ ${tasks.length} tarefas concluídas encontradas`);
+        res.json(tasks);
+        
+    } catch (error) {
+        console.error('❌ Erro ao buscar tarefas concluídas:', error);
+        res.status(500).json({ error: 'Erro ao buscar tarefas concluídas' });
+    }
+});
 
 // ===== INICIAR SERVIDOR =====
 app.listen(PORT, () => {

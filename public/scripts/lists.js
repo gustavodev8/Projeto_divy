@@ -60,6 +60,10 @@ function renderLists() {
 
     container.innerHTML = '';
 
+        console.log('🎨 RENDERIZANDO LISTAS:');
+    console.log('   - Total:', window.userLists.length);
+    console.log('   - Lista atual:', window.currentListId);
+
     window.userLists.forEach(list => {
         const isActive = list.id === window.currentListId;
         
@@ -69,7 +73,7 @@ function renderLists() {
         
         listElement.innerHTML = `
             <div class="list-item-content" onclick="selectList(${list.id})">
-                <span class="list-emoji">${list.emoji || '📋'}</span>
+                <span class="list-emoji" style="background: ${list.color || '#146551'}; border-color: ${list.color || '#146551'}"></span>
                 <span class="list-name">${list.name}</span>
                 <span class="list-count">0</span>
             </div>
@@ -100,40 +104,59 @@ function renderLists() {
 
 // ===== SELECIONAR LISTA =====
 async function selectList(listId) {
-    window.currentListId = listId;
+    console.log('📋 Selecionando lista:', listId);
     
-    // Atualizar visual da sidebar
-    document.querySelectorAll('.list-item').forEach(item => {
-        item.classList.toggle('active', parseInt(item.dataset.listId) === listId);
+    // ✅ Salvar lista atual
+    window.currentListId = parseInt(listId);
+    window.currentSmartFilter = null; // Limpar filtro inteligente
+    
+    localStorage.setItem('currentListId', listId);
+    
+    // ✅ Remover seleção de filtros inteligentes
+    document.querySelectorAll('.nav-item[data-filter]').forEach(item => {
+        item.classList.remove('active');
     });
-
-    // Carregar seções dessa lista
+    
+    // ✅ Atualizar UI das listas
+    document.querySelectorAll('.list-item').forEach(item => {
+        if (item.dataset.listId === listId.toString()) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+    
+    // ✅ Carregar seções da lista
     if (typeof loadSections === 'function') {
         await loadSections(listId);
+        console.log('📁 Seções carregadas para lista', listId);
+    } else if (typeof loadSectionsForList === 'function') {
+        await loadSectionsForList(listId);
+        console.log('📁 Seções carregadas para lista', listId);
     }
     
-    // Recarregar tarefas
-    if (typeof loadAndDisplayTasksFromDatabase === 'function') {
-        await loadAndDisplayTasksFromDatabase();
+    // ✅ Atualizar estado dos botões de adicionar tarefa
+    if (typeof updateAddTaskButtonState === 'function') {
+        updateAddTaskButtonState();
+    } else if (typeof updateAddTaskButtonsState === 'function') {
+        updateAddTaskButtonsState();
     }
-
-    // Atualizar título da página
-    const list = window.userLists.find(l => l.id === listId);
-    if (list) {
-        const pageTitle = document.querySelector('.page-title');
-        if (pageTitle) {
-            const emoji = pageTitle.querySelector('.title-emoji');
-            if (emoji) emoji.textContent = list.emoji || '📋';
-            
-            // Atualizar texto do título
-            const titleText = Array.from(pageTitle.childNodes).find(node => node.nodeType === 3);
-            if (titleText) {
-                titleText.textContent = list.name;
-            } else {
-                pageTitle.innerHTML = `<span class="title-emoji">${list.emoji || '📋'}</span>${list.name}`;
-            }
-        }
+    
+    // ✅ Filtrar e renderizar tarefas
+    if (typeof filterTasksByCurrentList === 'function') {
+        filterTasksByCurrentList();
     }
+    
+    if (typeof renderAllTasks === 'function') {
+        renderAllTasks();
+    }
+    
+    // ✅ ATUALIZAR TÍTULO DA PÁGINA
+    if (typeof updatePageTitle === 'function') {
+        updatePageTitle();
+    }
+    
+    console.log('✅ Lista selecionada:', listId);
 }
 
 // ===== CRIAR LISTA =====
@@ -279,36 +302,63 @@ async function deleteList(listId) {
 
 // ===== MODAL CRIAR LISTA =====
 function showCreateListModal() {
-    const modal = document.createElement('div');
-    modal.className = 'section-modal-overlay';
-    modal.innerHTML = `
-        <div class="section-modal">
-            <div class="section-modal-header">
-                <h3>Nova Lista</h3>
-                <button class="section-modal-close" onclick="this.closest('.section-modal-overlay').remove()">×</button>
-            </div>
-            <div class="section-modal-body">
-                <div class="section-modal-field">
-                    <label>Emoji</label>
-                    <input type="text" id="newListEmoji" value="📋" maxlength="2">
+    const modalHTML = `
+        <div class="list-modal-overlay active" id="listModalOverlay" onclick="closeCreateListModal()">
+            <div class="list-modal" onclick="event.stopPropagation()">
+                <div class="list-modal-header">
+                    <h3 class="list-modal-title">Nova Lista</h3>
+                    <button class="btn-close-modal" onclick="closeCreateListModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
                 </div>
-                <div class="section-modal-field">
-                    <label>Nome da Lista</label>
-                    <input type="text" id="newListName" placeholder="Ex: Trabalho, Estudos, Casa..." autofocus>
+                
+                <div class="list-modal-body">
+                    <div class="list-form-field">
+                        <label class="list-form-label">Nome da Lista</label>
+                        <input 
+                            type="text" 
+                            id="listNameInput" 
+                            class="list-form-input"
+                            placeholder="Ex: Trabalho, Estudos, Casa"
+                            autocomplete="off"
+                        />
+                    </div>
                 </div>
-                <div class="section-modal-field">
-                    <label>Cor</label>
-                    <input type="color" id="newListColor" value="#146551">
+                
+                <div class="list-modal-footer">
+                    <button class="list-btn-cancel" onclick="closeCreateListModal()">
+                        Cancelar
+                    </button>
+                    <button class="list-btn-save" onclick="saveNewList()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Criar Lista
+                    </button>
                 </div>
-            </div>
-            <div class="section-modal-actions">
-                <button class="btn-cancel" onclick="this.closest('.section-modal-overlay').remove()">Cancelar</button>
-                <button class="btn-save" onclick="submitCreateList()">Criar Lista</button>
             </div>
         </div>
     `;
-    document.body.appendChild(modal);
-    document.getElementById('newListName').focus();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.style.overflow = 'hidden';
+    
+    // Focus no input
+    setTimeout(() => {
+        document.getElementById('listNameInput')?.focus();
+    }, 100);
+}
+
+function closeCreateListModal() {
+    const overlay = document.getElementById('listModalOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+    document.body.style.overflow = '';
 }
 
 async function submitCreateList() {
@@ -342,6 +392,141 @@ function updateListTaskCounts() {
         }
     });
 }
+
+/* ========================================
+   CRIAR NOVA LISTA
+   ======================================== */
+
+function showCreateListModal() {
+    const modalHTML = `
+        <div class="list-modal-overlay active" id="listModalOverlay" onclick="closeCreateListModal()">
+            <div class="list-modal" onclick="event.stopPropagation()">
+                <div class="list-modal-header">
+                    <h3 class="list-modal-title">Nova Lista</h3>
+                    <button class="btn-close-modal" onclick="closeCreateListModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="list-modal-body">
+                    <div class="list-form-field">
+                        <label class="list-form-label">Nome da Lista</label>
+                        <input 
+                            type="text" 
+                            id="listNameInput" 
+                            class="list-form-input"
+                            placeholder="Ex: Trabalho, Estudos, Casa"
+                            autocomplete="off"
+                            onkeypress="if(event.key === 'Enter') saveNewList()"
+                        />
+                    </div>
+                </div>
+                
+                <div class="list-modal-footer">
+                    <button class="list-btn-cancel" onclick="closeCreateListModal()">
+                        Cancelar
+                    </button>
+                    <button class="list-btn-save" onclick="saveNewList()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Criar Lista
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.style.overflow = 'hidden';
+    
+    setTimeout(() => {
+        document.getElementById('listNameInput')?.focus();
+    }, 100);
+}
+
+function closeCreateListModal() {
+    const overlay = document.getElementById('listModalOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+    document.body.style.overflow = '';
+}
+
+async function saveNewList() {
+    console.log('💾 Salvando nova lista...');
+    
+    const nameInput = document.getElementById('listNameInput');
+    const listName = nameInput?.value.trim();
+    
+    if (!listName) {
+        alert('❌ Por favor, digite um nome para a lista');
+        nameInput?.focus();
+        return;
+    }
+    
+    const user = getCurrentUser();
+    if (!user) {
+        alert('❌ Usuário não encontrado. Faça login novamente.');
+        return;
+    }
+    
+    try {
+        console.log('📤 Enviando lista para o servidor:', listName);
+        
+        const response = await fetch(`${API_URL}/api/lists`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: listName,
+                user_id: user.id
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('✅ Lista criada com sucesso:', result.list);
+            
+            // Fechar modal
+            closeCreateListModal();
+            
+            // Recarregar listas
+            if (typeof loadUserLists === 'function') {
+                await loadUserLists();
+            }
+            
+            // Mostrar notificação
+            if (typeof showNotification === 'function') {
+                showNotification('✅ Lista criada com sucesso!');
+            }
+            
+            // Selecionar a nova lista
+            if (result.list && result.list.id) {
+                selectList(result.list.id);
+            }
+            
+        } else {
+            console.error('❌ Erro ao criar lista:', result.error);
+            alert('❌ Erro ao criar lista: ' + (result.error || 'Erro desconhecido'));
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro na requisição:', error);
+        alert('❌ Erro ao criar lista. Verifique sua conexão.');
+    }
+}
+
+// Exportar funções globalmente
+window.showCreateListModal = showCreateListModal;
+window.closeCreateListModal = closeCreateListModal;
+window.saveNewList = saveNewList;
 
 // ===== EXPORTAR FUNÇÕES =====
 window.loadLists = loadLists;

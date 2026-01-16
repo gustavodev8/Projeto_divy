@@ -3,464 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurações - Nura</title>
+    <title>Ajustes - Nura</title>
     <link rel="stylesheet" href="../css/Ajustes.css">
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h1>Configurações</h1>
-                <p>Personalize sua experiência</p>
-            </div>
+    <div class="settings-container">
+        <!-- Header -->
+        <header class="settings-header">
+            <a href="Tela_Inicial.html" class="btn-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+            <h1>Ajustes</h1>
+        </header>
+
+        <!-- Content -->
+        <main class="settings-content">
             
-            <ul class="nav-list">
-                <li class="nav-item active" data-section="appearance">Aparência</li>
-                <li class="nav-item" data-section="tasks">Tarefas</li>
-                <li class="nav-item" data-section="ai">Assistente IA</li>
-                <li class="nav-item" data-section="notifications">Notificações</li>
-                <li class="nav-item" data-section="plans">Planos</li>
-                <li class="nav-item" data-section="account">Conta</li>
-            </ul>
-        </aside>
-        
-        <main class="content">
             <!-- Aparência -->
-            <section class="section active" id="appearance">
-                <h2 class="section-title">Aparência</h2>
-                <p class="section-subtitle">Personalize a interface do sistema</p>
+            <section class="settings-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                        <circle cx="12" cy="12" r="5"></circle>
+                    </svg>
+                    Aparência
+                </h2>
                 
-                <div class="setting-group">
-                    <h3 class="group-title">Tema</h3>
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Modo escuro</div>
-                            <div class="setting-description">Ativa o tema escuro para reduzir o brilho</div>
-                        </div>
-                        <div class="setting-control">
-                            <div class="toggle-switch" id="darkModeToggle"></div>
-                        </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Modo escuro</div>
+                        <div class="setting-description">Ativar tema escuro para reduzir o brilho</div>
                     </div>
-                </div>
-                
-                <div class="setting-group">
-                    <h3 class="group-title">Cor principal</h3>
-                    <div class="color-grid">
-                        <div class="color-option active" style="background: #49a09d;" data-color="#49a09d"></div>
-                        <div class="color-option" style="background: #667eea;" data-color="#667eea"></div>
-                        <div class="color-option" style="background: #e74c3c;" data-color="#e74c3c"></div>
-                        <div class="color-option" style="background: #2ecc71;" data-color="#2ecc71"></div>
-                        <div class="color-option" style="background: #f39c12;" data-color="#f39c12"></div>
-                        <div class="color-option" style="background: #9b59b6;" data-color="#9b59b6"></div>
-                    </div>
-                </div>
-                
-                <div class="setting-group">
-                    <h3 class="group-title">Tipografia</h3>
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Tamanho da fonte</div>
-                            <div class="setting-description">Ajuste o tamanho do texto</div>
-                        </div>
-                        <div class="setting-control">
-                            <select>
-                                <option>Pequeno</option>
-                                <option selected>Médio</option>
-                                <option>Grande</option>
-                            </select>
-                        </div>
-                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </section>
-            
-            <!-- Tarefas -->
-            <section class="section" id="tasks">
-                <h2 class="section-title">Tarefas</h2>
-                <p class="section-subtitle">Configure como suas tarefas são exibidas</p>
+
+            <!-- Visualização -->
+            <section class="settings-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Visualização de Tarefas
+                </h2>
                 
-                <div class="setting-group">
-                    <h3 class="group-title">Visualização</h3>
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Modo de exibição padrão</div>
-                            <div class="setting-description">Escolha como visualizar suas tarefas</div>
-                        </div>
-                        <div class="setting-control">
-                            <select>
-                                <option selected>Lista</option>
-                                <option>Kanban</option>
-                                <option>Calendário</option>
-                            </select>
-                        </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Mostrar detalhes</div>
+                        <div class="setting-description">Exibir descrição e data nas tarefas</div>
                     </div>
-                    
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Ordenar por</div>
-                            <div class="setting-description">Define a ordem de exibição</div>
-                        </div>
-                        <div class="setting-control">
-                            <select>
-                                <option selected>Mais recentes</option>
-                                <option>Mais antigas</option>
-                                <option>Prioridade</option>
-                                <option>Alfabética</option>
-                            </select>
-                        </div>
-                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="showDetailsToggle" checked>
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                
-                <div class="setting-group">
-                    <h3 class="group-title">Filtros</h3>
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Ocultar tarefas concluídas</div>
-                            <div class="setting-description">Separar tarefas finalizadas</div>
-                        </div>
-                        <div class="setting-control">
-                            <div class="toggle-switch active"></div>
-                        </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Esconder concluídas</div>
+                        <div class="setting-description">Ocultar tarefas já finalizadas da lista</div>
                     </div>
-                    
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Destacar tarefas urgentes</div>
-                            <div class="setting-description">Prioridades no topo</div>
-                        </div>
-                        <div class="setting-control">
-                            <div class="toggle-switch active"></div>
-                        </div>
+                    <label class="switch">
+                        <input type="checkbox" id="hideCompletedToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Destacar urgentes</div>
+                        <div class="setting-description">Colorir bordas de tarefas por prioridade</div>
                     </div>
+                    <label class="switch">
+                        <input type="checkbox" id="highlightUrgentToggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </section>
-            
+
             <!-- IA -->
-            <section class="section" id="ai">
-                <h2 class="section-title">Assistente IA</h2>
-                <p class="section-subtitle">Configure o comportamento da inteligência artificial</p>
-
-                <div class="setting-group">
-                    <h3 class="group-title">Sugestões automáticas</h3>
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Descrições por IA</div>
-                            <div class="setting-description">A IA adiciona descrições automáticas às tarefas criadas</div>
-                        </div>
-                        <div class="setting-control">
-                            <div class="toggle-switch active" id="aiDescriptionsToggle"></div>
-                        </div>
+            <section class="settings-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    Assistente IA
+                </h2>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Sugestões automáticas</div>
+                        <div class="setting-description">Gerar descrições automáticas para novas tarefas</div>
                     </div>
-
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Nível de detalhamento</div>
-                            <div class="setting-description">Quanto de informação a IA deve adicionar nas descrições</div>
-                        </div>
-                        <div class="setting-control">
-                            <select id="aiDetailLevel">
-                                <option value="baixo">Baixo - Breve e direto</option>
-                                <option value="medio" selected>Médio - Equilibrado</option>
-                                <option value="alto">Alto - Detalhado e completo</option>
-                            </select>
-                        </div>
-                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="aiSuggestionsToggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
 
-                <div class="setting-group">
-                    <h3 class="group-title">Geração de rotinas</h3>
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Sugestões de otimização</div>
-                            <div class="setting-description">A IA sugere melhorias na organização de tarefas</div>
-                        </div>
-                        <div class="setting-control">
-                            <div class="toggle-switch active" id="aiOptimizationToggle"></div>
-                        </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Nível de detalhamento</div>
+                        <div class="setting-description">Quanto de detalhes a IA deve gerar</div>
                     </div>
+                    <select id="aiDetailLevel" class="select-minimal">
+                        <option value="baixo">Baixo</option>
+                        <option value="medio" selected>Médio</option>
+                        <option value="alto">Alto</option>
+                    </select>
                 </div>
             </section>
-            
-            <!-- Notificações -->
-            <section class="section" id="notifications">
-                <h2 class="section-title">Notificações</h2>
-                <p class="section-subtitle">Gerencie como você recebe alertas</p>
-                
-                <div class="setting-group">
-                    <h3 class="group-title">Alertas</h3>
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Notificações no navegador</div>
-                            <div class="setting-description">Alertas mesmo minimizado</div>
-                        </div>
-                        <div class="setting-control">
-                            <div class="toggle-switch"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Resumo diário por email</div>
-                            <div class="setting-description">Tarefas pendentes às 8h</div>
-                        </div>
-                        <div class="setting-control">
-                            <div class="toggle-switch"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">Relatório semanal</div>
-                            <div class="setting-description">Relatório com IA toda segunda às 08:00 com análise de produtividade e sugestões</div>
-                        </div>
-                        <div class="setting-control">
-                            <div class="toggle-switch active" id="weeklyReportToggle"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- ========================================== -->
-                <!-- NOVA SEÇÃO: NOTIFICAÇÕES POR WHATSAPP -->
-                <!-- ========================================== -->
-                <div class="setting-group">
-                    <h3 class="group-title">WhatsApp</h3>
 
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <div class="setting-label">📱 Resumo diário por WhatsApp</div>
-                            <div class="setting-description">Receba suas tarefas pendentes às 07:58</div>
-                        </div>
-                        <div class="setting-control">
-                            <label class="whatsapp-toggle">
-                                <input type="checkbox" id="whatsapp-notifications">
-                                <span class="whatsapp-slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ========================================== -->
-                <!-- NOVA SEÇÃO: NOTIFICAÇÕES POR TELEGRAM -->
-                <!-- ========================================== -->
-                <div class="setting-group">
-                    <h3 class="group-title">Telegram</h3>
-
-                    <div class="telegram-status" id="telegramStatus">
-                        <div class="status-icon">💬</div>
-                        <div class="status-info">
-                            <p class="status-title">Telegram não vinculado</p>
-                            <p class="status-description">Conecte seu Telegram para receber notificações aleatórias durante o dia</p>
-                        </div>
-                    </div>
-
-                    <div class="setting-row telegram-input-row" id="telegramInputRow">
-                        <div class="setting-info">
-                            <div class="setting-label">🔗 Código de Vinculação</div>
-                            <div class="setting-description">
-                                1. Abra o Telegram<br>
-                                2. Busque por <strong>@SeuBotNura</strong><br>
-                                3. Digite /start e depois /vincular<br>
-                                4. Cole o código aqui e salve
-                            </div>
-                        </div>
-                        <div class="setting-control">
-                            <div class="telegram-input-group">
-                                <input type="text" id="telegramChatId" placeholder="Cole o código aqui" class="telegram-input">
-                                <button id="saveTelegram" class="btn-telegram">Vincular</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="setting-row telegram-connected-row" id="telegramConnectedRow" style="display: none;">
-                        <div class="setting-info">
-                            <div class="setting-label">✅ Telegram Conectado</div>
-                            <div class="setting-description">
-                                Você receberá:<br>
-                                • Notificações aleatórias (8h-20h)<br>
-                                • Alertas de tarefas urgentes<br>
-                                • Resumos personalizados
-                            </div>
-                        </div>
-                        <div class="setting-control">
-                            <button id="unlinkTelegram" class="btn-telegram btn-unlink">Desvincular</button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group" style="margin-top: 16px;">
-                        <label class="form-label">📞 Número de WhatsApp</label>
-                        <div class="setting-description" style="margin-bottom: 8px;">
-                            Formato: 5511999887766 (código do país + DDD + número)
-                        </div>
-                        <input 
-                            type="tel" 
-                            id="whatsapp-number" 
-                            class="form-input whatsapp-input"
-                            placeholder="5511999887766"
-                            maxlength="13"
-                            pattern="[0-9]*"
-                        >
-                    </div>
-                    
-                    <div class="button-group" style="margin-top: 16px;">
-                        <button class="btn btn-whatsapp" onclick="testarEnvioWhatsApp()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 2L11 13"></path>
-                                <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
-                            </svg>
-                            Enviar Mensagem de Teste
-                        </button>
-                    </div>
-                    
-                    <div class="whatsapp-info">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="16" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                        </svg>
-                        <div>
-                            <strong>Importante:</strong>
-                            <ul>
-                                <li>Digite apenas números, sem espaços ou caracteres especiais</li>
-                                <li>Inclua o código do país (55 para Brasil)</li>
-                                <li>Exemplo: <code>5511999887766</code></li>
-                                <li>Mensagens enviadas automaticamente às 07:58 (horário de Brasília)</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- Planos -->
-            <section class="section" id="plans">
-                <h2 class="section-title">Planos e Assinatura</h2>
-                <p class="section-subtitle">Escolha o melhor plano para você</p>
-                
-                <div class="setting-group">
-                    <h3 class="group-title">Disponíveis</h3>
-                    <div class="plans-container">
-                        <div class="plan-card">
-                            <div class="plan-name">Gratuito</div>
-                            <div class="plan-price">R$ 0</div>
-                            <div class="plan-period">para sempre</div>
-                            <ul class="plan-features">
-                                <li>Até 10 tarefas</li>
-                                <li>Sincronização básica</li>
-                                <li>Suporte por email</li>
-                            </ul>
-                            <button class="btn" style="width: 100%; margin-top: 12px;">Manter</button>
-                        </div>
-                        
-                        <div class="plan-card active">
-                            <div class="plan-badge">Seu plano</div>
-                            <div class="plan-name">Pro</div>
-                            <div class="plan-price">R$ 29</div>
-                            <div class="plan-period">por mês</div>
-                            <ul class="plan-features">
-                                <li>Tarefas ilimitadas</li>
-                                <li>Sincronização em tempo real</li>
-                                <li>Sugestões de IA</li>
-                                <li>Suporte prioritário</li>
-                            </ul>
-                            <button class="btn" style="width: 100%; margin-top: 12px;" disabled>Seu plano atual</button>
-                        </div>
-                        
-                        <div class="plan-card">
-                            <div class="plan-name">Premium</div>
-                            <div class="plan-price">R$ 99</div>
-                            <div class="plan-period">por mês</div>
-                            <ul class="plan-features">
-                                <li>Tudo no Pro</li>
-                                <li>IA avançada</li>
-                                <li>Relatórios personalizados</li>
-                                <li>Suporte 24/7 VIP</li>
-                            </ul>
-                            <button class="btn btn-primary" style="width: 100%; margin-top: 12px;">Fazer upgrade</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="setting-group">
-                    <h3 class="group-title">Gerenciar</h3>
-                    <p style="color: #999; margin-bottom: 16px; font-size: 0.9rem;">Assinatura vence em 30 de dezembro de 2025</p>
-                    <div class="button-group">
-                        <button class="btn">Trocar plano</button>
-                        <button class="btn btn-danger">Cancelar assinatura</button>
-                    </div>
-                </div>
-            </section>
-            
             <!-- Conta -->
-            <section class="section" id="account">
-                <h2 class="section-title">Conta</h2>
-                <p class="section-subtitle">Gerencie suas informações pessoais</p>
+            <section class="settings-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Conta
+                </h2>
                 
-                <div class="setting-group">
-                    <h3 class="group-title">Informações</h3>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Nome completo</label>
-                        <input type="text" class="form-input" value="Administrador" placeholder="Seu nome">
+                <div class="account-info">
+                    <div class="account-avatar">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
                     </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-input" value="admin@nura.ia" placeholder="seu@email.com">
-                    </div>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-primary">Salvar</button>
-                        <button class="btn">Cancelar</button>
+                    <div class="account-details">
+                        <div class="account-name">Carregando...</div>
+                        <div class="account-email">carregando...</div>
                     </div>
                 </div>
+
+                <button class="btn-signout" onclick="logout()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Sair da conta
+                </button>
+            </section>
+
+            <!-- Sobre -->
+            <section class="settings-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    Sobre
+                </h2>
                 
-                <div class="setting-group">
-                    <h3 class="group-title">Segurança</h3>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Nova senha</label>
-                        <input type="password" class="form-input" placeholder="Digite sua nova senha">
+                <div class="about-info">
+                    <div class="about-item">
+                        <span class="about-label">Versão</span>
+                        <span class="about-value">1.0.0</span>
                     </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Confirmar senha</label>
-                        <input type="password" class="form-input" placeholder="Confirme sua nova senha">
+                    <div class="about-item">
+                        <span class="about-label">Modelo IA</span>
+                        <span class="about-value">Gemini 2.5 Flash</span>
                     </div>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-primary">Alterar senha</button>
+                    <div class="about-item">
+                        <span class="about-label">Desenvolvido por</span>
+                        <span class="about-value">Nura Team</span>
                     </div>
-                </div>
-                
-                <div class="danger-zone">
-                    <div class="danger-zone-title">Zona de perigo</div>
-                    <div class="danger-zone-description">
-                        Excluir sua conta irá remover permanentemente todos os seus dados.
-                    </div>
-                    <button class="btn btn-danger">Excluir conta</button>
                 </div>
             </section>
+
         </main>
     </div>
-    
-    <script>
-        // ===== NAVEGAÇÃO ENTRE SEÇÕES =====
-        // Este código roda ANTES do settings.js para não conflitar
-        document.addEventListener('DOMContentLoaded', function() {
-            // Navegação
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                    item.classList.add('active');
-                    document.getElementById(item.dataset.section).classList.add('active');
-                });
-            });
-        });
-        
-        // ===== OS TOGGLES E CORES SÃO GERENCIADOS PELO settings.js =====
-        // Não adicionar listeners aqui para evitar conflito
-    </script>
-    <script src="../scripts/aiSettings.js"></script>
-    <script src="../scripts/settings.js"></script>
+
+    <!-- Scripts -->
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/ajustes.js"></script>
 </body>
 </html>

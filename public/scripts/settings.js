@@ -8,18 +8,22 @@ const SETTINGS_API_URL = window.location.hostname === 'localhost'
 let currentUserId = null;
 
 // ===== OBJETO DE CONFIGURAÇÕES =====
-const nuraSettings = {
+let nuraSettings = {
     hideCompleted: false,
     highlightUrgent: true,
     autoSuggestions: true,
     detailLevel: 'Médio',
     darkMode: false,
     primaryColor: '#49a09d',
-    currentPlan: 'pro',
-    planRenewalDate: '30 de dezembro de 2025',
+    currentPlan: 'free',
+    planRenewalDate: '',
     viewMode: 'lista',
+    showDetails: false, 
     emailNotifications: true,
-    weeklyReport: true
+    weeklyReport: false,
+    aiDescriptionsEnabled: true,
+    aiDetailLevel: 'medio',
+    aiOptimizationEnabled: true
 };
 
 // ===== OBTER ID DO USUÁRIO =====
@@ -40,82 +44,97 @@ function getCurrentUserId() {
 
 // ===== CARREGAR CONFIGURAÇÕES DO BANCO =====
 async function loadSettingsFromDatabase() {
-    try {
-        const userId = getCurrentUserId();
-        
-        if (!userId) {
-            console.warn('⚠️ Usuário não identificado');
-            return false;
-        }
-
-        const response = await fetch(`${SETTINGS_API_URL}/api/settings/${userId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-user-id': userId
-            }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            
-            if (data.success && data.settings) {
-                Object.assign(nuraSettings, data.settings);
-                console.log('✅ Configurações carregadas do banco:', nuraSettings);
-                applySettings();
-                updateUIWithSettings();
-                return true;
-            }
-        } else if (response.status === 404) {
-            console.log('📝 Criando configurações padrão...');
-            await saveSettingsToDatabase();
-            updateUIWithSettings();
-            return true;
-        } else {
-            console.error('❌ Erro:', response.status);
-            return false;
-        }
-    } catch (err) {
-        console.error('❌ Erro ao carregar configurações:', err);
-        return false;
+    const user = getCurrentUser();
+    
+    // ✅ DEFAULTS INLINE (não depende de variável externa)
+    const DEFAULTS = {
+        hideCompleted: false,
+        highlightUrgent: true,
+        autoSuggestions: true,
+        detailLevel: 'Médio',
+        darkMode: false,
+        primaryColor: '#49a09d',
+        currentPlan: 'free',
+        planRenewalDate: '',
+        viewMode: 'lista',
+        showDetails: false,
+        emailNotifications: true,
+        weeklyReport: false,
+        aiDescriptionsEnabled: true,
+        aiDetailLevel: 'medio',
+        aiOptimizationEnabled: true
+    };
+    
+    if (!user) {
+        console.warn('⚠️ Usuário não logado, usando configurações padrão');
+        nuraSettings = { ...DEFAULTS };
+        this.applySettings();
+        return;
     }
+
+    console.log('⏳ Carregando configurações do banco para usuário:', user.id);
+
+    try {
+        const response = await fetch(`${API_URL}/api/settings/${user.id}`);
+        const data = await response.json();
+
+        if (data.success && data.settings) {
+            console.log('📥 Configurações carregadas do banco:', data.settings);
+            console.log('📥 showDetails carregado:', data.settings.showDetails);
+            
+            // Mesclar defaults com dados do banco
+Object.assign(nuraSettings, DEFAULTS, data.settings);
+            
+            console.log('✅ Configurações mescladas:', nuraSettings);
+            console.log('✅ showDetails final:', nuraSettings.showDetails);
+        } else {
+            console.log('⚠️ Nenhuma configuração encontrada, usando padrão');
+            nuraSettings = { ...DEFAULTS };
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar configurações:', error);
+        nuraSettings = { ...DEFAULTS };
+    }
+    
+    // ✅ FALLBACK: localStorage
+    const localShowDetails = localStorage.getItem('nura_showDetails');
+    if (localShowDetails !== null) {
+        nuraSettings.showDetails = localShowDetails === 'true';
+        console.log('📦 showDetails do localStorage:', nuraSettings.showDetails);
+    }
+    
+    this.applySettings();
 }
 
 // ===== SALVAR CONFIGURAÇÕES NO BANCO =====
 async function saveSettingsToDatabase() {
-    try {
-        const userId = getCurrentUserId();
-        
-        if (!userId) {
-            console.warn('⚠️ Usuário não identificado');
-            return false;
-        }
+    const user = getCurrentUser();
+    if (!user) {
+        console.error('❌ Usuário não logado');
+        return;
+    }
 
-        const response = await fetch(`${SETTINGS_API_URL}/api/settings/${userId}`, {
+    console.log('⚙️ Salvando configurações no banco...');
+    console.log('📦 Configurações a salvar:', nuraSettings);
+
+    try {
+        const response = await fetch(`${API_URL}/api/settings/${user.id}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'x-user-id': userId
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                user_id: userId,
-                settings: nuraSettings
-            })
+            body: JSON.stringify(nuraSettings) // ✅ Deve enviar TODO o objeto
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-                console.log('✅ Configurações salvas no banco');
-                return true;
-            }
+        const result = await response.json();
+
+        if (result.success) {
+            console.log('✅ Configurações salvas com sucesso!');
+        } else {
+            console.error('❌ Erro ao salvar:', result.error);
         }
-        
-        console.error('❌ Erro ao salvar configurações');
-        return false;
-    } catch (err) {
-        console.error('❌ Erro de conexão:', err);
-        return false;
+    } catch (error) {
+        console.error('❌ Erro de conexão:', error);
     }
 }
 
@@ -833,8 +852,107 @@ async function unlinkTelegram() {
 
 // ===== EXPORTAR FUNÇÕES =====
 window.nuraSettingsFunctions = {
-    loadSettingsFromDatabase,
-    saveSettingsToDatabase,
+    loadSettingsFromDatabase: async function() {
+        const user = getCurrentUser();
+        
+        const DEFAULTS = {
+            hideCompleted: false,
+            highlightUrgent: true,
+            autoSuggestions: true,
+            detailLevel: 'Médio',
+            darkMode: false,
+            primaryColor: '#49a09d',
+            currentPlan: 'free',
+            planRenewalDate: '',
+            viewMode: 'lista',
+            showDetails: false,
+            emailNotifications: true,
+            weeklyReport: false,
+            aiDescriptionsEnabled: true,
+            aiDetailLevel: 'medio',
+            aiOptimizationEnabled: true
+        };
+        
+        if (!user) {
+            console.warn('⚠️ Usuário não logado, usando configurações padrão');
+            Object.assign(nuraSettings, DEFAULTS);
+            this.applySettings();
+            return;
+        }
+
+        console.log('⏳ Carregando configurações do banco para usuário:', user.id);
+
+        try {
+            const response = await fetch(`${SETTINGS_API_URL}/api/settings/${user.id}`);
+            const data = await response.json();
+
+            if (data.success && data.settings) {
+                console.log('📥 Configurações carregadas do banco:', data.settings);
+                console.log('📥 showDetails carregado:', data.settings.showDetails);
+                
+                Object.assign(nuraSettings, DEFAULTS, data.settings);
+                
+                console.log('✅ Configurações mescladas:', nuraSettings);
+                console.log('✅ showDetails final:', nuraSettings.showDetails);
+            } else {
+                console.log('⚠️ Nenhuma configuração encontrada, usando padrão');
+                Object.assign(nuraSettings, DEFAULTS);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar configurações:', error);
+            Object.assign(nuraSettings, DEFAULTS);
+        }
+        
+        const localShowDetails = localStorage.getItem('nura_showDetails');
+        if (localShowDetails !== null) {
+            nuraSettings.showDetails = localShowDetails === 'true';
+            console.log('📦 showDetails do localStorage:', nuraSettings.showDetails);
+        }
+        
+        this.applySettings();
+    },
+    
+    saveSettingsToDatabase: async function() {
+        const user = getCurrentUser();
+        if (!user) {
+            console.error('❌ Usuário não logado');
+            return;
+        }
+
+        console.log('⚙️ Salvando configurações no banco...');
+        console.log('📦 Configurações a salvar:', nuraSettings);
+
+        try {
+            const response = await fetch(`${SETTINGS_API_URL}/api/settings/${user.id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nuraSettings)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log('✅ Configurações salvas com sucesso!');
+            } else {
+                console.error('❌ Erro ao salvar:', result.error);
+            }
+        } catch (error) {
+            console.error('❌ Erro de conexão:', error);
+        }
+    },
+    
+    applySettings: function() {
+        if (nuraSettings.darkMode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+        
+        document.documentElement.style.setProperty('--primary-color', nuraSettings.primaryColor);
+        
+        console.log('🎨 Configurações aplicadas');
+    },
+    
     toggleHideCompleted,
     toggleHighlightUrgent,
     toggleAutoSuggestions,
@@ -848,8 +966,7 @@ window.nuraSettingsFunctions = {
     syncDarkMode,
     setPrimaryColor,
     showNotification,
-    getSettings: () => ({ ...nuraSettings }),
-    // Telegram
+    getSettings: () => nuraSettings,
     checkTelegramStatus,
     linkTelegram,
     unlinkTelegram

@@ -960,22 +960,41 @@ function toggleView() {
 
 // ===== INICIALIZAÇÃO DO SISTEMA (ÚLTIMA) =====
 document.addEventListener('DOMContentLoaded', async function() {
-  // ✅ PRIMEIRO: Verifica autenticação
-  currentUser = await getCurrentUser();
-  
-  if (!currentUser) {
-    console.warn('⚠️ Usuário não autenticado! Redirecionando...');
-    window.location.href = '/login.html';
-    return;
-  }
-  
-  console.log('👤 Usuário logado:', currentUser.nome);
-  
-  // Carrega tarefas do usuário
-  await loadTasksFromDatabase();
-  initializeEventListeners();
-  initializeGroupToggles();
-  initializeMenuToggle();
+    console.log('🚀 Iniciando sistema de tarefas...');
+    
+    currentUser = getCurrentUser();
+    
+    if (!currentUser) {
+        console.error('❌ Usuário não está logado!');
+        window.location.href = '/login';
+        return;
+    }
+    
+    console.log('👤 Usuário logado:', currentUser.username);
+    
+    initializeTaskSystem();
+    
+    // ===== AGUARDAR SETTINGS CARREGAR PRIMEIRO =====
+    if (window.nuraSettingsFunctions) {
+        console.log('⏳ Aguardando settings carregar...');
+        await window.nuraSettingsFunctions.loadSettingsFromDatabase();
+        console.log('✅ Settings carregadas:', window.nuraSettingsFunctions.getSettings());
+    }
+    
+    // Carregar listas
+    if (typeof loadLists === 'function') {
+        await loadLists();
+        console.log('📋 Listas carregadas, lista atual:', window.currentListId);
+    }
+    
+    // Carregar seções da lista atual
+    if (typeof loadSections === 'function' && window.currentListId) {
+        await loadSections(window.currentListId);
+        console.log('📁 Seções da lista', window.currentListId, 'carregadas');
+    }
+    
+    // ===== CARREGAR E RENDERIZAR TAREFAS (VAI USAR AS SETTINGS JÁ CARREGADAS) =====
+    loadAndDisplayTasksFromDatabase();
 });
 
 window.toggleTaskComplete = toggleTaskComplete;

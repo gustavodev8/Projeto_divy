@@ -1,0 +1,498 @@
+/* ========================================
+   SUBTASKS - DARK MODE
+   ======================================== */
+
+.dark-mode .subtasks-section {
+    border-top-color: var(--border-primary);
+}
+
+.dark-mode .subtasks-title {
+    color: var(--text-secondary);
+}
+
+.dark-mode .subtasks-title svg {
+    opacity: 0.8;
+}
+
+.dark-mode .subtasks-count {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.dark-mode .btn-generate-subtasks {
+    background: var(--primary);
+    color: var(--text-inverse);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.dark-mode .btn-generate-subtasks:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.dark-mode .btn-generate-subtasks:disabled {
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    box-shadow: none;
+}
+
+/* ===== LISTA DE SUBTAREFAS ===== */
+.dark-mode .subtask-item {
+    background: var(--bg-tertiary);
+    border-color: var(--border-primary);
+}
+
+.dark-mode .subtask-item:hover {
+    background: var(--card-hover);
+    border-color: var(--border-secondary);
+}
+
+.dark-mode .subtask-item.completed {
+    opacity: 0.5;
+}
+
+.dark-mode .subtask-item.completed .subtask-text {
+    color: var(--text-tertiary);
+}
+
+/* ===== CHECKBOX DA SUBTAREFA ===== */
+.dark-mode .subtask-checkbox-mark {
+    background: var(--bg-primary);
+    border-color: var(--border-primary);
+}
+
+.dark-mode .subtask-checkbox:hover .subtask-checkbox-mark {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.dark-mode .subtask-checkbox input:checked + .subtask-checkbox-mark {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+/* ===== TEXTO DA SUBTAREFA ===== */
+.dark-mode .subtask-text {
+    color: var(--text-primary);
+}
+
+/* ===== AÇÕES DA SUBTAREFA ===== */
+.dark-mode .btn-subtask-action {
+    color: var(--text-tertiary);
+}
+
+.dark-mode .btn-subtask-action:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.dark-mode .btn-subtask-action.delete:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+/* ===== INPUT PARA ADICIONAR SUBTAREFA ===== */
+.dark-mode .subtask-add-trigger {
+    border-color: var(--border-primary);
+    border-style: dashed;
+    color: var(--text-secondary);
+    background: transparent;
+}
+
+.dark-mode .subtask-add-trigger:hover {
+    border-color: var(--primary);
+    border-style: solid;
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.dark-mode .subtask-input {
+    background: var(--bg-secondary);
+    border-color: var(--primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.dark-mode .subtask-input:focus {
+    background: var(--bg-tertiary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.dark-mode .subtask-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.dark-mode .btn-subtask-save {
+    background: var(--primary);
+    color: var(--text-inverse);
+}
+
+.dark-mode .btn-subtask-save:hover {
+    background: var(--primary-hover);
+}
+
+.dark-mode .btn-subtask-cancel {
+    background: transparent;
+    border-color: var(--border-primary);
+    color: var(--text-secondary);
+}
+
+.dark-mode .btn-subtask-cancel:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* ===== BARRA DE PROGRESSO ===== */
+.dark-mode .subtasks-progress {
+    background: var(--bg-tertiary);
+}
+
+.dark-mode .progress-bar-container {
+    background: var(--bg-secondary);
+}
+
+.dark-mode .progress-bar-fill {
+    background: var(--primary);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+.dark-mode .progress-text {
+    color: var(--text-secondary);
+}
+
+/* ===== LOADING STATE ===== */
+.dark-mode .subtasks-loading {
+    color: var(--text-secondary);
+}
+
+/* ===== EMPTY STATE ===== */
+.dark-mode .subtasks-empty {
+    color: var(--text-tertiary);
+}
+
+/* ========================================
+   MELHORIAS GERAIS DO DARK MODE
+   ======================================== */
+
+/* ===== PAGE HEADER ===== */
+.dark-mode .page-header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.dark-mode .page-title {
+    color: var(--text-primary);
+}
+
+.dark-mode .task-count {
+    color: var(--text-secondary);
+}
+
+/* ===== ADD TASK INLINE ===== */
+.dark-mode .add-task-inline {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+}
+
+.dark-mode .add-task-trigger {
+    background: var(--bg-tertiary);
+    border: 1px dashed var(--border-primary);
+    color: var(--text-secondary);
+}
+
+.dark-mode .add-task-trigger:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    border-style: solid;
+    color: var(--primary);
+}
+
+/* ===== TASK MODAL ===== */
+.dark-mode .task-modal-header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.dark-mode .task-modal-title {
+    color: var(--text-primary);
+}
+
+.dark-mode .task-modal-label {
+    color: var(--text-secondary);
+}
+
+.dark-mode .task-modal-label svg {
+    color: var(--text-tertiary);
+}
+
+.dark-mode .task-modal-input,
+.dark-mode .task-modal-textarea,
+.dark-mode .task-modal-select {
+    background: var(--bg-tertiary);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+.dark-mode .task-modal-input:focus,
+.dark-mode .task-modal-textarea:focus,
+.dark-mode .task-modal-select:focus {
+    background: var(--bg-secondary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.dark-mode .btn-modal-primary {
+    background: var(--primary);
+    color: var(--text-inverse);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.dark-mode .btn-modal-primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.dark-mode .btn-modal-secondary {
+    background: transparent;
+    border: 1px solid var(--border-primary);
+    color: var(--text-secondary);
+}
+
+.dark-mode .btn-modal-secondary:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* ===== TASK DETAIL PANEL MELHORADO ===== */
+.dark-mode .task-detail-header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.dark-mode .task-detail-section {
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.dark-mode .task-detail-section-header {
+    color: var(--text-secondary);
+}
+
+.dark-mode .task-detail-section-header svg {
+    color: var(--text-tertiary);
+}
+
+.dark-mode .task-detail-checkbox .checkmark {
+    background: var(--bg-secondary);
+    border-color: var(--border-primary);
+}
+
+.dark-mode .task-detail-checkbox input:checked + .checkmark {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.dark-mode .task-detail-date-input,
+.dark-mode .task-detail-priority-select {
+    background: var(--bg-tertiary);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+.dark-mode .btn-detail-delete {
+    color: var(--danger);
+    border: 1px solid var(--danger-light);
+}
+
+.dark-mode .btn-detail-delete:hover {
+    background: var(--danger-light);
+    border-color: var(--danger);
+}
+
+/* ===== LISTS SIDEBAR ===== */
+.dark-mode .list-item {
+    color: var(--text-secondary);
+}
+
+.dark-mode .list-item:hover {
+    background: var(--sidebar-hover);
+    color: var(--text-primary);
+}
+
+.dark-mode .list-item.active {
+    background: var(--sidebar-active);
+    color: var(--primary);
+}
+
+.dark-mode .list-count {
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+}
+
+.dark-mode .btn-add-list {
+    color: var(--text-secondary);
+    border: 1px dashed var(--border-primary);
+}
+
+.dark-mode .btn-add-list:hover {
+    background: var(--sidebar-hover);
+    color: var(--primary);
+    border-style: solid;
+    border-color: var(--primary);
+}
+
+/* ===== SECTION HEADERS ===== */
+.dark-mode .section-header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.dark-mode .section-name {
+    color: var(--text-primary);
+}
+
+.dark-mode .section-count {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.dark-mode .section-menu-trigger {
+    color: var(--text-tertiary);
+}
+
+.dark-mode .section-menu-trigger:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* ===== TASK META TAGS ===== */
+.dark-mode .task-meta {
+    border-top: 1px solid var(--border-primary);
+}
+
+.dark-mode .task-tag {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-secondary);
+}
+
+.dark-mode .task-tag.priority-high {
+    background: var(--danger-light);
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.dark-mode .task-tag.priority-medium {
+    background: var(--warning-light);
+    color: var(--warning);
+    border-color: var(--warning);
+}
+
+.dark-mode .task-tag.priority-low {
+    background: var(--success-light);
+    color: var(--success);
+    border-color: var(--success);
+}
+
+/* ===== AI ROUTINE PANEL MELHORADO ===== */
+.dark-mode .ai-panel-close {
+    color: var(--text-secondary);
+}
+
+.dark-mode .ai-panel-close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.dark-mode .ai-form-group label {
+    color: var(--text-secondary);
+}
+
+.dark-mode .ai-time-input {
+    background: var(--bg-tertiary);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+.dark-mode #aiRoutineResult {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+}
+
+/* ===== TOOLTIPS ===== */
+.dark-mode [title]:hover::after {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ===== EMPTY STATES ===== */
+.dark-mode .empty-state {
+    color: var(--text-tertiary);
+}
+
+.dark-mode .empty-state svg {
+    opacity: 0.3;
+}
+
+/* ===== LOADING INDICATORS ===== */
+.dark-mode .spinner {
+    border-color: var(--border-primary);
+    border-top-color: var(--primary);
+}
+
+/* ===== TRANSITIONS SUAVIZADAS ===== */
+.dark-mode * {
+    transition: background-color 0.2s ease, 
+                border-color 0.2s ease, 
+                color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+/* ===== MELHOR CONTRASTE PARA ACESSIBILIDADE ===== */
+.dark-mode {
+    /* Força fonte antialiasing */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* ===== HIGHLIGHT ESPECIAL PARA ELEMENTOS INTERATIVOS ===== */
+.dark-mode button:focus-visible,
+.dark-mode input:focus-visible,
+.dark-mode textarea:focus-visible,
+.dark-mode select:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* ===== GLOW EFFECT PARA ELEMENTOS PRIMÁRIOS ===== */
+.dark-mode .btn-add-task,
+.dark-mode .btn-generate-subtasks,
+.dark-mode .btn-modal-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.dark-mode .btn-add-task::before,
+.dark-mode .btn-generate-subtasks::before,
+.dark-mode .btn-modal-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.dark-mode .btn-add-task:hover::before,
+.dark-mode .btn-generate-subtasks:hover::before,
+.dark-mode .btn-modal-primary:hover::before {
+    width: 300px;
+    height: 300px;
+}

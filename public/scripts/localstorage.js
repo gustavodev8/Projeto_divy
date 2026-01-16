@@ -23,7 +23,7 @@ function initializeElements() {
   const btnAdicionar = document.getElementById('btnAdicionar');
   const btnSalvar = document.getElementById('btnSalvar');
   const btnCancelar = document.getElementById('btnCancelar');
-  const blocoTarefas = document.getElementById('blocoTarefas');
+  //const blocoTarefas = document.getElementById('blocoTarefas');
   const textarea = document.getElementById('textareaTarefa');
   
   // Botão Adicionar - Mostra textarea
