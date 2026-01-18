@@ -19,6 +19,17 @@ const PORT = process.env.PORT || 3000;
 app.use(cors()); // Permite requisições de outros domínios
 app.use(express.json()); // Permite receber JSON no body
 
+// ===== INICIALIZAR WHATSAPP BOT =====
+console.log('🤖 Carregando bot WhatsApp...');
+setTimeout(() => {
+    try {
+        require('./whatsapp-bot');
+        console.log('✅ Bot WhatsApp carregado!');
+    } catch (error) {
+        console.error('❌ Erro ao carregar bot WhatsApp:', error);
+    }
+}, 3000); // Espera 3 segundos
+
 // ===== CONFIGURAÇÃO DA IA (GEMINI) =====
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -697,6 +708,112 @@ app.get('/api/tasks', async (req, res) => {
     }
 });
 
+// ✅ ROTAS ESPECÍFICAS - DEVEM VIR ANTES DE /api/tasks/:id
+
+// GET - TODAS AS TAREFAS CONCLUÍDAS
+app.get('/api/tasks/completed', async (req, res) => {
+    const { user_id } = req.query;
+    
+    if (!user_id) {
+        return res.status(400).json({ 
+            success: false,
+            error: 'user_id é obrigatório' 
+        });
+    }
+    
+    try {
+        console.log('📋 Buscando todas tarefas concluídas do usuário:', user_id);
+        
+        let query, params;
+        
+        if (db.isPostgres) {
+            query = `
+                SELECT * FROM tasks 
+                WHERE user_id = $1 
+                AND status = 'completed'
+                ORDER BY updated_at DESC
+            `;
+            params = [user_id];
+        } else {
+            query = `
+                SELECT * FROM tasks 
+                WHERE user_id = ? 
+                AND status = 'completed'
+                ORDER BY updated_at DESC
+            `;
+            params = [user_id];
+        }
+        
+        const tasks = await db.query(query, params);
+        
+        console.log(`✅ ${tasks.length} tarefas concluídas encontradas`);
+        
+        res.json({
+            success: true,
+            tasks: tasks,
+            total: tasks.length
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao buscar tarefas concluídas:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Erro ao buscar tarefas concluídas',
+            details: error.message 
+        });
+    }
+});
+
+// GET - TAREFAS CONCLUÍDAS ANTIGAS (+7 DIAS)
+app.get('/api/tasks/completed/old', async (req, res) => {
+    const { user_id } = req.query;
+    
+    if (!user_id) {
+        return res.status(400).json({ error: 'user_id é obrigatório' });
+    }
+    
+    try {
+        console.log('📋 Buscando tarefas concluídas antigas...');
+        
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const formattedDate = sevenDaysAgo.toISOString();
+        
+        let query, params;
+        
+        if (db.isPostgres) {
+            query = `
+                SELECT * FROM tasks 
+                WHERE user_id = $1 
+                AND status = 'completed'
+                AND updated_at < $2
+                ORDER BY updated_at DESC
+            `;
+            params = [user_id, formattedDate];
+        } else {
+            query = `
+                SELECT * FROM tasks 
+                WHERE user_id = ? 
+                AND status = 'completed'
+                AND updated_at < ?
+                ORDER BY updated_at DESC
+            `;
+            params = [user_id, formattedDate];
+        }
+        
+        const tasks = await db.query(query, params);
+        
+        console.log(`✅ ${tasks.length} tarefas antigas encontradas`);
+        res.json(tasks);
+        
+    } catch (error) {
+        console.error('❌ Erro:', error);
+        res.status(500).json({ error: 'Erro ao buscar tarefas antigas' });
+    }
+});
+
+// ✅ AGORA SIM - ROTA GENÉRICA COM PARÂMETRO (deve vir DEPOIS)
+
 // GET - Buscar uma tarefa específica
 app.get('/api/tasks/:id', async (req, res) => {
     try {
@@ -750,7 +867,6 @@ app.post('/api/tasks', async (req, res) => {
 
     try {
         if (db.isPostgres) {
-            // ✅ PostgreSQL
             const query = `
                 INSERT INTO tasks (
                     title, description, due_date, priority, status, 
@@ -777,7 +893,6 @@ app.post('/api/tasks', async (req, res) => {
             res.json({ success: true, task: task, id: task.id });
 
         } else {
-            // ✅ SQLite
             const query = `
                 INSERT INTO tasks (
                     title, description, due_date, priority, status, 
@@ -809,6 +924,7 @@ app.post('/api/tasks', async (req, res) => {
 });
 
 // PUT - Atualizar tarefa
+// PUT - Atualizar tarefa
 app.put('/api/tasks/:id', async (req, res) => {
     const taskId = req.params.id;
     const updates = req.body;
@@ -828,7 +944,7 @@ app.put('/api/tasks/:id', async (req, res) => {
         const values = [];
 
         if (db.isPostgres) {
-            // ✅ PostgreSQL - $1, $2, $3...
+            // ✅ PostgreSQL
             let paramCount = 1;
 
             if (updates.title !== undefined) {
@@ -850,6 +966,13 @@ app.put('/api/tasks/:id', async (req, res) => {
             if (updates.status !== undefined) {
                 fields.push(`status = $${paramCount++}`);
                 values.push(updates.status);
+                
+                // ✅ Se marcar como concluída, registrar completed_at
+                if (updates.status === 'completed') {
+                    fields.push(`completed_at = NOW()`);
+                } else if (updates.status !== 'completed') {
+                    fields.push(`completed_at = NULL`);
+                }
             }
             if (updates.section_id !== undefined) {
                 fields.push(`section_id = $${paramCount++}`);
@@ -889,7 +1012,7 @@ app.put('/api/tasks/:id', async (req, res) => {
             res.json({ success: true, task: result[0] });
 
         } else {
-            // ✅ SQLite - ?, ?, ?...
+            // ✅ SQLite
             if (updates.title !== undefined) {
                 fields.push('title = ?');
                 values.push(updates.title);
@@ -909,6 +1032,13 @@ app.put('/api/tasks/:id', async (req, res) => {
             if (updates.status !== undefined) {
                 fields.push('status = ?');
                 values.push(updates.status);
+                
+                // ✅ Se marcar como concluída, registrar completed_at
+                if (updates.status === 'completed') {
+                    fields.push(`completed_at = datetime('now')`);
+                } else {
+                    fields.push('completed_at = NULL');
+                }
             }
             if (updates.section_id !== undefined) {
                 fields.push('section_id = ?');
@@ -2567,6 +2697,7 @@ app.post('/gemini/generate', async (req, res) => {
 });
 
 // ===== ROTA: TAREFAS CONCLUÍDAS (MAIS DE 7 DIAS) =====
+// ===== ROTA: TAREFAS CONCLUÍDAS (MAIS DE 7 DIAS) =====
 app.get('/api/tasks/completed/old', async (req, res) => {
     const { user_id } = req.query;
     
@@ -2580,18 +2711,35 @@ app.get('/api/tasks/completed/old', async (req, res) => {
         // Calcular data de 7 dias atrás
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const formattedDate = sevenDaysAgo.toISOString().split('T')[0];
         
-        const query = `
-            SELECT t.*, l.name as list_name, l.color as list_color
-            FROM tasks t
-            LEFT JOIN lists l ON t.list_id = l.id
-            WHERE t.user_id = ? 
-            AND t.status = 'completed'
-            AND (t.completed_at < ? OR (t.completed_at IS NULL AND t.updated_at < ?))
-            ORDER BY COALESCE(t.completed_at, t.updated_at) DESC
-        `;
+        let query, params;
         
-        const [tasks] = await db.promise().query(query, [user_id, sevenDaysAgo, sevenDaysAgo]);
+        if (db.isPostgres) {
+            query = `
+                SELECT t.*, l.name as list_name, l.color as list_color
+                FROM tasks t
+                LEFT JOIN lists l ON t.list_id = l.id
+                WHERE t.user_id = $1 
+                AND t.status = 'completed'
+                AND (t.completed_at < $2 OR (t.completed_at IS NULL AND t.updated_at < $3))
+                ORDER BY COALESCE(t.completed_at, t.updated_at) DESC
+            `;
+            params = [user_id, formattedDate, formattedDate];
+        } else {
+            query = `
+                SELECT t.*, l.name as list_name, l.color as list_color
+                FROM tasks t
+                LEFT JOIN lists l ON t.list_id = l.id
+                WHERE t.user_id = ? 
+                AND t.status = 'completed'
+                AND (t.completed_at < ? OR (t.completed_at IS NULL AND t.updated_at < ?))
+                ORDER BY COALESCE(t.completed_at, t.updated_at) DESC
+            `;
+            params = [user_id, formattedDate, formattedDate];
+        }
+        
+        const tasks = await db.query(query, params);
         
         console.log(`✅ ${tasks.length} tarefas concluídas antigas encontradas`);
         res.json(tasks);
@@ -2603,34 +2751,160 @@ app.get('/api/tasks/completed/old', async (req, res) => {
 });
 
 // ===== ROTA: TODAS AS TAREFAS CONCLUÍDAS =====
+// ===== ROTA: TODAS AS TAREFAS CONCLUÍDAS =====
 app.get('/api/tasks/completed', async (req, res) => {
     const { user_id } = req.query;
     
     if (!user_id) {
-        return res.status(400).json({ error: 'user_id é obrigatório' });
+        return res.status(400).json({ 
+            success: false,
+            error: 'user_id é obrigatório' 
+        });
     }
     
     try {
         console.log('📋 Buscando todas tarefas concluídas do usuário:', user_id);
         
-        const query = `
-            SELECT t.*, l.name as list_name, l.color as list_color
-            FROM tasks t
-            LEFT JOIN lists l ON t.list_id = l.id
-            WHERE t.user_id = ? 
-            AND t.status = 'completed'
-            ORDER BY COALESCE(t.completed_at, t.updated_at) DESC
-        `;
+        let query, params;
         
-        const [tasks] = await db.promise().query(query, [user_id]);
+        if (db.isPostgres) {
+            // PostgreSQL
+            query = `
+                SELECT t.*, l.name as list_name, l.color as list_color
+                FROM tasks t
+                LEFT JOIN lists l ON t.list_id = l.id
+                WHERE t.user_id = $1 
+                AND t.status = 'completed'
+                ORDER BY t.updated_at DESC
+            `;
+            params = [user_id];
+        } else {
+            // SQLite
+            query = `
+                SELECT t.*, l.name as list_name, l.color as list_color
+                FROM tasks t
+                LEFT JOIN lists l ON t.list_id = l.id
+                WHERE t.user_id = ? 
+                AND t.status = 'completed'
+                ORDER BY t.updated_at DESC
+            `;
+            params = [user_id];
+        }
+        
+        const tasks = await db.query(query, params);
         
         console.log(`✅ ${tasks.length} tarefas concluídas encontradas`);
-        res.json(tasks);
+        
+        res.json({
+            success: true,
+            tasks: tasks,
+            total: tasks.length
+        });
         
     } catch (error) {
         console.error('❌ Erro ao buscar tarefas concluídas:', error);
-        res.status(500).json({ error: 'Erro ao buscar tarefas concluídas' });
+        res.status(500).json({ 
+            success: false,
+            error: 'Erro ao buscar tarefas concluídas',
+            details: error.message 
+        });
     }
+});
+
+// ===== MIGRATION: ADICIONAR COMPLETED_AT EM TASKS =====
+(async () => {
+    if (!db.isPostgres) {
+        console.log('⏭️ Pulando migration de completed_at (não é PostgreSQL)');
+        return;
+    }
+
+    try {
+        console.log('🔄 Verificando coluna completed_at na tabela tasks...');
+
+        const completedAtExists = await db.query(`
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'tasks' AND column_name = 'completed_at'
+        `);
+
+        if (completedAtExists.length === 0) {
+            console.log('🔄 Adicionando coluna completed_at...');
+            await db.query(`ALTER TABLE tasks ADD COLUMN completed_at TIMESTAMP`);
+            
+            // Atualizar tarefas já concluídas com updated_at
+            await db.query(`
+                UPDATE tasks 
+                SET completed_at = updated_at 
+                WHERE status = 'completed' AND completed_at IS NULL
+            `);
+            
+            console.log('✅ Coluna completed_at adicionada');
+        } else {
+            console.log('✅ Coluna completed_at já existe');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao adicionar completed_at:', error.message);
+    }
+})();
+
+// ===== ROTAS PARA SERVIR PÁGINAS HTML =====
+
+// Login
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Login.html'));
+});
+app.get('/Tela_Login.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Login.html'));
+});
+
+// Tela Inicial
+app.get('/inicial', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Inicial.html'));
+});
+app.get('/Tela_Inicial.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Inicial.html'));
+});
+
+// Gerenciamento de Tarefas
+app.get('/gerenciamento', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Gerenciamento.html'));
+});
+app.get('/Tela_Gerenciamento.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Gerenciamento.html'));
+});
+
+// ✅ ADICIONE ESTAS LINHAS:
+// Tarefas Concluídas
+app.get('/concluidas', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Concluidas.html'));
+});
+app.get('/Tela_Concluidas.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Concluidas.html'));
+});
+
+// Criar Conta
+app.get('/criar-conta', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_CriaConta.html'));
+});
+app.get('/Tela_CriaConta.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_CriaConta.html'));
+});
+
+// Ajustes/Configurações
+app.get('/ajustes', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Ajustes.html'));
+});
+app.get('/Tela_Ajustes.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Ajustes.html'));
+});
+
+// Teste de Email (página de teste)
+app.get('/teste-email', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_TesteEmail.html'));
+});
+app.get('/Tela_TesteEmail.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_TesteEmail.html'));
 });
 
 // ===== INICIAR SERVIDOR =====

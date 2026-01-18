@@ -203,7 +203,24 @@
             <span class="task-count">11 tarefas</span>
           </div>
         </div>
-        <div class="header-right">
+<div class="header-right">
+    <button class="btn-header" id="darkModeToggle" title="Modo Escuro">
+        <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+    
     <button class="btn-header" onclick="toggleViewOptionsMenu()" title="Mais opções" id="btnMoreOptions">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="1"></circle>
@@ -211,36 +228,7 @@
             <circle cx="12" cy="19" r="1"></circle>
         </svg>
     </button>
-          <button class="btn-header" title="Pesquisar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
-          </button>
-          <button class="btn-header" id="darkModeToggle" title="Modo Escuro">
-            <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="5"></circle>
-              <line x1="12" y1="1" x2="12" y2="3"></line>
-              <line x1="12" y1="21" x2="12" y2="23"></line>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-              <line x1="1" y1="12" x2="3" y2="12"></line>
-              <line x1="21" y1="12" x2="23" y2="12"></line>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-            </svg>
-            <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
-          </button>
-          <button class="btn-header btn-more" title="Mais opções">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="1"></circle>
-              <circle cx="19" cy="12" r="1"></circle>
-              <circle cx="5" cy="12" r="1"></circle>
-            </svg>
-          </button>
-        </div>
+</div>
       </header>
 
       <!-- Stats Cards (compacto) -->
@@ -821,14 +809,51 @@
     </div>
 </div>
 
+<!-- MODAL DE RENOMEAR SEÇÃO KANBAN -->
+<div class="modal-overlay" id="renameSectionModalOverlay" onclick="closeRenameSectionModal()"></div>
+
+<div class="modal-rename-section" id="renameSectionModal">
+    <div class="modal-header">
+        <h3 class="modal-title">Renomear Seção</h3>
+        <button class="btn-close-modal" onclick="closeRenameSectionModal()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+    
+    <div class="modal-body">
+        <div class="form-field">
+            <label class="form-label">Nome da seção</label>
+            <input 
+                type="text" 
+                id="renameSectionInput" 
+                class="form-input" 
+                placeholder="Digite o novo nome"
+                maxlength="50"
+                autocomplete="off"
+                onkeypress="if(event.key === 'Enter') { event.preventDefault(); saveRenamedSection(); }"
+            />
+            <span class="form-hint">Máximo 50 caracteres</span>
+        </div>
+    </div>
+    
+    <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeRenameSectionModal()">Cancelar</button>
+        <button class="btn-primary" id="btnSaveRenamedSection" onclick="saveRenamedSection()">Salvar</button>
+    </div>
+</div>
+
 <!-- Antes do </body> -->
+<!-- ===== SCRIPTS (ORDEM CORRETA) ===== -->
 <script src="../scripts/auth.js"></script>
 <script src="../scripts/settings.js"></script>
 <script src="../scripts/lists.js"></script>        
 <script src="../scripts/sections.js"></script>
+<script src="../scripts/kanban-view.js"></script>  <!-- ✅ ADICIONAR AQUI -->
 <script src="../scripts/sincro_telas.js"></script>
 <script src="../scripts/smart-filters.js"></script> 
-<script src="../scripts/kanban-view.js"></script>
 <script src="../scripts/estatisticas_backend.js"></script>
 <script src="../scripts/darkMode.js"></script>
 <script src="../scripts/task-detail-panel.js"></script>
@@ -840,35 +865,8 @@
 console.log('🔧 Carregando override de deleteTaskFromDetail...');
 
 // Esperar todos os scripts carregarem
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('📦 DOM carregado, aplicando override...');
-    
-    // Esperar 500ms para garantir que todos os scripts carregaram
-    setTimeout(function() {
-        // Sobrescrever a função deleteTaskFromDetail
-        window.deleteTaskFromDetail = async function() {
-            console.log('🗑️ DELETE CUSTOMIZADO CHAMADO!');
-            
-            // Buscar nome da tarefa
-            const task = window.homeTasks ? window.homeTasks.find(t => t.id === window.currentDetailTaskId) : null;
-            const taskName = task ? task.title : 'Esta tarefa';
-            
-            console.log('   Task ID:', window.currentDetailTaskId);
-            console.log('   Task Name:', taskName);
-            
-            // Abrir modal customizado
-            if (typeof showConfirmDeleteModal === 'function') {
-                showConfirmDeleteModal(window.currentDetailTaskId, taskName);
-            } else {
-                console.error('❌ showConfirmDeleteModal não existe!');
-                alert('Erro: função de modal não encontrada');
-            }
-        };
-        
-        console.log('✅ Função deleteTaskFromDetail SOBRESCRITA com sucesso!');
-        console.log('   Tipo:', typeof window.deleteTaskFromDetail);
-    }, 500);
-});
+// ===== GARANTIR QUE KANBAN-VIEW.JS FOI CARREGADO =====
+
 </script>
 
   <!-- Scripts -->

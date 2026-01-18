@@ -19,6 +19,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "@sendgrid/mail": "^8.1.6",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "@wppconnect-team/wppconnect": "^1.37.8",
     "better-sqlite3": "^12.5.0",
     "cors": "^2.8.5",
@@ -27,7 +28,8 @@
     "node-cron": "^4.2.1",
     "node-fetch": "^2.7.0",
     "node-telegram-bot-api": "^0.66.0",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "qrcode-terminal": "^0.12.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

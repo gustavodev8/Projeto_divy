@@ -108,44 +108,45 @@ function updateMenuState() {
 }
 
 // ===== MUDAR MODO DE VISUALIZAÇÃO =====
-async function changeViewMode(mode) {
+// ===== MUDAR MODO DE VISUALIZAÇÃO =====
+function changeViewMode(mode) {
     console.log('🔄 Mudando modo de visualização para:', mode);
     
-    // ✅ Salvar via settings.js
-    if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.setViewMode === 'function') {
-        await window.nuraSettingsFunctions.setViewMode(mode);
-    } else {
-        // FALLBACK: localStorage
-        const stored = localStorage.getItem('nura_settings') || '{}';
-        const settings = JSON.parse(stored);
-        settings.viewMode = mode;
-        localStorage.setItem('nura_settings', JSON.stringify(settings));
+    // Atualizar variável global
+    window.currentViewMode = mode;
+    
+    // Salvar nas configurações
+    if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.updateSettings === 'function') {
+        window.nuraSettingsFunctions.updateSettings({ viewMode: mode });
+        console.log('✅ Modo salvo nas configurações:', mode);
     }
     
-    // ✅ Verificar seções
-    if (window.currentListId) {
-        console.log('⏳ Verificando seções para lista', window.currentListId);
-        
-        if (!window.currentSections || window.currentSections.length === 0) {
-            console.log('🔄 Recarregando seções...');
-            if (typeof loadSections === 'function') {
-                await loadSections(window.currentListId);
-            }
+    // Atualizar indicadores visuais no menu
+    document.querySelectorAll('.menu-item[data-view]').forEach(item => {
+        const itemView = item.getAttribute('data-view');
+        if (itemView === mode) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
         }
-        
-        console.log('📊 Seções disponíveis:', window.currentSections?.length || 0);
-    }
+    });
     
-    // Re-renderizar
-    if (typeof renderAllTasks === 'function') {
-        renderAllTasks();
-    }
-    
-    updateMenuState();
+    // Fechar menu
     closeViewOptionsMenu();
     
-    showNotification(`✅ Visualização: ${mode}`);
+    // Renderizar com o novo modo
+    console.log('📊 Chamando renderAllTasks com modo:', mode);
+    if (typeof renderAllTasks === 'function') {
+        renderAllTasks();
+    } else if (typeof window.renderAllTasks === 'function') {
+        window.renderAllTasks();
+    } else {
+        console.error('❌ renderAllTasks não encontrado!');
+    }
 }
+
+// Exportar função
+window.changeViewMode = changeViewMode;
 
 // ===== ESCONDER CONCLUÍDAS =====
 async function toggleHideCompleted() {

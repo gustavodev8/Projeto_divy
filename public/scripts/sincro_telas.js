@@ -8,8 +8,25 @@ const API_URL = window.location.hostname === 'localhost'
     : window.location.origin;
 
 window.homeTasks = [];
-let currentUser = null;
+let currentViewMode = 'lista'; // Modo padrão
 window.currentListTasks = []; // Cache de tarefas filtradas por lista
+
+// ===== GARANTIR QUE KANBAN-VIEW.JS FOI CARREGADO =====
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📋 Verificando scripts carregados...');
+    console.log('   renderKanbanView:', typeof window.renderKanbanView);
+    console.log('   renderListView:', typeof renderListView);
+    
+    // Se renderKanbanView não estiver disponível após 2 segundos, alertar
+    setTimeout(() => {
+        if (typeof window.renderKanbanView !== 'function') {
+            console.error('❌ AVISO: renderKanbanView não foi carregado em 2 segundos');
+            console.log('📁 Verifique se kanban-view.js está no local correto');
+        } else {
+            console.log('✅ Todos os scripts carregados com sucesso');
+        }
+    }, 2000);
+});
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', async function() {
@@ -50,6 +67,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         updateAddTaskButtonState();
     }
 });
+
+
 
 // ===== INICIALIZAR SISTEMA DE TAREFAS =====
 async function initializeTaskSystem() {
@@ -275,29 +294,52 @@ function filterTasksBySmartFilter(filterType) {
 }
 
 function renderAllTasks() {
-    const container = document.getElementById('listaTarefas');
-    if (!container) return;
-
-    // Pegar modo de visualização
-    const settings = window.nuraSettingsFunctions ? window.nuraSettingsFunctions.getSettings() : {};
-    const viewMode = settings.viewMode || 'lista';
+    console.log('═══════════════════════════════════');
+    console.log('🎨 RENDERIZANDO TAREFAS');
+    console.log('   window.currentViewMode:', window.currentViewMode);
+    console.log('   Tipo renderKanbanView:', typeof window.renderKanbanView);
+    console.log('═══════════════════════════════════');
     
-    console.log('📊 Modo de visualização:', viewMode);
-    console.log('👁️ Mostrar detalhes:', settings.showDetails);
-
-    if (viewMode.toLowerCase() === 'kanban') {
-        // ✅ Renderizar Kanban (ele já decide internamente quais tarefas usar)
-        if (typeof renderKanbanView === 'function') {
-            renderKanbanView(container);
-        } else {
-            console.error('❌ renderKanbanView não disponível');
-        }
-    } else {
-        // Renderizar Lista (padrão)
-        renderListView(container);
+    const container = document.getElementById('listaTarefas');
+    if (!container) {
+        console.error('❌ Container #listaTarefas não encontrado');
+        return;
     }
-}
 
+    // ✅ OBTER MODO DE VISUALIZAÇÃO (com fallback para 'lista')
+    const viewMode = window.currentViewMode || 'lista';
+    
+    console.log('📊 Modo FINAL:', viewMode);
+
+    // ✅ MODO KANBAN
+    if (viewMode === 'kanban') {
+        console.log('🎯 ENTRANDO NO MODO KANBAN');
+        
+        // ✅ VERIFICAR SE A FUNÇÃO EXISTE
+        if (typeof window.renderKanbanView !== 'function') {
+            console.error('❌❌❌ renderKanbanView NÃO ESTÁ DISPONÍVEL!');
+            console.error('Verifique se kanban-view.js foi carregado corretamente no HTML');
+            
+            // Voltar para modo lista
+            window.currentViewMode = 'lista';
+            if (window.nuraSettingsFunctions) {
+                window.nuraSettingsFunctions.updateSettings({ viewMode: 'lista' });
+            }
+            
+            alert('Erro ao carregar modo Kanban. Voltando para modo Lista.');
+            renderListView(container);
+            return;
+        }
+        
+        console.log('✅ renderKanbanView EXISTE, executando...');
+        window.renderKanbanView(container);
+        return;
+    }
+
+    // ✅ MODO LISTA (PADRÃO)
+    console.log('📋 ENTRANDO NO MODO LISTA');
+    renderListView(container);
+}
 // ===== RENDERIZAR VISTA EM LISTA (VERSÃO CORRIGIDA) =====
 function renderListView(container) {
     console.log('🎨 === RENDERIZANDO VISTA EM LISTA ===');

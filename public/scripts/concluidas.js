@@ -7,36 +7,41 @@ let completedTasks = [];
 let currentFilter = 'all';
 
 // ===== CARREGAR TAREFAS CONCLUÍDAS =====
-// ===== CARREGAR TAREFAS CONCLUÍDAS =====
 async function loadCompletedTasks() {
     const user = getCurrentUser();
     if (!user) {
-        window.location.href = '../pages/Tela_Login.html';
+        window.location.href = 'Tela_Login.html';
         return;
     }
     
     try {
         console.log('📋 Carregando tarefas concluídas...');
         
-        // Buscar todas as tarefas concluídas
         const response = await fetch(`${API_URL}/api/tasks/completed?user_id=${user.id}`);
         
         if (!response.ok) {
             throw new Error('Erro ao carregar tarefas');
         }
         
-        completedTasks = await response.json();
+        const data = await response.json();
         
-        console.log(`✅ ${completedTasks.length} tarefas concluídas carregadas`);
-        
-        updateStats();
-        renderCompletedTasks();
+        if (data.success) {
+            completedTasks = data.tasks || [];
+            console.log(`✅ ${completedTasks.length} tarefas concluídas carregadas`);
+            
+            updateStats();
+            renderCompletedTasks();
+        } else {
+            throw new Error(data.error || 'Erro desconhecido');
+        }
         
     } catch (error) {
         console.error('❌ Erro ao carregar tarefas:', error);
         document.getElementById('emptyState').style.display = 'flex';
+        document.getElementById('completedCount').textContent = '0';
     }
 }
+
 // ===== ATUALIZAR ESTATÍSTICAS =====
 function updateStats() {
     const now = new Date();
@@ -44,19 +49,19 @@ function updateStats() {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     
     const thisWeek = completedTasks.filter(t => {
-        const completed = new Date(t.completed_at || t.updated_at);
-        return completed >= weekAgo;
+        const updated = new Date(t.updated_at);
+        return updated >= weekAgo;
     }).length;
     
     const thisMonth = completedTasks.filter(t => {
-        const completed = new Date(t.completed_at || t.updated_at);
-        return completed >= monthStart;
+        const updated = new Date(t.updated_at);
+        return updated >= monthStart;
     }).length;
     
     document.getElementById('totalCompleted').textContent = completedTasks.length;
     document.getElementById('thisWeek').textContent = thisWeek;
     document.getElementById('thisMonth').textContent = thisMonth;
-    document.getElementById('completedCount').textContent = `${completedTasks.length} tarefa${completedTasks.length !== 1 ? 's' : ''}`;
+    document.getElementById('completedCount').textContent = completedTasks.length;
 }
 
 // ===== RENDERIZAR TAREFAS =====
@@ -83,51 +88,58 @@ function renderCompletedTasks() {
     const groups = groupTasksByPeriod(filtered);
     
     container.innerHTML = Object.entries(groups).map(([period, tasks]) => `
-        <div class="completed-task-group">
-            <div class="completed-task-group-header">
-                <span class="completed-task-group-title">${period}</span>
-                <span class="completed-task-group-count">${tasks.length}</span>
+        <div class="task-group">
+            <div class="task-group-header">
+                <span class="task-group-title">${period}</span>
+                <span class="task-group-count">${tasks.length}</span>
             </div>
-            ${tasks.map(task => createCompletedTaskHTML(task)).join('')}
+            ${tasks.map(task => createTaskHTML(task)).join('')}
         </div>
     `).join('');
 }
 
 // ===== CRIAR HTML DA TAREFA =====
-function createCompletedTaskHTML(task) {
-    const completedDate = new Date(task.completed_at || task.updated_at);
-    const formattedDate = formatDate(completedDate);
-    const daysAgo = getDaysAgo(completedDate);
+function createTaskHTML(task) {
+    const updatedDate = new Date(task.updated_at);
+    const daysAgo = getDaysAgo(updatedDate);
+    
+    const priorityClass = task.priority || 'medium';
+    const priorityLabels = {
+        high: 'Alta',
+        medium: 'Média',
+        low: 'Baixa'
+    };
     
     return `
-        <div class="completed-task-item" data-task-id="${task.id}">
-            <label class="completed-task-checkbox">
+        <div class="task-item" data-task-id="${task.id}">
+            <label class="task-checkbox">
                 <input type="checkbox" checked onchange="reactivateTask(${task.id})">
-                <span class="checkmark"></span>
+                <span class="check"></span>
             </label>
             
-            <div class="completed-task-content">
-                <h4 class="completed-task-title">${task.title}</h4>
-                <div class="completed-task-meta">
-                    <span class="completed-task-date">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        Concluída ${daysAgo}
-                    </span>
+            <div class="task-body" onclick="openTaskModal(${task.id})" style="cursor: pointer;">
+                <div class="task-title">${escapeHtml(task.title)}</div>
+                <div class="task-meta">
+                    <span class="task-date">Concluída ${daysAgo}</span>
                     ${task.priority ? `
-                        <span class="completed-task-priority ${task.priority}">
-                            ${task.priority === 'high' ? '🔴' : task.priority === 'medium' ? '🟡' : '🟢'}
-                            ${task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Média' : 'Baixa'}
+                        <span class="task-priority ${priorityClass}">
+                            <span class="priority-indicator ${priorityClass}"></span>
+                            ${priorityLabels[priorityClass]}
                         </span>
                     ` : ''}
                 </div>
             </div>
             
-            <div class="completed-task-actions">
-                <button class="completed-task-btn delete" onclick="deleteTask(${task.id})" title="Excluir permanentemente">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="task-actions">
+                <button class="task-action-btn" onclick="event.stopPropagation(); openTaskModal(${task.id})" title="Ver detalhes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+                <button class="task-action-btn delete" onclick="event.stopPropagation(); deleteTask(${task.id})" title="Excluir permanentemente">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     </svg>
@@ -148,8 +160,8 @@ function groupTasksByPeriod(tasks) {
     };
     
     tasks.forEach(task => {
-        const completed = new Date(task.completed_at || task.updated_at);
-        const daysDiff = getDaysAgoNumber(completed);
+        const updated = new Date(task.updated_at);
+        const daysDiff = getDaysAgoNumber(updated);
         
         if (daysDiff === 0) {
             groups['Hoje'].push(task);
@@ -172,9 +184,9 @@ function groupTasksByPeriod(tasks) {
 function applyFilter(filter) {
     currentFilter = filter;
     
-    // Atualizar UI dos chips
-    document.querySelectorAll('.filter-chip').forEach(chip => {
-        chip.classList.remove('active');
+    // Atualizar UI dos botões
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
     });
     document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
     
@@ -187,13 +199,13 @@ function applyFilterLogic(tasks) {
     switch (currentFilter) {
         case 'recent':
             return tasks.filter(t => {
-                const completed = new Date(t.completed_at || t.updated_at);
-                return getDaysAgoNumber(completed) <= 7;
+                const updated = new Date(t.updated_at);
+                return getDaysAgoNumber(updated) <= 7;
             });
         case 'old':
             return tasks.filter(t => {
-                const completed = new Date(t.completed_at || t.updated_at);
-                return getDaysAgoNumber(completed) > 7;
+                const updated = new Date(t.updated_at);
+                return getDaysAgoNumber(updated) > 7;
             });
         case 'high':
             return tasks.filter(t => t.priority === 'high');
@@ -216,7 +228,7 @@ async function reactivateTask(taskId) {
     if (!user) return;
     
     try {
-        const response = await fetch(`${API_URL}/tasks/${taskId}`, {
+        const response = await fetch(`${API_URL}/api/tasks/${taskId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -231,16 +243,17 @@ async function reactivateTask(taskId) {
             completedTasks = completedTasks.filter(t => t.id !== taskId);
             updateStats();
             renderCompletedTasks();
-            showNotification('✅ Tarefa reativada!', 'success');
+            showNotification('Tarefa reativada com sucesso');
         }
     } catch (error) {
         console.error('❌ Erro:', error);
+        showNotification('Erro ao reativar tarefa');
     }
 }
 
 // ===== DELETAR TAREFA =====
 async function deleteTask(taskId) {
-    if (!confirm('Deseja excluir esta tarefa permanentemente?')) {
+    if (!confirm('Deseja excluir esta tarefa permanentemente? Esta ação não pode ser desfeita.')) {
         return;
     }
     
@@ -248,7 +261,7 @@ async function deleteTask(taskId) {
     if (!user) return;
     
     try {
-        const response = await fetch(`${API_URL}/tasks/${taskId}?user_id=${user.id}`, {
+        const response = await fetch(`${API_URL}/api/tasks/${taskId}?user_id=${user.id}`, {
             method: 'DELETE'
         });
         
@@ -258,18 +271,15 @@ async function deleteTask(taskId) {
             completedTasks = completedTasks.filter(t => t.id !== taskId);
             updateStats();
             renderCompletedTasks();
-            showNotification('🗑️ Tarefa excluída!', 'success');
+            showNotification('Tarefa excluída permanentemente');
         }
     } catch (error) {
         console.error('❌ Erro:', error);
+        showNotification('Erro ao excluir tarefa');
     }
 }
 
 // ===== UTILITÁRIOS =====
-function formatDate(date) {
-    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
 function getDaysAgo(date) {
     const days = getDaysAgoNumber(date);
     if (days === 0) return 'hoje';
@@ -283,12 +293,164 @@ function getDaysAgoNumber(date) {
     return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
-function showNotification(message, type) {
-    console.log(message);
-    // Implementar notificação visual
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showNotification(message) {
+    console.log('📢', message);
+    // Você pode adicionar uma notificação visual aqui
 }
 
 // ===== INICIALIZAR =====
 window.addEventListener('DOMContentLoaded', () => {
     loadCompletedTasks();
 });
+
+// ===== VARIÁVEL GLOBAL PARA TAREFA ATUAL =====
+let currentTaskId = null;
+
+// ===== ABRIR MODAL COM DETALHES DA TAREFA =====
+async function openTaskModal(taskId) {
+    currentTaskId = taskId;
+    const task = completedTasks.find(t => t.id === taskId);
+    
+    if (!task) {
+        console.error('Tarefa não encontrada');
+        return;
+    }
+    
+    console.log('📋 Abrindo detalhes da tarefa:', task);
+    
+    // Preencher título
+    document.getElementById('modalTaskTitle').textContent = task.title;
+    
+    // Preencher prioridade
+    const priorityLabels = {
+        high: 'Alta',
+        medium: 'Média',
+        low: 'Baixa'
+    };
+    
+    if (task.priority) {
+        document.getElementById('modalPrioritySection').style.display = 'flex';
+        const priorityElement = document.getElementById('modalPriority');
+        priorityElement.textContent = priorityLabels[task.priority] || task.priority;
+        priorityElement.className = `modal-value priority-badge ${task.priority}`;
+    } else {
+        document.getElementById('modalPrioritySection').style.display = 'none';
+    }
+    
+    // Preencher data de vencimento
+    if (task.due_date) {
+        document.getElementById('modalDueDateSection').style.display = 'flex';
+        const dueDate = new Date(task.due_date);
+        document.getElementById('modalDueDate').textContent = dueDate.toLocaleDateString('pt-BR');
+    } else {
+        document.getElementById('modalDueDateSection').style.display = 'none';
+    }
+    
+    // Preencher data de conclusão
+    const completedDate = new Date(task.updated_at);
+    document.getElementById('modalCompletedDate').textContent = 
+        completedDate.toLocaleDateString('pt-BR') + ' às ' + completedDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    
+    // Preencher descrição
+    if (task.description && task.description.trim()) {
+        document.getElementById('modalDescriptionSection').style.display = 'flex';
+        document.getElementById('modalDescription').textContent = task.description;
+    } else {
+        document.getElementById('modalDescriptionSection').style.display = 'none';
+    }
+    
+    // Carregar subtarefas
+    await loadSubtasks(taskId);
+    
+    // Mostrar modal
+    document.getElementById('taskModalOverlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+// ===== CARREGAR SUBTAREFAS =====
+async function loadSubtasks(taskId) {
+    try {
+        const response = await fetch(`${API_URL}/subtasks/${taskId}`);
+        
+        if (!response.ok) {
+            throw new Error('Erro ao carregar subtarefas');
+        }
+        
+        const subtasks = await response.json();
+        
+        if (subtasks && subtasks.length > 0) {
+            document.getElementById('modalSubtasksSection').style.display = 'flex';
+            document.getElementById('modalSubtaskCount').textContent = subtasks.length;
+            
+            const subtasksList = document.getElementById('modalSubtasksList');
+            subtasksList.innerHTML = subtasks.map(sub => `
+                <div class="modal-subtask-item ${sub.completed ? 'completed' : ''}">
+                    <div class="modal-subtask-checkbox ${sub.completed ? 'completed' : 'uncompleted'}">
+                        ${sub.completed ? `
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        ` : ''}
+                    </div>
+                    <span class="modal-subtask-title">${escapeHtml(sub.title)}</span>
+                </div>
+            `).join('');
+        } else {
+            document.getElementById('modalSubtasksSection').style.display = 'none';
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar subtarefas:', error);
+        document.getElementById('modalSubtasksSection').style.display = 'none';
+    }
+}
+
+// ===== FECHAR MODAL =====
+function closeTaskModal() {
+    document.getElementById('taskModalOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+    currentTaskId = null;
+}
+
+// ===== REATIVAR TAREFA DO MODAL =====
+async function reactivateTaskFromModal() {
+    if (!currentTaskId) return;
+    
+    if (!confirm('Deseja reativar esta tarefa?')) {
+        return;
+    }
+    
+    await reactivateTask(currentTaskId);
+    closeTaskModal();
+}
+
+// Fechar modal ao clicar fora
+document.addEventListener('click', (e) => {
+    const overlay = document.getElementById('taskModalOverlay');
+    if (e.target === overlay) {
+        closeTaskModal();
+    }
+});
+
+// Fechar modal com ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeTaskModal();
+    }
+});
+
+// Exportar funções globais
+window.openTaskModal = openTaskModal;
+window.closeTaskModal = closeTaskModal;
+window.reactivateTaskFromModal = reactivateTaskFromModal;
+
+// Exportar funções globais
+window.applyFilter = applyFilter;
+window.reactivateTask = reactivateTask;
+window.deleteTask = deleteTask;
