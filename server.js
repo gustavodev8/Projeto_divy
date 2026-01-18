@@ -1770,6 +1770,7 @@ app.post(`/telegram-webhook/${process.env.TELEGRAM_BOT_TOKEN}`, (req, res) => {
 // ===== API - AUTENTICAÇÃO =====
 
 // POST - Login do usuário
+// POST - Login do usuário
 app.post("/api/login", async (req, res) => {
     console.log("🔐 Tentativa de login:", req.body);
     
@@ -1783,21 +1784,33 @@ app.post("/api/login", async (req, res) => {
     }
     
     try {
-        // Busca por nome OU email
-        const user = await db.get(
-            `SELECT id, name, email FROM users 
-             WHERE (name = ? OR email = ?) AND password = ?`,
-            [username, username, password]
-        );
+        let user;
+        
+        if (db.isPostgres) {
+            // ✅ PostgreSQL - usar $1, $2 DIRETAMENTE
+            const result = await db.query(
+                `SELECT id, name AS username, email FROM users 
+                 WHERE (name = $1 OR email = $1) AND password = $2`,
+                [username, password]
+            );
+            user = result[0];
+        } else {
+            // ✅ SQLite - usar ?
+            user = await db.get(
+                `SELECT id, name AS username, email FROM users 
+                 WHERE (name = ? OR email = ?) AND password = ?`,
+                [username, username, password]
+            );
+        }
         
         if (user) {
-            console.log('✅ Login bem-sucedido:', user.name);
+            console.log('✅ Login bem-sucedido:', user.username);
             res.json({
                 success: true,
                 message: "Login realizado com sucesso!",
                 user: {
                     id: user.id,
-                    username: user.name,
+                    username: user.username,
                     email: user.email
                 }
             });
@@ -1813,7 +1826,7 @@ app.post("/api/login", async (req, res) => {
         console.error('❌ Erro no login:', err);
         res.status(500).json({
             success: false,
-            error: "Erro no servidor"
+            error: "Erro no servidor: " + err.message
         });
     }
 });
