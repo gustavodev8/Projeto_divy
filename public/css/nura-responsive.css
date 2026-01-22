@@ -1,0 +1,854 @@
+/* ========================================
+   NURA - RESPONSIVIDADE COMPLETA
+   Mobile First + Tablet + Desktop
+   ======================================== */
+
+/* ========================================
+   MOBILE FIRST - BASE (até 480px)
+   ======================================== */
+
+@media (max-width: 480px) {
+    /* ===== LAYOUT GERAL ===== */
+    .app-container {
+        flex-direction: column;
+    }
+    
+    /* ===== SIDEBAR - ESCONDIDA NO MOBILE ===== */
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: none;
+    }
+    
+    .sidebar.active {
+        left: 0;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    }
+    
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+        width: 100%;
+        height: 100vh;
+    }
+    
+    /* ===== HEADER ===== */
+    .page-header {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .header-left {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .btn-menu-mobile {
+        display: flex !important;
+    }
+    
+    .page-title {
+        font-size: 1.125rem;
+    }
+    
+    .title-emoji {
+        font-size: 1rem;
+    }
+    
+    .task-count {
+        font-size: 0.75rem;
+    }
+    
+    .header-right {
+        gap: 2px;
+    }
+    
+    .btn-header {
+        width: 32px;
+        height: 32px;
+    }
+    
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+        padding: 12px 16px;
+        gap: 16px;
+        flex-wrap: wrap;
+        overflow-x: auto;
+    }
+    
+    .stat-mini {
+        flex-shrink: 0;
+    }
+    
+    .stat-mini-value {
+        font-size: 1rem;
+    }
+    
+    .stat-mini-label {
+        font-size: 0.6875rem;
+    }
+    
+    /* ===== ADD TASK INLINE ===== */
+    .add-task-inline {
+        padding: 12px 16px;
+    }
+    
+    .add-task-trigger {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    /* ===== TASKS CONTAINER ===== */
+    .tasks-container {
+        padding: 0.5rem 1rem 5rem;
+    }
+    
+    /* ===== TASK ITEM ===== */
+    .task-item {
+        padding: 0.75rem;
+        gap: 0.625rem;
+    }
+    
+    .task-checkbox .checkmark {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .task-title {
+        font-size: 0.875rem;
+    }
+    
+    .task-subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .task-meta {
+        gap: 0.5rem;
+    }
+    
+    .task-tag {
+        font-size: 0.625rem;
+        padding: 0.125rem 0.375rem;
+    }
+    
+    .task-actions {
+        opacity: 1; /* Sempre visível no mobile */
+    }
+    
+    .task-action-btn {
+        width: 24px;
+        height: 24px;
+    }
+    
+    /* ===== SECTIONS ===== */
+    .task-section-header {
+        padding: 0.375rem 0 0.625rem;
+    }
+    
+    .section-title {
+        font-size: 0.6875rem;
+    }
+    
+    .section-tasks {
+        padding: 6px 8px 10px;
+    }
+    
+    .add-section-btn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    /* ===== MODAIS ===== */
+    .task-modal,
+    .modal-edit-section,
+    .list-modal,
+    .confirm-modal {
+        width: 95%;
+        max-width: none;
+        max-height: 90vh;
+    }
+    
+    .task-modal-header,
+    .modal-header,
+    .list-modal-header {
+        padding: 16px;
+    }
+    
+    .task-modal-title,
+    .modal-title,
+    .list-modal-title {
+        font-size: 16px;
+    }
+    
+    .task-modal-body,
+    .modal-body,
+    .list-modal-body {
+        padding: 16px;
+        max-height: calc(90vh - 140px);
+    }
+    
+    .task-modal-inline-fields {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .task-modal-footer,
+    .modal-footer,
+    .list-modal-footer {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-modal-secondary,
+    .btn-modal-primary,
+    .list-btn-cancel,
+    .list-btn-save,
+    .confirm-modal-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* ===== MENU DE OPÇÕES ===== */
+    .view-options-menu {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: none;
+        border-radius: 16px 16px 0 0;
+        transform: translateY(100%);
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    .view-options-menu.active {
+        transform: translateY(0);
+    }
+    
+    /* ===== TASK DETAIL PANEL ===== */
+    .task-detail-panel {
+        width: 100%;
+        border-left: none;
+        border-radius: 16px 16px 0 0;
+        height: 90vh;
+        top: auto;
+        bottom: 0;
+        transform: translateY(100%);
+    }
+    
+    .task-detail-panel.active {
+        transform: translateY(0);
+    }
+    
+    .task-detail-content {
+        padding: 16px;
+    }
+    
+    .task-detail-title-input {
+        font-size: 16px;
+    }
+    
+    /* ===== KANBAN ===== */
+    .kanban-columns {
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .kanban-column {
+        min-width: 85vw;
+        max-width: 85vw;
+    }
+    
+    .kanban-column-header {
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+    }
+    
+    .kanban-column-title {
+        font-size: 13px;
+    }
+    
+    .kanban-card {
+        padding: 10px;
+        min-height: 60px;
+    }
+    
+    .kanban-card-title {
+        font-size: 13px;
+    }
+    
+    .kanban-card-description {
+        font-size: 11px;
+        -webkit-line-clamp: 1;
+    }
+    
+    .kanban-card-menu-btn {
+        opacity: 1;
+    }
+    
+    .kanban-add-column {
+        min-width: 200px;
+    }
+    
+    /* ===== CONFIRM MODAL ===== */
+    .confirm-modal-content {
+        padding: 24px 16px;
+    }
+    
+    .confirm-modal-title {
+        font-size: 18px;
+    }
+    
+    .confirm-modal-actions {
+        flex-direction: column;
+    }
+    
+    /* ===== NOTIFICAÇÕES ===== */
+    .notification {
+        top: auto;
+        bottom: 20px;
+        right: 16px;
+        left: 16px;
+        max-width: none;
+    }
+}
+
+/* ========================================
+   MOBILE LANDSCAPE + SMALL TABLETS (481px - 768px)
+   ======================================== */
+
+@media (min-width: 481px) and (max-width: 768px) {
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+    
+    .sidebar.active {
+        left: 0;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    }
+    
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .btn-menu-mobile {
+        display: flex !important;
+    }
+    
+    /* ===== HEADER ===== */
+    .page-header {
+        padding: 12px 20px;
+    }
+    
+    .page-title {
+        font-size: 1.125rem;
+    }
+    
+    /* ===== TASKS ===== */
+    .tasks-container {
+        padding: 0.5rem 1.25rem 2rem;
+    }
+    
+    .task-item {
+        padding: 0.75rem 1rem;
+    }
+    
+    .task-actions {
+        opacity: 1;
+    }
+    
+    /* ===== MODAIS ===== */
+    .task-modal,
+    .list-modal {
+        width: 90%;
+        max-width: 500px;
+    }
+    
+    .task-modal-inline-fields {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    /* ===== KANBAN ===== */
+    .kanban-columns {
+        padding: 20px;
+    }
+    
+    .kanban-column {
+        min-width: 280px;
+        max-width: 300px;
+    }
+    
+    /* ===== TASK DETAIL PANEL ===== */
+    .task-detail-panel {
+        width: 380px;
+    }
+    
+    /* ===== VIEW OPTIONS ===== */
+    .view-options-menu {
+        right: 20px;
+        width: 280px;
+    }
+}
+
+/* ========================================
+   TABLETS (769px - 1024px)
+   ======================================== */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+        width: 240px;
+    }
+    
+    .sidebar-brand {
+        padding: 16px 16px 14px;
+    }
+    
+    .brand-logo {
+        width: 26px;
+        height: 26px;
+    }
+    
+    .brand-name {
+        font-size: 0.9375rem;
+    }
+    
+    .sidebar-user {
+        padding: 12px 16px;
+    }
+    
+    .user-avatar {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .user-name {
+        font-size: 0.75rem;
+    }
+    
+    .sidebar-section {
+        padding: 12px 14px;
+    }
+    
+    .btn-add-task {
+        padding: 9px 12px;
+        font-size: 0.8125rem;
+    }
+    
+    .sidebar-nav {
+        padding: 8px 10px;
+    }
+    
+    .nav-item {
+        padding: 7px 9px;
+    }
+    
+    .nav-text {
+        font-size: 0.75rem;
+    }
+    
+    .btn-menu-mobile {
+        display: none;
+    }
+    
+    /* ===== HEADER ===== */
+    .page-header {
+        padding: 12px 20px;
+    }
+    
+    .page-title {
+        font-size: 1.125rem;
+    }
+    
+    /* ===== MAIN ===== */
+    .tasks-container {
+        padding: 0.5rem 1.25rem 2rem;
+    }
+    
+    /* ===== KANBAN ===== */
+    .kanban-columns {
+        padding: 20px;
+        gap: 14px;
+    }
+    
+    .kanban-column {
+        min-width: 260px;
+        max-width: 280px;
+    }
+    
+    /* ===== TASK DETAIL ===== */
+    .task-detail-panel {
+        width: 380px;
+    }
+}
+
+/* ========================================
+   DESKTOP SMALL (1025px - 1280px)
+   ======================================== */
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+    .sidebar {
+        width: 250px;
+    }
+    
+    .kanban-column {
+        min-width: 270px;
+        max-width: 300px;
+    }
+    
+    .task-detail-panel {
+        width: 400px;
+    }
+}
+
+/* ========================================
+   DESKTOP LARGE (1281px+)
+   ======================================== */
+
+@media (min-width: 1281px) {
+    .sidebar {
+        width: 260px;
+    }
+    
+    .kanban-column {
+        min-width: 280px;
+        max-width: 320px;
+    }
+    
+    .task-detail-panel {
+        width: 420px;
+    }
+    
+    .tasks-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+
+/* ========================================
+   UTILITÁRIOS RESPONSIVOS
+   ======================================== */
+
+/* Esconder em mobile */
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+/* Esconder em desktop */
+@media (min-width: 769px) {
+    .hide-desktop {
+        display: none !important;
+    }
+}
+
+/* Mostrar apenas em mobile */
+@media (min-width: 769px) {
+    .show-mobile-only {
+        display: none !important;
+    }
+}
+
+/* ========================================
+   AJUSTES PARA ALTURA DE TELA PEQUENA
+   ======================================== */
+
+@media (max-height: 600px) {
+    .sidebar-brand {
+        padding: 12px 16px 10px;
+    }
+    
+    .sidebar-user {
+        padding: 10px 16px;
+    }
+    
+    .sidebar-section {
+        padding: 10px 14px;
+    }
+    
+    .btn-add-task {
+        padding: 8px 12px;
+    }
+    
+    .nav-item {
+        padding: 6px 10px;
+    }
+    
+    .page-header {
+        padding: 10px 20px;
+    }
+    
+    .stats-bar {
+        padding: 10px 20px;
+    }
+    
+    .task-modal-body,
+    .list-modal-body {
+        max-height: calc(80vh - 120px);
+    }
+}
+
+/* ========================================
+   ORIENTAÇÃO LANDSCAPE EM MOBILE
+   ======================================== */
+
+@media (max-width: 896px) and (orientation: landscape) {
+    .sidebar {
+        width: 240px;
+    }
+    
+    .task-detail-panel {
+        width: 50%;
+        max-width: 400px;
+    }
+    
+    .task-modal,
+    .list-modal {
+        max-height: 85vh;
+    }
+    
+    .task-modal-body,
+    .list-modal-body {
+        max-height: calc(85vh - 130px);
+    }
+    
+    .kanban-column {
+        max-height: calc(100vh - 180px);
+    }
+}
+
+/* ========================================
+   TOUCH DEVICES - MELHORIAS DE UX
+   ======================================== */
+
+@media (hover: none) and (pointer: coarse) {
+    /* Aumentar áreas de toque */
+    .task-checkbox .checkmark {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .task-action-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .btn-header {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .nav-item {
+        padding: 10px 12px;
+    }
+    
+    .list-item {
+        padding: 10px 12px;
+    }
+    
+    /* Mostrar ações sempre */
+    .task-actions {
+        opacity: 1;
+    }
+    
+    .kanban-card-menu-btn {
+        opacity: 1;
+    }
+    
+    .list-item-actions {
+        opacity: 1;
+    }
+    
+    /* Remover hover effects que não funcionam bem em touch */
+    .task-item:hover {
+        background: transparent;
+    }
+    
+    .task-item:active {
+        background: var(--surface-hover);
+    }
+    
+    .kanban-card:hover {
+        transform: none;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .kanban-card:active {
+        transform: scale(0.98);
+    }
+}
+
+/* ========================================
+   SCROLLBAR RESPONSIVA
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Scrollbar mais fina em mobile */
+    .sidebar::-webkit-scrollbar,
+    .main-content::-webkit-scrollbar,
+    .tasks-container::-webkit-scrollbar,
+    .kanban-cards-container::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    /* Esconder scrollbar horizontal do kanban em mobile */
+    .kanban-board::-webkit-scrollbar {
+        height: 4px;
+    }
+}
+
+/* ========================================
+   FIXES PARA SAFE AREA (NOTCH/HOME INDICATOR)
+   ======================================== */
+
+@supports (padding: max(0px)) {
+    @media (max-width: 768px) {
+        .page-header {
+            padding-top: max(12px, env(safe-area-inset-top));
+        }
+        
+        .sidebar {
+            padding-top: max(0px, env(safe-area-inset-top));
+            padding-left: max(0px, env(safe-area-inset-left));
+        }
+        
+        .tasks-container {
+            padding-bottom: max(2rem, calc(env(safe-area-inset-bottom) + 1rem));
+        }
+        
+        .task-modal,
+        .list-modal {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .view-options-menu {
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+        }
+        
+        .task-detail-panel {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    }
+}
+
+/* ========================================
+   ANIMAÇÕES OTIMIZADAS PARA PERFORMANCE
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .sidebar {
+        transition: none;
+    }
+    
+    .task-detail-panel {
+        transition: none;
+    }
+    
+    .kanban-card:hover {
+        transform: none;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+    .sidebar,
+    .btn-menu-mobile,
+    .header-right,
+    .task-actions,
+    .add-task-inline,
+    .add-section-btn,
+    .btn-add-list,
+    .notification {
+        display: none !important;
+    }
+    
+    .main-content {
+        width: 100%;
+    }
+    
+    .task-item {
+        page-break-inside: avoid;
+    }
+    
+    .kanban-columns {
+        flex-wrap: wrap;
+    }
+    
+    .kanban-column {
+        page-break-inside: avoid;
+    }
+}
+/* FIX: Remover centralização das tarefas em desktop */
+.tasks-container {
+    max-width: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+/* Seções devem ocupar largura total */
+.task-section {
+    width: 100%;
+}
+
+.section-tasks {
+    width: 100%;
+}

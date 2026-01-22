@@ -1,0 +1,589 @@
+/* ========================================
+   NURA - ESTILOS EXTRAS RESPONSIVOS
+   Complemento para funcionalidades mobile
+   ======================================== */
+
+/* ===== BOTÃO FECHAR SIDEBAR (MOBILE) ===== */
+.btn-close-sidebar {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 100ms ease;
+    margin-left: auto;
+}
+
+.btn-close-sidebar:hover {
+    background: var(--surface-hover);
+    color: var(--text-strong);
+}
+
+/* ===== CLASSES UTILITÁRIAS ===== */
+.hide-mobile {
+    display: block;
+}
+
+.hide-desktop {
+    display: none;
+}
+
+.hide-mobile-text {
+    display: inline;
+}
+
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none !important;
+    }
+    
+    .hide-desktop {
+        display: flex !important;
+    }
+    
+    .hide-mobile-text {
+        display: none;
+    }
+}
+
+/* ===== SIDEBAR MOBILE ===== */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        width: 85%;
+        max-width: 320px;
+        height: 100vh;
+        height: 100dvh; /* Dynamic viewport height para iOS */
+        z-index: 1000;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: none;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .sidebar.active {
+        left: 0;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+    }
+    
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .btn-menu-mobile {
+        display: flex !important;
+    }
+    
+    /* Ajustar brand para incluir botão fechar */
+    .sidebar-brand {
+        display: flex;
+        align-items: center;
+        padding-right: 12px;
+    }
+}
+
+/* ===== BOTÃO MENU MOBILE ===== */
+.btn-menu-mobile {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 100ms ease;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-menu-mobile:hover {
+    background: var(--surface-hover);
+    color: var(--text-strong);
+}
+
+.btn-menu-mobile:active {
+    background: var(--surface-active);
+    transform: scale(0.95);
+}
+
+/* ===== VIEW OPTIONS OVERLAY ===== */
+.view-options-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 998;
+    display: none;
+}
+
+.view-options-overlay.active {
+    display: block;
+}
+
+/* ===== MAIN CONTENT AJUSTES ===== */
+@media (max-width: 768px) {
+    .main-content {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .page-header {
+        padding: 12px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: var(--surface-main);
+    }
+    
+    .header-left {
+        gap: 12px;
+    }
+    
+    .page-title {
+        font-size: 1.125rem;
+    }
+    
+    .page-title .title-emoji {
+        font-size: 1rem;
+    }
+    
+    .page-title .title-text {
+        font-size: inherit;
+    }
+    
+    .task-count {
+        font-size: 0.75rem;
+    }
+}
+
+/* ===== STATS BAR MOBILE ===== */
+@media (max-width: 480px) {
+    .stats-bar {
+        padding: 12px 16px;
+        gap: 12px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .stats-bar::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .stat-mini {
+        flex-shrink: 0;
+        min-width: max-content;
+    }
+    
+    .stat-mini-value {
+        font-size: 1rem;
+    }
+    
+    .stat-mini-label {
+        font-size: 0.6875rem;
+    }
+}
+
+/* ===== TASKS CONTAINER MOBILE ===== */
+@media (max-width: 768px) {
+    .tasks-container {
+        padding: 0.5rem 1rem 6rem; /* Extra padding no bottom para FAB */
+    }
+    
+    .task-item {
+        padding: 0.75rem;
+        margin-bottom: 4px;
+    }
+    
+    .task-title {
+        font-size: 0.9rem;
+    }
+    
+    .task-actions {
+        opacity: 1; /* Sempre visível no mobile */
+    }
+}
+
+/* ===== MODAL MOBILE ===== */
+@media (max-width: 480px) {
+    .task-modal,
+    .list-modal,
+    .modal-edit-section,
+    .modal-rename-section {
+        width: 95%;
+        max-width: none;
+        max-height: 90vh;
+        max-height: 90dvh;
+        margin: auto;
+    }
+    
+    .task-modal-body,
+    .modal-body,
+    .list-modal-body {
+        padding: 16px;
+        max-height: calc(90vh - 140px);
+        max-height: calc(90dvh - 140px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .task-modal-footer,
+    .modal-footer,
+    .list-modal-footer {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .task-modal-footer button,
+    .modal-footer button,
+    .list-modal-footer button {
+        width: 100%;
+    }
+    
+    .task-modal-inline-fields {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+/* ===== TASK DETAIL PANEL MOBILE ===== */
+@media (max-width: 768px) {
+    .task-detail-panel {
+        width: 100%;
+        height: 90vh;
+        height: 90dvh;
+        top: auto;
+        bottom: 0;
+        right: 0;
+        border-radius: 16px 16px 0 0;
+        border-left: none;
+        transform: translateY(100%);
+    }
+    
+    .task-detail-panel.active {
+        transform: translateY(0);
+    }
+    
+    .task-detail-overlay {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+    }
+    
+    .task-detail-content {
+        padding: 16px;
+        padding-bottom: 32px;
+    }
+    
+    .task-detail-title-input {
+        font-size: 16px; /* Previne zoom no iOS */
+    }
+}
+
+/* ===== AI FLOAT BUTTON MOBILE ===== */
+@media (max-width: 768px) {
+    .ai-float-button {
+        bottom: 24px;
+        right: 16px;
+        width: 52px;
+        height: 52px;
+    }
+}
+
+/* ===== AI ROUTINE PANEL MOBILE ===== */
+@media (max-width: 768px) {
+    #aiRoutinePanel {
+        width: 100%;
+        max-width: none;
+        height: 85vh;
+        height: 85dvh;
+        top: auto;
+        bottom: 0;
+        right: 0;
+        border-radius: 16px 16px 0 0;
+    }
+    
+    #aiRoutinePanel.active {
+        transform: translateY(0);
+    }
+    
+    .ai-panel-body {
+        padding: 16px;
+    }
+    
+    .ai-time-inputs {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .ai-time-input {
+        width: 100%;
+    }
+}
+
+/* ===== VIEW OPTIONS MENU MOBILE ===== */
+@media (max-width: 768px) {
+    .view-options-menu {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: none;
+        border-radius: 16px 16px 0 0;
+        transform: translateY(100%);
+        max-height: 70vh;
+        max-height: 70dvh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .view-options-menu.active {
+        transform: translateY(0);
+    }
+    
+    .menu-item {
+        padding: 14px 16px;
+    }
+}
+
+/* ===== CONFIRM MODAL MOBILE ===== */
+@media (max-width: 480px) {
+    .confirm-modal {
+        width: 90%;
+        max-width: none;
+    }
+    
+    .confirm-modal-content {
+        padding: 24px 16px;
+    }
+    
+    .confirm-modal-actions {
+        flex-direction: column;
+    }
+    
+    .confirm-modal-btn {
+        width: 100%;
+    }
+}
+
+/* ===== KANBAN MOBILE ===== */
+@media (max-width: 768px) {
+    .kanban-columns {
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .kanban-column {
+        min-width: 85vw;
+        max-width: 85vw;
+        max-height: calc(100vh - 200px);
+        max-height: calc(100dvh - 200px);
+    }
+    
+    .kanban-card {
+        padding: 10px;
+    }
+    
+    .kanban-card-title {
+        font-size: 13px;
+    }
+    
+    .kanban-card-menu-btn {
+        opacity: 1;
+    }
+}
+
+/* ===== NOTIFICAÇÕES MOBILE ===== */
+@media (max-width: 768px) {
+    .notification {
+        top: auto;
+        bottom: 80px; /* Acima do FAB */
+        left: 16px;
+        right: 16px;
+        max-width: none;
+        transform: translateY(150%);
+    }
+    
+    .notification-show {
+        transform: translateY(0);
+    }
+}
+
+/* ===== TOUCH FEEDBACK ===== */
+@media (hover: none) and (pointer: coarse) {
+    .task-item,
+    .nav-item,
+    .list-item,
+    .menu-item,
+    .kanban-card {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .task-item:active,
+    .nav-item:active,
+    .list-item:active,
+    .menu-item:active {
+        background: var(--surface-active);
+    }
+    
+    .kanban-card:active {
+        transform: scale(0.98);
+    }
+    
+    /* Aumentar áreas de toque */
+    .task-checkbox .checkmark {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .task-action-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .btn-header {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+/* ===== SAFE AREA (NOTCH/HOME INDICATOR) ===== */
+@supports (padding: max(0px)) {
+    @media (max-width: 768px) {
+        .page-header {
+            padding-top: max(12px, env(safe-area-inset-top));
+        }
+        
+        .sidebar {
+            padding-top: max(0px, env(safe-area-inset-top));
+            padding-bottom: max(0px, env(safe-area-inset-bottom));
+        }
+        
+        .tasks-container {
+            padding-bottom: max(6rem, calc(env(safe-area-inset-bottom) + 5rem));
+        }
+        
+        .task-detail-panel,
+        .view-options-menu,
+        #aiRoutinePanel {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .ai-float-button {
+            bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+        }
+    }
+}
+
+/* ===== LANDSCAPE MOBILE ===== */
+@media (max-width: 896px) and (orientation: landscape) {
+    .sidebar {
+        width: 280px;
+    }
+    
+    .task-detail-panel {
+        width: 50%;
+        max-width: 400px;
+        height: 100%;
+        top: 0;
+        bottom: auto;
+        border-radius: 0;
+        transform: translateX(100%);
+    }
+    
+    .task-detail-panel.active {
+        transform: translateX(0);
+    }
+    
+    .view-options-menu {
+        max-height: 85vh;
+    }
+    
+    #aiRoutinePanel {
+        width: 50%;
+        max-width: 400px;
+        height: 100%;
+        top: 0;
+        bottom: auto;
+        border-radius: 0;
+    }
+}
+
+/* ===== DARK MODE ADJUSTMENTS ===== */
+.dark-mode .sidebar-overlay.active {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.dark-mode .task-detail-overlay.active {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+/* ===== ANIMAÇÕES REDUZIDAS ===== */
+@media (prefers-reduced-motion: reduce) {
+    .sidebar,
+    .task-detail-panel,
+    .view-options-menu,
+    #aiRoutinePanel,
+    .task-modal,
+    .sidebar-overlay,
+    .notification {
+        transition: none !important;
+    }
+}
+
+/* ===== SCROLL SNAP PARA KANBAN MOBILE ===== */
+@media (max-width: 768px) {
+    .kanban-columns {
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+    }
+    
+    .kanban-column {
+        scroll-snap-align: center;
+    }
+}
+
+/* ===== INPUT FOCUS STYLES (iOS FIX) ===== */
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    input[type="email"],
+    textarea,
+    select {
+        font-size: 16px !important; /* Previne zoom no iOS */
+    }
+}

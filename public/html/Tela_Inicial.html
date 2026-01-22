@@ -4,27 +4,52 @@
 <head>
   <meta charset="UTF-8">
   <title>Nura - Gestão Inteligente de Tarefas</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#146551">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <!-- CSS -->
   <link rel="stylesheet" href="../css/TelaPrincipal.css">
   <link rel="stylesheet" href="../css/sections.css">
   <link rel="stylesheet" href="../css/dark-mode-system.css">
   <link rel="stylesheet" href="../css/ai-routine-panel.css">
+  <link rel="stylesheet" href="../css/nura-fix-mobile.css">
+  <link rel="stylesheet" href="../css/nura-responsive.css">
+  <link rel="stylesheet" href="../css/nura-mobile-extras.css">
   <link rel="stylesheet" href="../css/subtasks.css">
   <link rel="stylesheet" href="../css/mobile.css">
+  
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Preconnect para performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 
 <body>
   <div class="app-container">
     
-    <!-- ===== SIDEBAR ESQUERDA (MODIFICADA - ÍCONES SVG) ===== -->
-    <aside class="sidebar">
+    <!-- ===== OVERLAY DA SIDEBAR (MOBILE) ===== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- ===== SIDEBAR ESQUERDA ===== -->
+    <aside class="sidebar" id="sidebar">
       <!-- Logo/Brand -->
       <div class="sidebar-brand">
         <div class="brand-logo">
           <span class="logo-letter">N</span>
         </div>
         <span class="brand-name">Nura</span>
+        
+        <!-- Botão fechar sidebar (mobile) -->
+        <button class="btn-close-sidebar hide-desktop" id="btnCloseSidebar" aria-label="Fechar menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
 
       <!-- User Profile Mini -->
@@ -49,13 +74,13 @@
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          Nova Tarefa
+          <span class="hide-mobile-text">Nova Tarefa</span>
         </button>
       </div>
 
       <!-- Navigation -->
       <nav class="sidebar-nav">
-        <a href="#" class="nav-item" data-filter="inbox" onclick="applySmartFilter('inbox'); return false;">
+        <a href="#" class="nav-item" data-filter="inbox" onclick="applySmartFilter('inbox'); closeSidebarMobile(); return false;">
           <span class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -66,7 +91,7 @@
           <span class="nav-badge" id="badge-inbox">0</span>
         </a>
         
-        <a href="#" class="nav-item" data-filter="today" onclick="applySmartFilter('today'); return false;">
+        <a href="#" class="nav-item" data-filter="today" onclick="applySmartFilter('today'); closeSidebarMobile(); return false;">
           <span class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -79,7 +104,7 @@
           <span class="nav-badge" id="badge-today">0</span>
         </a>
         
-        <a href="#" class="nav-item" data-filter="next7days" onclick="applySmartFilter('next7days'); return false;">
+        <a href="#" class="nav-item" data-filter="next7days" onclick="applySmartFilter('next7days'); closeSidebarMobile(); return false;">
           <span class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -94,7 +119,7 @@
           <span class="nav-badge" id="badge-next7days">0</span>
         </a>
         
-        <a href="#" class="nav-item" data-filter="all" onclick="applySmartFilter('all'); return false;">
+        <a href="#" class="nav-item" data-filter="all" onclick="applySmartFilter('all'); closeSidebarMobile(); return false;">
           <span class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="8" y1="6" x2="21" y2="6"></line>
@@ -111,7 +136,7 @@
       </nav>
 
       <!-- Listas/Projetos -->
-      <div class="sidebar-section">
+      <div class="sidebar-section sidebar-lists-section">
         <div class="section-header">
           <div class="section-header-title">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -122,7 +147,7 @@
           </div>
         </div>
         
-        <div class="lists-container">
+        <div class="lists-container" id="listsContainer">
           <!-- As listas são renderizadas aqui via JS -->
         </div>
         
@@ -136,12 +161,12 @@
         </button>
       </div>
 
-      <!-- Etiquetas -->
+      <!-- Etiquetas (oculto) -->
       <div class="sidebar-section" style="display: none;">
         <div class="section-header">
           <span>Etiquetas</span>
         </div>
-        <p class="section-hint">Categorize suas tarefas com etiquetas. Selecione rapidamente uma etiqueta digitando "#"</p>
+        <p class="section-hint">Categorize suas tarefas com etiquetas.</p>
         <div class="tags-container">
           <span class="tag">#urgente</span>
           <span class="tag">#reunião</span>
@@ -150,46 +175,46 @@
       </div>
 
       <!-- Bottom Actions -->
-<div class="sidebar-bottom">
-    <a href="Tela_Concluidas.html" class="nav-item">
-        <span class="nav-icon">
+      <div class="sidebar-bottom">
+        <a href="Tela_Concluidas.html" class="nav-item" onclick="closeSidebarMobile();">
+          <span class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
-        </span>
-        <span class="nav-text">Concluído</span>
-    </a>
-    <a href="#" class="nav-item">
-        <span class="nav-icon">
+          </span>
+          <span class="nav-text">Concluído</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                <line x1="10" y1="11" x2="10" y2="17"></line>
-                <line x1="14" y1="11" x2="14" y2="17"></line>
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
             </svg>
-        </span>
-        <span class="nav-text">Lixeira</span>
-    </a>
-    <a href="Tela_Ajustes.html" class="nav-item">
-        <span class="nav-icon">
+          </span>
+          <span class="nav-text">Lixeira</span>
+        </a>
+        <a href="Tela_Ajustes.html" class="nav-item" onclick="closeSidebarMobile();">
+          <span class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M12 1v6m0 6v6m6-12-6 6m-6-6 6 6m6 6-6-6m-6 6 6-6"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 1v6m0 6v6m6-12-6 6m-6-6 6 6m6 6-6-6m-6 6 6-6"></path>
             </svg>
-        </span>
-        <span class="nav-text">Configurações</span>
-    </a>
-</div>
+          </span>
+          <span class="nav-text">Configurações</span>
+        </a>
+      </div>
     </aside>
 
     <!-- ===== ÁREA PRINCIPAL ===== -->
-    <main class="main-content">
+    <main class="main-content" id="mainContent">
       
       <!-- Header da página -->
       <header class="page-header">
         <div class="header-left">
-          <button class="btn-menu-mobile" id="menuToggle">
+          <button class="btn-menu-mobile" id="menuToggle" aria-label="Abrir menu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -199,51 +224,52 @@
           <div class="page-title-group">
             <h1 class="page-title">
               <span class="title-emoji">👋</span>
-              Bem-vindo
+              <span class="title-text">Bem-vindo</span>
             </h1>
-            <span class="task-count">11 tarefas</span>
+            <span class="task-count" id="taskCountHeader">0 tarefas</span>
           </div>
         </div>
-<div class="header-right">
-    <button class="btn-header" id="darkModeToggle" title="Modo Escuro">
-        <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-    </button>
-    
-    <button class="btn-header" onclick="toggleViewOptionsMenu()" title="Mais opções" id="btnMoreOptions">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="1"></circle>
-            <circle cx="12" cy="5" r="1"></circle>
-            <circle cx="12" cy="19" r="1"></circle>
-        </svg>
-    </button>
-</div>
+        
+        <div class="header-right">
+          <button class="btn-header" id="darkModeToggle" title="Modo Escuro" aria-label="Alternar modo escuro">
+            <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+          
+          <button class="btn-header" onclick="toggleViewOptionsMenu()" title="Mais opções" id="btnMoreOptions" aria-label="Mais opções">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="12" cy="5" r="1"></circle>
+              <circle cx="12" cy="19" r="1"></circle>
+            </svg>
+          </button>
+        </div>
       </header>
 
       <!-- Stats Cards (compacto) -->
       <div class="stats-bar">
         <div class="stat-mini">
-          <span class="stat-mini-value" id="tarefas-ativas">5</span>
+          <span class="stat-mini-value" id="tarefas-ativas">0</span>
           <span class="stat-mini-label">Ativas</span>
         </div>
         <div class="stat-mini">
-          <span class="stat-mini-value" id="percentual-concluidas">40%</span>
+          <span class="stat-mini-value" id="percentual-concluidas">0%</span>
           <span class="stat-mini-label">Concluídas</span>
         </div>
-        <div class="stat-mini">
-          <span class="stat-mini-value" id="tarefas-andamento">3</span>
+        <div class="stat-mini hide-mobile">
+          <span class="stat-mini-value" id="tarefas-andamento">0</span>
           <span class="stat-mini-label">Em Progresso</span>
         </div>
         <div class="stat-mini stat-ai">
@@ -252,7 +278,7 @@
         </div>
       </div>
 
-      <!-- Input de Nova Tarefa (sempre visível, estilo TickTick) -->
+      <!-- Input de Nova Tarefa -->
       <div class="add-task-inline">
         <button class="add-task-trigger" id="btnAdicionar" onclick="openTaskModal()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -263,111 +289,7 @@
         </button>
       </div>
 
-<!-- MODAL DE CRIAR TAREFA - DESIGN PROFISSIONAL -->
-<div class="task-modal-overlay" id="taskModalOverlay" onclick="closeTaskModal()"></div>
-
-<div class="task-modal" id="taskModal">
-    <!-- Header -->
-    <div class="task-modal-header">
-        <h3 class="task-modal-title">Nova Tarefa</h3>
-        <button class="btn-close-modal" onclick="closeTaskModal()" title="Fechar (Esc)">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
-    </div>
-
-    <!-- Body -->
-    <div class="task-modal-body">
-        <!-- Título -->
-        <div class="task-modal-field">
-            <input 
-                type="text" 
-                id="inputTituloTarefa" 
-                class="task-modal-input task-modal-title-input" 
-                placeholder="Título da tarefa"
-                autocomplete="off"
-            />
-        </div>
-
-        <!-- Descrição -->
-        <div class="task-modal-field">
-            <textarea 
-                id="textareaDescricaoTarefa" 
-                class="task-modal-textarea" 
-                placeholder="Descrição (opcional)"
-                rows="3"
-            ></textarea>
-        </div>
-
-        <!-- Campos inline: Data e Prioridade -->
-        <div class="task-modal-inline-fields">
-            <!-- Data -->
-            <div class="task-modal-field-group">
-                <label class="task-modal-label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    <span>Data de vencimento</span>
-                </label>
-                <input 
-                    type="date" 
-                    id="inputDataTarefa" 
-                    class="task-modal-input task-modal-date-input"
-                />
-            </div>
-
-            <!-- Prioridade -->
-            <div class="task-modal-field-group">
-                <label class="task-modal-label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                    </svg>
-                    <span>Prioridade</span>
-                </label>
-                <select id="selectPrioridadeTarefa" class="task-modal-select">
-                    <option value="low">🟢 Baixa</option>
-                    <option value="medium" selected>🟡 Média</option>
-                    <option value="high">🔴 Alta</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Seção (se aplicável) -->
-        <div class="task-modal-field-group" id="taskModalSectionField" style="display: none;">
-            <label class="task-modal-label">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                </svg>
-                <span>Seção</span>
-            </label>
-            <select id="selectSecaoTarefa" class="task-modal-select">
-                <option value="">Sem seção</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="task-modal-footer">
-        <button class="btn-modal-secondary" onclick="closeTaskModal()">
-            Cancelar
-        </button>
-        <button class="btn-modal-primary" id="btnSalvar" onclick="salvarNovaTarefa()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            <span>Criar Tarefa</span>
-        </button>
-    </div>
-</div>
-
-      <!-- Lista de Tarefas com Seções Colapsáveis -->
+      <!-- Lista de Tarefas -->
       <div class="tasks-container" id="listaTarefas">
         <!-- Tarefas serão carregadas dinamicamente do banco de dados -->
       </div>
@@ -376,575 +298,747 @@
 
   </div>
 
-<!-- PAINEL LATERAL DE DETALHES DA TAREFA -->
-<div class="task-detail-panel" id="taskDetailPanel">
-    <div class="task-detail-header">
-        <button class="btn-close-panel" onclick="closeTaskDetailPanel()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
+  <!-- ===== MODAIS E OVERLAYS ===== -->
+
+  <!-- MODAL DE CRIAR TAREFA -->
+  <div class="task-modal-overlay" id="taskModalOverlay" onclick="closeTaskModal()"></div>
+
+  <div class="task-modal" id="taskModal" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+    <!-- Header -->
+    <div class="task-modal-header">
+      <h3 class="task-modal-title" id="taskModalTitle">Nova Tarefa</h3>
+      <button class="btn-close-modal" onclick="closeTaskModal()" title="Fechar (Esc)" aria-label="Fechar modal">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="task-modal-body">
+      <!-- Título -->
+      <div class="task-modal-field">
+        <input 
+          type="text" 
+          id="inputTituloTarefa" 
+          class="task-modal-input task-modal-title-input" 
+          placeholder="Título da tarefa"
+          autocomplete="off"
+          enterkeyhint="next"
+        />
+      </div>
+
+      <!-- Descrição -->
+      <div class="task-modal-field">
+        <textarea 
+          id="textareaDescricaoTarefa" 
+          class="task-modal-textarea" 
+          placeholder="Descrição (opcional)"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Campos inline: Data e Prioridade -->
+      <div class="task-modal-inline-fields">
+        <!-- Data -->
+        <div class="task-modal-field-group">
+          <label class="task-modal-label" for="inputDataTarefa">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-        </button>
+            <span>Data de vencimento</span>
+          </label>
+          <input 
+            type="date" 
+            id="inputDataTarefa" 
+            class="task-modal-input task-modal-date-input"
+          />
+        </div>
+
+        <!-- Prioridade -->
+        <div class="task-modal-field-group">
+          <label class="task-modal-label" for="selectPrioridadeTarefa">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+            <span>Prioridade</span>
+          </label>
+          <select id="selectPrioridadeTarefa" class="task-modal-select">
+            <option value="low">🟢 Baixa</option>
+            <option value="medium" selected>🟡 Média</option>
+            <option value="high">🔴 Alta</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Seção (se aplicável) -->
+      <div class="task-modal-field-group" id="taskModalSectionField" style="display: none;">
+        <label class="task-modal-label" for="selectSecaoTarefa">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>Seção</span>
+        </label>
+        <select id="selectSecaoTarefa" class="task-modal-select">
+          <option value="">Sem seção</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="task-modal-footer">
+      <button class="btn-modal-secondary" onclick="closeTaskModal()">
+        Cancelar
+      </button>
+      <button class="btn-modal-primary" id="btnSalvar" onclick="salvarNovaTarefa()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Criar Tarefa</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- PAINEL LATERAL DE DETALHES DA TAREFA -->
+  <div class="task-detail-overlay" id="taskDetailOverlay" onclick="closeTaskDetailPanel()"></div>
+  
+  <div class="task-detail-panel" id="taskDetailPanel" role="dialog" aria-modal="true">
+    <div class="task-detail-header">
+      <button class="btn-close-panel" onclick="closeTaskDetailPanel()" aria-label="Fechar painel">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     
     <div class="task-detail-content">
-        <!-- Checkbox e Título -->
-        <div class="task-detail-title-section">
-            <label class="task-detail-checkbox">
-                <input type="checkbox" id="detailTaskCheckbox" onchange="toggleTaskFromDetail()">
-                <span class="checkmark"></span>
-            </label>
-<textarea 
-    id="detailTaskTitle" 
-    class="task-detail-title-input" 
-    placeholder="Nome da tarefa" 
-    oninput="autoResizeTextarea(this)"
-></textarea>
+      <!-- Checkbox e Título -->
+      <div class="task-detail-title-section">
+        <label class="task-detail-checkbox">
+          <input type="checkbox" id="detailTaskCheckbox" onchange="toggleTaskFromDetail()">
+          <span class="checkmark"></span>
+        </label>
+        <textarea 
+          id="detailTaskTitle" 
+          class="task-detail-title-input" 
+          placeholder="Nome da tarefa" 
+          oninput="autoResizeTextarea(this)"
+        ></textarea>
+      </div>
+      
+      <!-- Descrição -->
+      <div class="task-detail-section">
+        <div class="task-detail-section-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span>Descrição</span>
         </div>
-        
-        <!-- Descrição -->
-        <div class="task-detail-section">
-            <div class="task-detail-section-header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-                <span>Descrição</span>
+        <textarea 
+          id="detailTaskDescription" 
+          class="task-detail-description-input" 
+          placeholder="Adicione uma descrição..." 
+          oninput="autoResizeTextarea(this)"
+        ></textarea>
+      </div>
+      
+      <!-- Data de vencimento -->
+      <div class="task-detail-section">
+        <div class="task-detail-section-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Data de vencimento</span>
+        </div>
+        <input 
+          type="date" 
+          id="detailTaskDueDate" 
+          class="task-detail-date-input"
+          onchange="updateTaskDueDate()"
+        >
+      </div>
+      
+      <!-- Prioridade -->
+      <div class="task-detail-section">
+        <div class="task-detail-section-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 19V6M5 12l7-7 7 7"/>
+          </svg>
+          <span>Prioridade</span>
+        </div>
+        <select 
+          id="detailTaskPriority" 
+          class="task-detail-priority-select"
+          onchange="updateTaskPriority()"
+        >
+          <option value="low">🟢 Baixa</option>
+          <option value="medium">🟡 Média</option>
+          <option value="high">🔴 Alta</option>
+        </select>
+      </div>
+      
+      <!-- Subtarefas -->
+      <div class="task-detail-section">
+        <div class="subtasks-section">
+          <!-- Header com título e botão gerar -->
+          <div class="subtasks-header">
+            <div class="subtasks-title">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+              <span>Subtarefas</span>
+              <span class="subtasks-count" id="subtasksCount">0</span>
             </div>
-<textarea 
-    id="detailTaskDescription" 
-    class="task-detail-description-input" 
-    placeholder="Adicione uma descrição..." 
-    oninput="autoResizeTextarea(this)"
-></textarea>
-        </div>
-        
-        <!-- Data de vencimento -->
-        <div class="task-detail-section">
-            <div class="task-detail-section-header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                <span>Data de vencimento</span>
-            </div>
-            <input 
-                type="date" 
-                id="detailTaskDueDate" 
-                class="task-detail-date-input"
-                onchange="updateTaskDueDate()"
-            >
-        </div>
-        
-        <!-- Prioridade -->
-        <div class="task-detail-section">
-            <div class="task-detail-section-header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 19V6M5 12l7-7 7 7"/>
-                </svg>
-                <span>Prioridade</span>
-            </div>
-            <select 
-                id="detailTaskPriority" 
-                class="task-detail-priority-select"
-                onchange="updateTaskPriority()"
-            >
-                <option value="low">🟢 Baixa</option>
-                <option value="medium">🟡 Média</option>
-                <option value="high">🔴 Alta</option>
-            </select>
-        </div>
-        
-        <!-- Subtarefas -->
-        <div class="task-detail-section">
-            <div class="subtasks-section">
-                <!-- Header com título e botão gerar -->
-                <div class="subtasks-header">
-                    <div class="subtasks-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 11 12 14 22 4"></polyline>
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                        </svg>
-                        <span>Subtarefas</span>
-                        <span class="subtasks-count" id="subtasksCount">0</span>
-                    </div>
-                    <button class="btn-generate-subtasks" id="btnGenerateSubtasks" onclick="generateSubtasksWithAI()" title="Quebrar tarefa em subtarefas com IA">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                            <polyline points="2 17 12 22 22 17"></polyline>
-                            <polyline points="2 12 12 17 22 12"></polyline>
-                        </svg>
-                        Gerar com IA
-                    </button>
-                </div>
-
-                <!-- Lista de subtarefas -->
-                <div class="subtasks-list" id="subtasksList"></div>
-
-                <!-- Input para adicionar subtarefa -->
-                <div class="subtask-add-container">
-                    <button class="subtask-add-trigger" id="btnAddSubtask" onclick="showSubtaskInput()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Adicionar subtarefa
-                    </button>
-
-                    <div class="subtask-input-container" id="subtaskInputContainer">
-                        <input 
-                            type="text" 
-                            id="subtaskInput" 
-                            class="subtask-input" 
-                            placeholder="Digite a subtarefa..."
-                            onkeypress="handleSubtaskInputKeypress(event)"
-                        />
-                        <button class="btn-subtask-save" onclick="saveNewSubtask()">Adicionar</button>
-                        <button class="btn-subtask-cancel" onclick="hideSubtaskInput()">Cancelar</button>
-                    </div>
-                </div>
-
-                <!-- Barra de progresso -->
-                <div class="subtasks-progress" id="subtasksProgress" style="display: none;">
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill" id="subtasksProgressBar" style="width: 0%"></div>
-                    </div>
-                    <span class="progress-text" id="subtasksProgressText">0/0</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Ações -->
-        <div class="task-detail-actions">
-            <button class="btn-detail-delete" onclick="deleteTaskFromDetail()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-                Excluir tarefa
+            <button class="btn-generate-subtasks" id="btnGenerateSubtasks" onclick="generateSubtasksWithAI()" title="Quebrar tarefa em subtarefas com IA">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+              </svg>
+              <span class="hide-mobile-text">Gerar com IA</span>
             </button>
+          </div>
+
+          <!-- Lista de subtarefas -->
+          <div class="subtasks-list" id="subtasksList"></div>
+
+          <!-- Input para adicionar subtarefa -->
+          <div class="subtask-add-container">
+            <button class="subtask-add-trigger" id="btnAddSubtask" onclick="showSubtaskInput()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Adicionar subtarefa
+            </button>
+
+            <div class="subtask-input-container" id="subtaskInputContainer">
+              <input 
+                type="text" 
+                id="subtaskInput" 
+                class="subtask-input" 
+                placeholder="Digite a subtarefa..."
+                onkeypress="handleSubtaskInputKeypress(event)"
+                enterkeyhint="done"
+              />
+              <button class="btn-subtask-save" onclick="saveNewSubtask()">Adicionar</button>
+              <button class="btn-subtask-cancel" onclick="hideSubtaskInput()">Cancelar</button>
+            </div>
+          </div>
+
+          <!-- Barra de progresso -->
+          <div class="subtasks-progress" id="subtasksProgress" style="display: none;">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="subtasksProgressBar" style="width: 0%"></div>
+            </div>
+            <span class="progress-text" id="subtasksProgressText">0/0</span>
+          </div>
         </div>
+      </div>
+      
+      <!-- Ações -->
+      <div class="task-detail-actions">
+        <button class="btn-detail-delete" onclick="deleteTaskFromDetail()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          Excluir tarefa
+        </button>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Overlay para fechar o painel -->
-<div class="task-detail-overlay" id="taskDetailOverlay" onclick="closeTaskDetailPanel()"></div>
-
-<!-- MENU DE OPÇÕES DE VISUALIZAÇÃO -->
-<div class="view-options-menu" id="viewOptionsMenu">
+  <!-- MENU DE OPÇÕES DE VISUALIZAÇÃO -->
+  <div class="view-options-overlay" id="viewOptionsOverlay" onclick="toggleViewOptionsMenu()"></div>
+  
+  <div class="view-options-menu" id="viewOptionsMenu" role="menu">
     <!-- Visualização -->
     <div class="menu-section">
-        <div class="menu-section-title">Visualização</div>
-        <button class="menu-item" onclick="changeViewMode('lista')" data-view="lista">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12"></line>
-                <line x1="8" y1="18" x2="21" y2="18"></line>
-                <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                <line x1="3" y1="18" x2="3.01" y2="18"></line>
-            </svg>
-            <span>Lista</span>
-            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        </button>
-        
-        <button class="menu-item" onclick="changeViewMode('kanban')" data-view="kanban">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-            </svg>
-            <span>Kanban</span>
-            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        </button>
-        
-        <button class="menu-item" onclick="changeViewMode('calendario')" data-view="calendario">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            <span>Calendário</span>
-            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        </button>
+      <div class="menu-section-title">Visualização</div>
+      <button class="menu-item" onclick="changeViewMode('lista')" data-view="lista" role="menuitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <span>Lista</span>
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </button>
+      
+      <button class="menu-item" onclick="changeViewMode('kanban')" data-view="kanban" role="menuitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Kanban</span>
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </button>
+      
+      <button class="menu-item" onclick="changeViewMode('calendario')" data-view="calendario" role="menuitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Calendário</span>
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </button>
     </div>
     
     <div class="menu-divider"></div>
     
     <!-- Opções de exibição -->
-    <button class="menu-item" onclick="toggleHideCompleted()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="9 11 12 14 22 4"></polyline>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-        </svg>
-        <span>Esconder concluídas</span>
-        <input type="checkbox" id="toggleHideCompletedCheckbox" class="menu-checkbox" onclick="event.stopPropagation()">
+    <button class="menu-item" onclick="toggleHideCompleted()" role="menuitem">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 11 12 14 22 4"></polyline>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+      </svg>
+      <span>Esconder concluídas</span>
+      <input type="checkbox" id="toggleHideCompletedCheckbox" class="menu-checkbox" onclick="event.stopPropagation()">
     </button>
     
-<button class="menu-item" onclick="toggleShowDetails()">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <button class="menu-item" onclick="toggleShowDetails()" role="menuitem">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
         <line x1="16" y1="13" x2="8" y2="13"></line>
         <line x1="16" y1="17" x2="8" y2="17"></line>
-    </svg>
-    <span>Mostrar detalhes</span>
-    <input type="checkbox" id="toggleShowDetailsCheckbox" class="menu-checkbox" onchange="toggleShowDetails()" onclick="event.stopPropagation()">
-</button>
+      </svg>
+      <span>Mostrar detalhes</span>
+      <input type="checkbox" id="toggleShowDetailsCheckbox" class="menu-checkbox" onchange="toggleShowDetails()" onclick="event.stopPropagation()">
+    </button>
     
     <div class="menu-divider"></div>
     
     <!-- Seções -->
-    <button class="menu-item" onclick="showCreateSectionModal()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        <span>Adicionar Seção</span>
+    <button class="menu-item" onclick="showCreateSectionModal()" role="menuitem">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Adicionar Seção</span>
     </button>
     
     <div class="menu-divider"></div>
     
     <!-- Outras opções -->
-    <button class="menu-item" onclick="shareList()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="18" cy="5" r="3"></circle>
-            <circle cx="6" cy="12" r="3"></circle>
-            <circle cx="18" cy="19" r="3"></circle>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-        </svg>
-        <span>Compartilhar</span>
+    <button class="menu-item" onclick="shareList()" role="menuitem">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="18" cy="5" r="3"></circle>
+        <circle cx="6" cy="12" r="3"></circle>
+        <circle cx="18" cy="19" r="3"></circle>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+      </svg>
+      <span>Compartilhar</span>
     </button>
     
-    <button class="menu-item" onclick="openSettings()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m0 6l4.2 4.2M23 12h-6m-6 0H1m13.2 5.2l-4.2-4.2m0-6l-4.2-4.2"></path>
-        </svg>
-        <span>Visualizar Opções</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto;">
-            <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
+    <button class="menu-item" onclick="openSettings()" role="menuitem">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m0 6l4.2 4.2M23 12h-6m-6 0H1m13.2 5.2l-4.2-4.2m0-6l-4.2-4.2"></path>
+      </svg>
+      <span>Visualizar Opções</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto;">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
     </button>
     
     <div class="menu-divider"></div>
     
-    <button class="menu-item" onclick="printList()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-            <rect x="6" y="14" width="12" height="8"></rect>
-        </svg>
-        <span>Imprimir</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto;">
-            <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
+    <button class="menu-item" onclick="printList()" role="menuitem">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+      </svg>
+      <span>Imprimir</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto;">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
     </button>
-</div>
+  </div>
 
-<!-- MODAL DE EDITAR SEÇÃO -->
-<div class="modal-overlay" id="editSectionModalOverlay" onclick="closeEditSectionModal()"></div>
+  <!-- MODAL DE EDITAR SEÇÃO -->
+  <div class="modal-overlay" id="editSectionModalOverlay" onclick="closeEditSectionModal()"></div>
 
-<div class="modal-edit-section" id="editSectionModal">
+  <div class="modal-edit-section" id="editSectionModal" role="dialog" aria-modal="true">
     <div class="modal-header">
-        <h3 class="modal-title">Editar Seção</h3>
-        <button class="btn-close-modal" onclick="closeEditSectionModal()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
+      <h3 class="modal-title">Editar Seção</h3>
+      <button class="btn-close-modal" onclick="closeEditSectionModal()" aria-label="Fechar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     
     <div class="modal-body">
-        <div class="form-field">
-            <label class="form-label">Nome da seção</label>
-            <input 
-                type="text" 
-                id="editSectionNameInput" 
-                class="form-input" 
-                placeholder="Digite o nome"
-                maxlength="50"
-            />
-        </div>
+      <div class="form-field">
+        <label class="form-label" for="editSectionNameInput">Nome da seção</label>
+        <input 
+          type="text" 
+          id="editSectionNameInput" 
+          class="form-input" 
+          placeholder="Digite o nome"
+          maxlength="50"
+        />
+      </div>
     </div>
     
     <div class="modal-footer">
-        <button class="btn-secondary" onclick="closeEditSectionModal()">Cancelar</button>
-        <button class="btn-primary" onclick="saveEditedSectionName()">Salvar</button>
+      <button class="btn-secondary" onclick="closeEditSectionModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveEditedSectionName()">Salvar</button>
     </div>
-</div>
+  </div>
 
-
-<!-- BOTÃO FLUTUANTE (NUVEM IA) -->
-<button class="ai-float-button" onclick="openAIRoutinePanel()" title="Gerar rotina com IA">
+  <!-- BOTÃO FLUTUANTE (NUVEM IA) -->
+  <button class="ai-float-button" onclick="openAIRoutinePanel()" title="Gerar rotina com IA" aria-label="Abrir assistente IA">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-        <polyline points="2 17 12 22 22 17"></polyline>
-        <polyline points="2 12 12 17 22 12"></polyline>
+      <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+      <polyline points="2 17 12 22 22 17"></polyline>
+      <polyline points="2 12 12 17 22 12"></polyline>
     </svg>
-</button>
+  </button>
 
-<!-- OVERLAY -->
-<div id="aiRoutinePanelOverlay" onclick="closeAIRoutinePanel()"></div>
+  <!-- OVERLAY AI PANEL -->
+  <div id="aiRoutinePanelOverlay" onclick="closeAIRoutinePanel()"></div>
 
-<!-- PAINEL LATERAL -->
-<div id="aiRoutinePanel">
+  <!-- PAINEL LATERAL IA -->
+  <div id="aiRoutinePanel" role="dialog" aria-modal="true" aria-labelledby="aiPanelTitle">
     <!-- HEADER -->
     <div class="ai-panel-header">
-        <div class="ai-panel-header-content">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                <polyline points="2 17 12 22 22 17"></polyline>
-                <polyline points="2 12 12 17 22 12"></polyline>
-            </svg>
-            <h2>Assistente IA</h2>
-        </div>
-        <button class="ai-panel-close" onclick="closeAIRoutinePanel()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
+      <div class="ai-panel-header-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
+        </svg>
+        <h2 id="aiPanelTitle">Assistente IA</h2>
+      </div>
+      <button class="ai-panel-close" onclick="closeAIRoutinePanel()" aria-label="Fechar painel IA">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
 
     <!-- BODY -->
     <div class="ai-panel-body">
-        <!-- DESCRIÇÃO -->
-        <div class="ai-form-group">
-            <label>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-                Descreva como será seu dia
-            </label>
-            <textarea 
-                id="aiRoutineDescription" 
-                class="ai-textarea" 
-                placeholder="Ex: Preciso estudar para uma prova importante, fazer exercícios, trabalhar num projeto e ter tempo para descanso..."
-            ></textarea>
-        </div>
+      <!-- DESCRIÇÃO -->
+      <div class="ai-form-group">
+        <label for="aiRoutineDescription">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          Descreva como será seu dia
+        </label>
+        <textarea 
+          id="aiRoutineDescription" 
+          class="ai-textarea" 
+          placeholder="Ex: Preciso estudar para uma prova importante, fazer exercícios, trabalhar num projeto e ter tempo para descanso..."
+        ></textarea>
+      </div>
 
-        <!-- HORÁRIOS -->
-        <div class="ai-form-group">
-            <label>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                Período do dia
-            </label>
-            <div class="ai-time-inputs">
-                <input type="time" id="aiStartTime" class="ai-time-input" value="08:00">
-                <input type="time" id="aiEndTime" class="ai-time-input" value="18:00">
-            </div>
+      <!-- HORÁRIOS -->
+      <div class="ai-form-group">
+        <label>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Período do dia
+        </label>
+        <div class="ai-time-inputs">
+          <input type="time" id="aiStartTime" class="ai-time-input" value="08:00">
+          <input type="time" id="aiEndTime" class="ai-time-input" value="18:00">
         </div>
+      </div>
 
-        <!-- BOTÃO GERAR -->
-        <button class="btn-generate-routine" onclick="generateAIRoutine()">
+      <!-- BOTÃO GERAR -->
+      <button class="btn-generate-routine" onclick="generateAIRoutine()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
+        </svg>
+        Gerar Rotina
+      </button>
+
+      <!-- RESULTADO -->
+      <div id="aiRoutineResult"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
+  <div class="confirm-modal-overlay" id="confirmModalOverlay">
+    <div class="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+      <div class="confirm-modal-content">
+        <div class="confirm-modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </div>
+        
+        <h3 class="confirm-modal-title" id="confirmModalTitle">Excluir tarefa?</h3>
+        <p class="confirm-modal-message">
+          Esta ação não pode ser desfeita. A tarefa será permanentemente removida.
+        </p>
+        
+        <div class="confirm-modal-task-name" id="confirmModalTaskName">
+          Nome da tarefa
+        </div>
+        
+        <div class="confirm-modal-actions">
+          <button class="confirm-modal-btn confirm-modal-btn-cancel" onclick="closeConfirmModal()">
+            Cancelar
+          </button>
+          <button class="confirm-modal-btn confirm-modal-btn-delete" id="confirmDeleteBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                <polyline points="2 17 12 22 22 17"></polyline>
-                <polyline points="2 12 12 17 22 12"></polyline>
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
-            Gerar Rotina
-        </button>
-
-        <!-- RESULTADO -->
-        <div id="aiRoutineResult"></div>
-    </div>
-</div>
-
-<!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
-<div class="confirm-modal-overlay" id="confirmModalOverlay">
-    <div class="confirm-modal">
-        <div class="confirm-modal-content">
-            <div class="confirm-modal-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18"></path>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>
-            </div>
-            
-            <h3 class="confirm-modal-title">Excluir tarefa?</h3>
-            <p class="confirm-modal-message">
-                Esta ação não pode ser desfeita. A tarefa será permanentemente removida.
-            </p>
-            
-            <div class="confirm-modal-task-name" id="confirmModalTaskName">
-                Nome da tarefa
-            </div>
-            
-            <div class="confirm-modal-actions">
-                <button class="confirm-modal-btn confirm-modal-btn-cancel" onclick="closeConfirmModal()">
-                    Cancelar
-                </button>
-                <button class="confirm-modal-btn confirm-modal-btn-delete" id="confirmDeleteBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 6h18"></path>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                    Excluir
-                </button>
-            </div>
+            Excluir
+          </button>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- MODAL DE RENOMEAR SEÇÃO KANBAN -->
-<div class="modal-overlay" id="renameSectionModalOverlay" onclick="closeRenameSectionModal()"></div>
+  <!-- MODAL DE RENOMEAR SEÇÃO KANBAN -->
+  <div class="modal-overlay" id="renameSectionModalOverlay" onclick="closeRenameSectionModal()"></div>
 
-<div class="modal-rename-section" id="renameSectionModal">
+  <div class="modal-rename-section" id="renameSectionModal" role="dialog" aria-modal="true">
     <div class="modal-header">
-        <h3 class="modal-title">Renomear Seção</h3>
-        <button class="btn-close-modal" onclick="closeRenameSectionModal()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
+      <h3 class="modal-title">Renomear Seção</h3>
+      <button class="btn-close-modal" onclick="closeRenameSectionModal()" aria-label="Fechar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     
     <div class="modal-body">
-        <div class="form-field">
-            <label class="form-label">Nome da seção</label>
-            <input 
-                type="text" 
-                id="renameSectionInput" 
-                class="form-input" 
-                placeholder="Digite o novo nome"
-                maxlength="50"
-                autocomplete="off"
-                onkeypress="if(event.key === 'Enter') { event.preventDefault(); saveRenamedSection(); }"
-            />
-            <span class="form-hint">Máximo 50 caracteres</span>
-        </div>
+      <div class="form-field">
+        <label class="form-label" for="renameSectionInput">Nome da seção</label>
+        <input 
+          type="text" 
+          id="renameSectionInput" 
+          class="form-input" 
+          placeholder="Digite o novo nome"
+          maxlength="50"
+          autocomplete="off"
+          onkeypress="if(event.key === 'Enter') { event.preventDefault(); saveRenamedSection(); }"
+        />
+        <span class="form-hint">Máximo 50 caracteres</span>
+      </div>
     </div>
     
     <div class="modal-footer">
-        <button class="btn-secondary" onclick="closeRenameSectionModal()">Cancelar</button>
-        <button class="btn-primary" id="btnSaveRenamedSection" onclick="saveRenamedSection()">Salvar</button>
+      <button class="btn-secondary" onclick="closeRenameSectionModal()">Cancelar</button>
+      <button class="btn-primary" id="btnSaveRenamedSection" onclick="saveRenamedSection()">Salvar</button>
     </div>
-</div>
+  </div>
 
-<!-- Antes do </body> -->
-<!-- ===== SCRIPTS (ORDEM CORRETA) ===== -->
-<script src="../scripts/auth.js"></script>
-<script src="../scripts/settings.js"></script>
-<script src="../scripts/lists.js"></script>        
-<script src="../scripts/sections.js"></script>
-<script src="../scripts/kanban-view.js"></script>  <!-- ✅ ADICIONAR AQUI -->
-<script src="../scripts/sincro_telas.js"></script>
-<script src="../scripts/smart-filters.js"></script> 
-<script src="../scripts/estatisticas_backend.js"></script>
-<script src="../scripts/darkMode.js"></script>
-<script src="../scripts/task-detail-panel.js"></script>
-<script src="../scripts/view-options-menu.js"></script>
-<script src="../scripts/ai-routine-panel.js"></script>
-<script src="../scripts/subtasks.js"></script>
+  <!-- ===== SCRIPTS ===== -->
+  <script src="../scripts/auth.js"></script>
+  <script src="../scripts/settings.js"></script>
+  <script src="../scripts/lists.js"></script>        
+  <script src="../scripts/sections.js"></script>
+  <script src="../scripts/kanban-view.js"></script>
+  <script src="../scripts/sincro_telas.js"></script>
+  <script src="../scripts/smart-filters.js"></script> 
+  <script src="../scripts/estatisticas_backend.js"></script>
+  <script src="../scripts/darkMode.js"></script>
+  <script src="../scripts/task-detail-panel.js"></script>
+  <script src="../scripts/view-options-menu.js"></script>
+  <script src="../scripts/ai-routine-panel.js"></script>
+  <script src="../scripts/subtasks.js"></script>
 
-<script>
-console.log('🔧 Carregando override de deleteTaskFromDetail...');
-
-// Esperar todos os scripts carregarem
-// ===== GARANTIR QUE KANBAN-VIEW.JS FOI CARREGADO =====
-
-</script>
-
-  <!-- Scripts -->
   <script>
-    // Toggle sidebar mobile
+    // ===== SIDEBAR MOBILE TOGGLE =====
     const menuToggle = document.getElementById('menuToggle');
-    const sidebar = document.querySelector('.sidebar');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const btnCloseSidebar = document.getElementById('btnCloseSidebar');
     
-    menuToggle?.addEventListener('click', () => {
-      sidebar.classList.toggle('open');
+    // Função para abrir sidebar
+    function openSidebar() {
+      sidebar.classList.add('active');
+      sidebarOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden'; // Previne scroll do body
+    }
+    
+    // Função para fechar sidebar
+    function closeSidebarMobile() {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+      document.body.style.overflow = ''; // Restaura scroll
+    }
+    
+    // Event listeners
+    menuToggle?.addEventListener('click', openSidebar);
+    sidebarOverlay?.addEventListener('click', closeSidebarMobile);
+    btnCloseSidebar?.addEventListener('click', closeSidebarMobile);
+    
+    // Fechar sidebar com tecla Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSidebarMobile();
+        closeTaskModal();
+        closeTaskDetailPanel();
+        
+        // Fechar menu de opções se estiver aberto
+        const viewMenu = document.getElementById('viewOptionsMenu');
+        if (viewMenu?.classList.contains('active')) {
+          toggleViewOptionsMenu();
+        }
+      }
     });
-
-    // Toggle seções colapsáveis
+    
+    // ===== TOGGLE SEÇÕES COLAPSÁVEIS =====
     document.querySelectorAll('.section-toggle').forEach(btn => {
       btn.addEventListener('click', () => {
         const section = btn.dataset.section;
         const tasks = document.getElementById(`section-${section}`);
         const chevron = btn.querySelector('.chevron');
         
-        tasks.classList.toggle('collapsed');
-        chevron.classList.toggle('rotated');
+        tasks?.classList.toggle('collapsed');
+        chevron?.classList.toggle('rotated');
       });
     });
 
-    // Toggle bloco de adicionar tarefa
+    // ===== ABRIR MODAL DE TAREFA =====
     const btnAdicionar = document.getElementById('btnAdicionar');
     const btnNovaGlobal = document.getElementById('btnNovaGlobal');
-    const blocoTarefas = document.getElementById('blocoTarefas');
-    const btnCancelar = document.getElementById('btnCancelar');
-    const addTaskTrigger = document.querySelector('.add-task-trigger');
 
-// ✅ Abrir modal ao clicar
-    btnAdicionar?.addEventListener('click', openTaskModal);
-    btnNovaGlobal?.addEventListener('click', openTaskModal);
-
-    // Toggle AI Panel
-    const aiToggle = document.getElementById('aiToggle');
-    const aiPanel = document.getElementById('aiPanel');
-    const aiClose = document.getElementById('aiClose');
-    const aiCard = document.getElementById('aiCard');
-
-    aiToggle?.addEventListener('click', () => {
-      aiCard.classList.toggle('expanded');
+    btnAdicionar?.addEventListener('click', () => {
+      openTaskModal();
+      closeSidebarMobile(); // Fecha sidebar ao abrir modal no mobile
+    });
+    
+    btnNovaGlobal?.addEventListener('click', () => {
+      openTaskModal();
+      closeSidebarMobile(); // Fecha sidebar ao abrir modal no mobile
     });
 
-    aiClose?.addEventListener('click', () => {
-      aiCard.classList.remove('expanded');
-    });
-
-    // Dark mode gerenciado por darkMode.js
-
-    // Checkbox toggle - integrado com sistema de tarefas
+    // ===== CHECKBOX TOGGLE (DELEGAÇÃO DE EVENTOS) =====
     document.addEventListener('click', function(e) {
-      // Delegar evento para checkboxes dinâmicas
       if (e.target.closest('.task-checkbox input')) {
         const checkbox = e.target;
         const taskItem = checkbox.closest('.task-item');
         const taskId = taskItem?.dataset.taskId;
 
         if (taskId) {
-          // Usar função do sincro_telas.js
           if (typeof toggleTaskFromHome === 'function') {
             toggleTaskFromHome(parseInt(taskId));
           }
         } else {
-          // Tarefas estáticas (tutorial)
-          taskItem.classList.toggle('completed', checkbox.checked);
+          taskItem?.classList.toggle('completed', checkbox.checked);
         }
       }
     });
 
-    // Atualizar contadores após carregar tarefas
+    // ===== ATUALIZAR ESTATÍSTICAS AO CARREGAR =====
     window.addEventListener('load', () => {
       if (typeof atualizarEstatisticas === 'function') {
         atualizarEstatisticas();
       }
     });
+    
+    // ===== PREVENIR ZOOM EM INPUTS NO iOS =====
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+      el.addEventListener('focus', function() {
+        if (window.innerWidth <= 768) {
+          document.querySelector('meta[name="viewport"]')
+            .setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        }
+      });
+      
+      el.addEventListener('blur', function() {
+        document.querySelector('meta[name="viewport"]')
+          .setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+      });
+    });
+    
+    // ===== DETECTAR SWIPE PARA ABRIR SIDEBAR (MOBILE) =====
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    document.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+    
+    function handleSwipe() {
+      const swipeThreshold = 80;
+      const swipeDistance = touchEndX - touchStartX;
+      
+      // Swipe da esquerda para direita (abrir sidebar)
+      if (touchStartX < 30 && swipeDistance > swipeThreshold && !sidebar.classList.contains('active')) {
+        openSidebar();
+      }
+      
+      // Swipe da direita para esquerda (fechar sidebar)
+      if (swipeDistance < -swipeThreshold && sidebar.classList.contains('active')) {
+        closeSidebarMobile();
+      }
+    }
+    
+    // ===== ATUALIZAR CONTADOR DE TAREFAS NO HEADER =====
+    function updateTaskCountHeader(count) {
+      const taskCountHeader = document.getElementById('taskCountHeader');
+      if (taskCountHeader) {
+        taskCountHeader.textContent = `${count} tarefa${count !== 1 ? 's' : ''}`;
+      }
+    }
+    
+    // Expor função globalmente
+    window.updateTaskCountHeader = updateTaskCountHeader;
+    window.closeSidebarMobile = closeSidebarMobile;
+    window.openSidebar = openSidebar;
+    
+    console.log('✅ Tela Inicial carregada com responsividade');
   </script>
 </body>
 
