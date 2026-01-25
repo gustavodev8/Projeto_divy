@@ -189,40 +189,46 @@ async function createList(name, emoji = '📋', color = '#146551') {
 }
 
 // ===== EDITAR LISTA =====
+// ===== EDITAR LISTA =====
 function editList(listId) {
     const list = window.userLists.find(l => l.id === listId);
     if (!list) return;
 
-    const modal = document.createElement('div');
-    modal.className = 'section-modal-overlay';
-    modal.innerHTML = `
-        <div class="section-modal">
-            <div class="section-modal-header">
-                <h3>Editar Lista</h3>
-                <button class="section-modal-close" onclick="this.closest('.section-modal-overlay').remove()">×</button>
-            </div>
-            <div class="section-modal-body">
-                <div class="section-modal-field">
-                    <label>Emoji</label>
-                    <input type="text" id="editListEmoji" value="${list.emoji || '📋'}" maxlength="2">
-                </div>
-                <div class="section-modal-field">
-                    <label>Nome da Lista</label>
-                    <input type="text" id="editListName" value="${list.name}" autofocus>
-                </div>
-                <div class="section-modal-field">
-                    <label>Cor</label>
-                    <input type="color" id="editListColor" value="${list.color || '#146551'}">
-                </div>
-            </div>
-            <div class="section-modal-actions">
-                <button class="btn-cancel" onclick="this.closest('.section-modal-overlay').remove()">Cancelar</button>
-                <button class="btn-save" onclick="submitEditList(${listId})">Salvar</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    document.getElementById('editListName').focus();
+    console.log('📝 Editando lista:', list);
+
+    // Remove foco atual
+    document.activeElement?.blur();
+
+    // Usa o modal que já existe no HTML
+    const overlay = document.getElementById('editListModalOverlay');
+    const modal = document.getElementById('editListModal');
+    
+    if (!overlay || !modal) {
+        console.error('❌ Modal de editar lista não encontrado no HTML');
+        return;
+    }
+
+    // Preenche os campos
+    document.getElementById('editListName').value = list.name || '';
+    document.getElementById('editListColor').value = list.color || '#146551';
+    document.getElementById('editListEmojiBtn').textContent = list.emoji || '📋';
+
+    // Guarda o ID da lista sendo editada
+    window.editingListId = listId;
+
+    // Abre o modal
+    overlay.style.display = 'flex';
+    
+    setTimeout(() => {
+        overlay.classList.add('active');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Foco no input
+        setTimeout(() => {
+            document.getElementById('editListName')?.focus();
+        }, 100);
+    }, 10);
 }
 
 async function submitEditList(listId) {

@@ -1,0 +1,589 @@
+/* ========================================
+   NURA - CSS UNIFICADO DE CORREÇÕES
+   Mobile + Modais + Task Detail
+   IMPORTANTE: Todos os modais FECHADOS por padrão
+   ======================================== */
+
+/* =========================================
+   PARTE 1: MOBILE / RESPONSIVIDADE
+   ========================================= */
+
+/* Classes utilitárias */
+.hide-mobile { display: block; }
+.hide-desktop { display: none; }
+.hide-mobile-text { display: inline; }
+
+@media (max-width: 768px) {
+    .hide-mobile { display: none !important; }
+    .hide-desktop { display: flex !important; }
+    .hide-mobile-text { display: none; }
+}
+
+/* Botão fechar sidebar */
+.btn-close-sidebar {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+/* Sidebar Mobile */
+@media (max-width: 1024px) {
+    .app-container {
+        display: flex;
+        flex-direction: row;
+        position: relative;
+    }
+    
+    .sidebar {
+        position: fixed !important;
+        left: -100% !important;
+        top: 0 !important;
+        width: 280px !important;
+        max-width: 85vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        z-index: 1000 !important;
+        transition: left 0.3s ease !important;
+        overflow-y: auto !important;
+    }
+    
+    .sidebar.active,
+    .sidebar.open {
+        left: 0 !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
+    }
+    
+    .sidebar-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        z-index: 999 !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transition: all 0.3s ease !important;
+        pointer-events: none !important;
+    }
+    
+    .sidebar-overlay.active {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    
+    .main-content {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    
+    .btn-menu-mobile {
+        display: flex !important;
+    }
+}
+
+/* Botão menu mobile */
+.btn-menu-mobile {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Tasks container - largura total */
+.tasks-container {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.task-section,
+.section-tasks {
+    width: 100% !important;
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+    .sidebar {
+        position: relative !important;
+        left: 0 !important;
+        width: 260px !important;
+    }
+    
+    .main-content {
+        flex: 1;
+        width: calc(100% - 260px) !important;
+    }
+    
+    .btn-menu-mobile {
+        display: none !important;
+    }
+    
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
+
+/* =========================================
+   PARTE 2: TODOS OS MODAIS
+   IMPORTANTE: display: none por padrão!
+   ========================================= */
+
+/* === OVERLAYS - ESCONDIDOS POR PADRÃO === */
+.section-modal-overlay,
+.list-modal-overlay,
+.modal-overlay,
+.edit-list-modal-overlay,
+.confirm-modal-overlay,
+#editListModalOverlay,
+#listModalOverlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    z-index: 9998 !important;
+    
+    /* FECHADO POR PADRÃO */
+    display: none !important;
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Overlay ABERTO */
+.section-modal-overlay.active,
+.list-modal-overlay.active,
+.modal-overlay.active,
+.edit-list-modal-overlay.active,
+#editListModalOverlay.active,
+#listModalOverlay.active {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    padding: 20px !important;
+}
+
+/* === MODAIS - ESCONDIDOS POR PADRÃO === */
+.section-modal,
+.list-modal,
+.edit-list-modal,
+.modal-edit-list,
+.modal-edit-section,
+.modal-rename-section,
+#editListModal {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    max-height: 90vh !important;
+    background: var(--surface-main, #1a1a1a) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    
+    /* FECHADO POR PADRÃO */
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transition: all 0.2s ease;
+}
+
+/* Modal ABERTO */
+.section-modal.active,
+.list-modal.active,
+.edit-list-modal.active,
+#editListModal.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: scale(1) !important;
+}
+
+/* === HEADER DO MODAL === */
+.section-modal-header,
+.list-modal-header,
+.modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 20px 24px !important;
+    border-bottom: 1px solid var(--border-light, #2a2a2a) !important;
+}
+
+.section-modal-header h3,
+.list-modal-title,
+.modal-title {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: var(--text-strong, #f5f5f5) !important;
+    margin: 0 !important;
+}
+
+/* Botão fechar (X) */
+.section-modal-close,
+.btn-close-modal {
+    width: 36px !important;
+    height: 36px !important;
+    border: none !important;
+    background: var(--surface-hover, #2a2a2a) !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: var(--text-muted, #888) !important;
+    font-size: 20px !important;
+    padding: 0 !important;
+}
+
+.section-modal-close:hover,
+.btn-close-modal:hover {
+    background: var(--surface-active, #333) !important;
+    color: var(--text-strong, #f5f5f5) !important;
+}
+
+/* === BODY DO MODAL === */
+.section-modal-body,
+.list-modal-body,
+.modal-body {
+    padding: 24px !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+}
+
+/* === CAMPOS DO FORMULÁRIO === */
+.section-modal-field,
+.list-form-field,
+.form-field,
+.form-group,
+.modal-field {
+    margin-bottom: 20px !important;
+}
+
+.section-modal-field:last-child,
+.form-group:last-child {
+    margin-bottom: 0 !important;
+}
+
+.section-modal-field label,
+.list-form-label,
+.form-label,
+.form-group label {
+    display: block !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--text-muted, #888) !important;
+    margin-bottom: 8px !important;
+    text-transform: uppercase !important;
+}
+
+/* === INPUTS === */
+.section-modal-field input[type="text"],
+.section-modal-field input[type="color"],
+.list-form-input,
+.form-input,
+#editListName,
+#editListColor {
+    width: 100% !important;
+    padding: 14px 16px !important;
+    border: 1px solid var(--border-light, #2a2a2a) !important;
+    border-radius: 10px !important;
+    background: var(--surface-secondary, #1f1f1f) !important;
+    font-size: 15px !important;
+    color: var(--text-strong, #f5f5f5) !important;
+    box-sizing: border-box !important;
+}
+
+.section-modal-field input:focus,
+.list-form-input:focus,
+.form-input:focus,
+#editListName:focus {
+    outline: none !important;
+    border-color: var(--nura-primary, #146551) !important;
+    box-shadow: 0 0 0 3px rgba(20, 101, 81, 0.25) !important;
+}
+
+/* Input de cor */
+input[type="color"],
+#editListColor {
+    height: 50px !important;
+    padding: 6px !important;
+    cursor: pointer !important;
+}
+
+/* Botão emoji */
+.emoji-picker-button,
+#editListEmojiBtn {
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 28px !important;
+    text-align: center !important;
+    border: 1px solid var(--border-light, #2a2a2a) !important;
+    border-radius: 12px !important;
+    background: var(--surface-secondary, #1f1f1f) !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* === FOOTER / ACTIONS === */
+.section-modal-actions,
+.list-modal-footer,
+.modal-footer {
+    display: flex !important;
+    gap: 12px !important;
+    padding: 20px 24px !important;
+    border-top: 1px solid var(--border-light, #2a2a2a) !important;
+}
+
+/* Botão Cancelar */
+.btn-cancel,
+.list-btn-cancel,
+.btn-modal-secondary,
+.btn-secondary {
+    flex: 1 !important;
+    padding: 14px 20px !important;
+    border: 1px solid var(--border-light, #2a2a2a) !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    color: var(--text-muted, #888) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+.btn-cancel:hover,
+.btn-secondary:hover {
+    background: var(--surface-hover, #2a2a2a) !important;
+    color: var(--text-strong, #f5f5f5) !important;
+}
+
+/* Botão Salvar */
+.btn-save,
+.list-btn-save,
+.btn-modal-primary,
+.btn-primary {
+    flex: 1 !important;
+    padding: 14px 20px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: var(--nura-primary, #146551) !important;
+    color: white !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+}
+
+.btn-save:hover,
+.btn-primary:hover {
+    background: var(--nura-primary-dark, #0f4d3d) !important;
+}
+
+/* === MOBILE MODAIS === */
+@media (max-width: 480px) {
+    .section-modal-overlay.active,
+    .list-modal-overlay.active,
+    #editListModalOverlay.active,
+    #listModalOverlay.active {
+        padding: 0 !important;
+        align-items: flex-end !important;
+    }
+    
+    .section-modal,
+    .list-modal,
+    #editListModal {
+        max-width: none !important;
+        width: 100% !important;
+        max-height: 85vh !important;
+        border-radius: 20px 20px 0 0 !important;
+    }
+    
+    .section-modal-field input[type="text"],
+    .list-form-input,
+    #editListName {
+        font-size: 16px !important;
+    }
+    
+    .section-modal-actions,
+    .list-modal-footer,
+    .modal-footer {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    .btn-cancel,
+    .btn-save,
+    .btn-secondary,
+    .btn-primary {
+        width: 100% !important;
+    }
+}
+
+/* =========================================
+   PARTE 3: TASK DETAIL PANEL
+   ========================================= */
+
+.task-detail-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 420px;
+    height: 100vh;
+    background: var(--surface-main);
+    border-left: 1px solid var(--border-light);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.task-detail-panel.active {
+    transform: translateX(0);
+}
+
+.task-detail-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 999;
+}
+
+.task-detail-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media (max-width: 768px) {
+    .task-detail-panel {
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 92vh !important;
+        border-radius: 20px 20px 0 0 !important;
+        border-left: none !important;
+        transform: translateY(100%) !important;
+    }
+    
+    .task-detail-panel.active {
+        transform: translateY(0) !important;
+    }
+}
+
+/* =========================================
+   PARTE 4: AI PANEL - FECHADO POR PADRÃO
+   ========================================= */
+
+#aiRoutinePanel {
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    transform: translateY(100%) !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease !important;
+    z-index: 1001 !important;
+}
+
+#aiRoutinePanel.active {
+    transform: translateY(0) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#aiRoutinePanelOverlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 1000 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+#aiRoutinePanelOverlay.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+@media (max-width: 768px) {
+    #aiRoutinePanel {
+        width: 100% !important;
+        height: 85vh !important;
+        border-radius: 16px 16px 0 0 !important;
+    }
+}
+
+/* =========================================
+   PARTE 5: DARK MODE
+   ========================================= */
+
+.dark-mode .section-modal,
+.dark-mode .list-modal,
+.dark-mode #editListModal {
+    background: #141414 !important;
+}
+
+.dark-mode .section-modal-header,
+.dark-mode .list-modal-header {
+    border-bottom-color: #2a2a2a !important;
+}
+
+.dark-mode .section-modal-actions,
+.dark-mode .list-modal-footer {
+    border-top-color: #2a2a2a !important;
+}
+
+.dark-mode .section-modal-field input,
+.dark-mode .list-form-input,
+.dark-mode #editListName,
+.dark-mode #editListColor {
+    background: #1f1f1f !important;
+    border-color: #2a2a2a !important;
+    color: #f5f5f5 !important;
+}
+
+.dark-mode .emoji-picker-button,
+.dark-mode #editListEmojiBtn {
+    background: #1f1f1f !important;
+    border-color: #2a2a2a !important;
+}

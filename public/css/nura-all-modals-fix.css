@@ -1,0 +1,439 @@
+/* ========================================
+   NURA - FIX COMPLETO PARA TODOS OS MODAIS
+   Cobre: section-modal, list-modal, edit-list
+   ======================================== */
+
+/* ===== OVERLAYS - TODOS OS TIPOS ===== */
+.section-modal-overlay,
+.list-modal-overlay,
+.modal-overlay,
+.edit-list-modal-overlay,
+.confirm-modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    z-index: 9998 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+}
+
+/* ===== MODAIS - TODOS OS TIPOS ===== */
+.section-modal,
+.list-modal,
+.edit-list-modal,
+.modal-edit-list,
+.modal-edit-section,
+.modal-rename-section {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    max-height: 90vh !important;
+    max-height: 90dvh !important;
+    background: var(--surface-main, #1a1a1a) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    animation: modalFadeIn 0.25s ease !important;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ===== HEADER DO MODAL ===== */
+.section-modal-header,
+.list-modal-header,
+.modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 20px 24px !important;
+    border-bottom: 1px solid var(--border-light, #2a2a2a) !important;
+    flex-shrink: 0 !important;
+}
+
+.section-modal-header h3,
+.list-modal-title,
+.modal-title {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: var(--text-strong, #f5f5f5) !important;
+    margin: 0 !important;
+}
+
+/* Botão fechar (X) */
+.section-modal-close,
+.btn-close-modal {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border: none !important;
+    background: var(--surface-hover, #2a2a2a) !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: var(--text-muted, #888) !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    transition: all 0.15s ease !important;
+    padding: 0 !important;
+}
+
+.section-modal-close:hover,
+.btn-close-modal:hover {
+    background: var(--surface-active, #333) !important;
+    color: var(--text-strong, #f5f5f5) !important;
+}
+
+/* ===== BODY DO MODAL ===== */
+.section-modal-body,
+.list-modal-body,
+.modal-body {
+    padding: 24px !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* ===== CAMPOS DO FORMULÁRIO ===== */
+.section-modal-field,
+.list-form-field,
+.form-field,
+.modal-field {
+    margin-bottom: 20px !important;
+}
+
+.section-modal-field:last-child,
+.list-form-field:last-child,
+.form-field:last-child,
+.modal-field:last-child {
+    margin-bottom: 0 !important;
+}
+
+.section-modal-field label,
+.list-form-label,
+.form-label,
+.modal-label {
+    display: block !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--text-muted, #888) !important;
+    margin-bottom: 8px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+}
+
+/* ===== INPUTS ===== */
+.section-modal-field input[type="text"],
+.section-modal-field input[type="color"],
+.list-form-input,
+.form-input,
+.modal-input {
+    width: 100% !important;
+    padding: 14px 16px !important;
+    border: 1px solid var(--border-light, #2a2a2a) !important;
+    border-radius: 10px !important;
+    background: var(--surface-secondary, #1f1f1f) !important;
+    font-size: 15px !important;
+    color: var(--text-strong, #f5f5f5) !important;
+    transition: all 0.15s ease !important;
+    box-sizing: border-box !important;
+    font-family: inherit !important;
+}
+
+.section-modal-field input[type="text"]:focus,
+.list-form-input:focus,
+.form-input:focus,
+.modal-input:focus {
+    outline: none !important;
+    border-color: var(--nura-primary, #146551) !important;
+    background: var(--surface-main, #1a1a1a) !important;
+    box-shadow: 0 0 0 3px rgba(20, 101, 81, 0.25) !important;
+}
+
+/* Input de cor */
+.section-modal-field input[type="color"] {
+    height: 50px !important;
+    padding: 6px !important;
+    cursor: pointer !important;
+}
+
+.section-modal-field input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 4px !important;
+}
+
+.section-modal-field input[type="color"]::-webkit-color-swatch {
+    border-radius: 6px !important;
+    border: none !important;
+}
+
+/* Input de emoji */
+.section-modal-field input[maxlength="2"] {
+    width: 70px !important;
+    height: 60px !important;
+    font-size: 28px !important;
+    text-align: center !important;
+    padding: 0 !important;
+}
+
+/* ===== FOOTER / ACTIONS ===== */
+.section-modal-actions,
+.list-modal-footer,
+.modal-footer {
+    display: flex !important;
+    gap: 12px !important;
+    padding: 20px 24px !important;
+    border-top: 1px solid var(--border-light, #2a2a2a) !important;
+    flex-shrink: 0 !important;
+}
+
+/* Botão Cancelar */
+.btn-cancel,
+.list-btn-cancel,
+.btn-modal-secondary,
+.btn-secondary {
+    flex: 1 !important;
+    padding: 14px 20px !important;
+    border: 1px solid var(--border-light, #2a2a2a) !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    color: var(--text-muted, #888) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    font-family: inherit !important;
+}
+
+.btn-cancel:hover,
+.list-btn-cancel:hover,
+.btn-modal-secondary:hover,
+.btn-secondary:hover {
+    background: var(--surface-hover, #2a2a2a) !important;
+    color: var(--text-strong, #f5f5f5) !important;
+}
+
+/* Botão Salvar/Primário */
+.btn-save,
+.list-btn-save,
+.btn-modal-primary,
+.btn-primary {
+    flex: 1 !important;
+    padding: 14px 20px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: var(--nura-primary, #146551) !important;
+    color: white !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    font-family: inherit !important;
+}
+
+.btn-save:hover,
+.list-btn-save:hover,
+.btn-modal-primary:hover,
+.btn-primary:hover {
+    background: var(--nura-primary-dark, #0f4d3d) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-save:active,
+.list-btn-save:active,
+.btn-modal-primary:active,
+.btn-primary:active {
+    transform: translateY(0) !important;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+    .section-modal-overlay,
+    .list-modal-overlay,
+    .modal-overlay {
+        padding: 16px !important;
+        align-items: flex-end !important; /* Modal vem de baixo */
+    }
+    
+    .section-modal,
+    .list-modal,
+    .edit-list-modal,
+    .modal-edit-list,
+    .modal-edit-section {
+        max-width: none !important;
+        width: 100% !important;
+        max-height: 85vh !important;
+        max-height: 85dvh !important;
+        border-radius: 20px 20px 0 0 !important;
+        animation: modalSlideUp 0.3s ease !important;
+    }
+    
+    @keyframes modalSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .section-modal-header,
+    .list-modal-header,
+    .modal-header {
+        padding: 16px 20px !important;
+        position: relative !important;
+    }
+    
+    /* Handle de arraste no topo */
+    .section-modal-header::before,
+    .list-modal-header::before,
+    .modal-header::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 8px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 36px !important;
+        height: 4px !important;
+        background: var(--border-subtle, #444) !important;
+        border-radius: 2px !important;
+    }
+    
+    .section-modal-header,
+    .list-modal-header,
+    .modal-header {
+        padding-top: 24px !important;
+    }
+    
+    .section-modal-header h3,
+    .list-modal-title,
+    .modal-title {
+        font-size: 16px !important;
+    }
+    
+    .section-modal-body,
+    .list-modal-body,
+    .modal-body {
+        padding: 20px !important;
+    }
+    
+    .section-modal-field input[type="text"],
+    .list-form-input,
+    .form-input {
+        font-size: 16px !important; /* Previne zoom iOS */
+        padding: 16px !important;
+    }
+    
+    .section-modal-actions,
+    .list-modal-footer,
+    .modal-footer {
+        flex-direction: column !important;
+        padding: 16px 20px 24px !important;
+        gap: 10px !important;
+    }
+    
+    .btn-cancel,
+    .btn-save,
+    .list-btn-cancel,
+    .list-btn-save,
+    .btn-modal-secondary,
+    .btn-modal-primary,
+    .btn-secondary,
+    .btn-primary {
+        width: 100% !important;
+        padding: 16px !important;
+    }
+    
+    /* Ordem: Salvar primeiro no mobile */
+    .section-modal-actions,
+    .list-modal-footer,
+    .modal-footer {
+        flex-direction: column-reverse !important;
+    }
+}
+
+/* ===== DARK MODE ===== */
+.dark-mode .section-modal,
+.dark-mode .list-modal,
+.dark-mode .edit-list-modal,
+.dark-mode .modal-edit-section {
+    background: #141414 !important;
+}
+
+.dark-mode .section-modal-header,
+.dark-mode .list-modal-header,
+.dark-mode .modal-header {
+    border-bottom-color: #2a2a2a !important;
+}
+
+.dark-mode .section-modal-actions,
+.dark-mode .list-modal-footer,
+.dark-mode .modal-footer {
+    border-top-color: #2a2a2a !important;
+}
+
+.dark-mode .section-modal-field input,
+.dark-mode .list-form-input,
+.dark-mode .form-input {
+    background: #1f1f1f !important;
+    border-color: #2a2a2a !important;
+    color: #f5f5f5 !important;
+}
+
+.dark-mode .section-modal-field input:focus,
+.dark-mode .list-form-input:focus,
+.dark-mode .form-input:focus {
+    background: #1a1a1a !important;
+    border-color: var(--nura-primary, #146551) !important;
+}
+
+.dark-mode .section-modal-close,
+.dark-mode .btn-close-modal {
+    background: #2a2a2a !important;
+    color: #888 !important;
+}
+
+.dark-mode .section-modal-close:hover,
+.dark-mode .btn-close-modal:hover {
+    background: #333 !important;
+    color: #f5f5f5 !important;
+}
+
+/* ===== SAFE AREA (iPhone) ===== */
+@supports (padding: max(0px)) {
+    @media (max-width: 480px) {
+        .section-modal-actions,
+        .list-modal-footer,
+        .modal-footer {
+            padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px)) !important;
+        }
+    }
+}
