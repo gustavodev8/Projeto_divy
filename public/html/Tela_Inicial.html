@@ -879,67 +879,67 @@
   <!-- ========================================
        MODAL DE EDITAR LISTA
        ======================================== -->
-  <div class="list-modal-overlay" id="editListModalOverlay"></div>
-
-  <div class="list-modal" id="editListModal" role="dialog" aria-modal="true" aria-labelledby="editListModalTitle">
-    <!-- Header -->
-    <div class="list-modal-header">
-      <h3 class="list-modal-title" id="editListModalTitle">Editar Lista</h3>
-      <button class="btn-close-modal" onclick="closeEditListModal()" aria-label="Fechar modal">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-    </div>
-    
-    <!-- Body -->
-    <div class="list-modal-body">
-      <!-- Emoji -->
-      <div class="form-group">
-        <label for="editListEmoji">Emoji</label>
-        <button type="button" class="emoji-picker-button" id="editListEmojiBtn" onclick="selectEmoji()">
-          📋
+  <div class="list-modal-overlay" id="editListModalOverlay">
+    <div class="list-modal" id="editListModal" role="dialog" aria-modal="true" aria-labelledby="editListModalTitle">
+      <!-- Header -->
+      <div class="list-modal-header">
+        <h3 class="list-modal-title" id="editListModalTitle">Editar Lista</h3>
+        <button class="btn-close-modal" onclick="closeEditListModal()" aria-label="Fechar modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
-      
-      <!-- Nome -->
-      <div class="form-group">
-        <label for="editListName">Nome da Lista</label>
-        <input 
-          type="text" 
-          id="editListName" 
-          class="list-form-input"
-          placeholder="Digite o nome da lista"
-          maxlength="50"
-          autocomplete="off"
-        />
+
+      <!-- Body -->
+      <div class="list-modal-body">
+        <!-- Emoji -->
+        <div class="form-group">
+          <label for="editListEmoji">Emoji</label>
+          <button type="button" class="emoji-picker-button" id="editListEmojiBtn" onclick="selectEmoji()">
+            📋
+          </button>
+        </div>
+
+        <!-- Nome -->
+        <div class="form-group">
+          <label for="editListName">Nome da Lista</label>
+          <input
+            type="text"
+            id="editListName"
+            class="list-form-input"
+            placeholder="Digite o nome da lista"
+            maxlength="50"
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- Cor -->
+        <div class="form-group">
+          <label for="editListColor">Cor</label>
+          <input
+            type="color"
+            id="editListColor"
+            value="#146551"
+          />
+        </div>
       </div>
-      
-      <!-- Cor -->
-      <div class="form-group">
-        <label for="editListColor">Cor</label>
-        <input 
-          type="color" 
-          id="editListColor" 
-          value="#146551"
-        />
+
+      <!-- Footer -->
+      <div class="list-modal-footer">
+        <button class="btn-cancel" onclick="closeEditListModal()">
+          Cancelar
+        </button>
+        <button class="btn-save" id="btnSaveEditList" onclick="saveEditedList()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          Salvar
+        </button>
       </div>
-    </div>
-    
-    <!-- Footer -->
-    <div class="list-modal-footer">
-      <button class="btn-cancel" onclick="closeEditListModal()">
-        Cancelar
-      </button>
-      <button class="btn-save" id="btnSaveEditList" onclick="saveEditedList()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-          <polyline points="17 21 17 13 7 13 7 21"></polyline>
-          <polyline points="7 3 7 8 15 8"></polyline>
-        </svg>
-        Salvar
-      </button>
     </div>
   </div>
 
