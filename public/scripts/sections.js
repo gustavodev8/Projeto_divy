@@ -116,12 +116,96 @@ async function createSection(sectionName) {
     }
 }
 
-// ===== EXCLUIR SEÇÃO =====
+// ===== VARIÁVEL PARA ARMAZENAR SEÇÃO PENDENTE DE EXCLUSÃO =====
+let pendingDeleteSectionId = null;
+
+// ===== MOSTRAR MODAL DE EXCLUIR SEÇÃO =====
+function showDeleteSectionModal(sectionId, sectionName) {
+    console.log('🗑️ Abrindo modal de excluir seção:', sectionId, sectionName);
+
+    pendingDeleteSectionId = sectionId;
+
+    const overlay = document.getElementById('deleteSectionModalOverlay');
+    const nameElement = document.getElementById('deleteSectionModalName');
+
+    if (nameElement) {
+        nameElement.textContent = sectionName;
+    }
+
+    if (overlay) {
+        overlay.classList.add('active');
+    }
+
+    // Configurar botão de confirmar
+    const confirmBtn = document.getElementById('confirmDeleteSectionBtn');
+    if (confirmBtn) {
+        confirmBtn.onclick = confirmDeleteSection;
+    }
+}
+
+// ===== FECHAR MODAL DE EXCLUIR SEÇÃO =====
+function closeDeleteSectionModal() {
+    const overlay = document.getElementById('deleteSectionModalOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+    pendingDeleteSectionId = null;
+}
+
+// ===== CONFIRMAR EXCLUSÃO DA SEÇÃO =====
+async function confirmDeleteSection() {
+    if (!pendingDeleteSectionId) return;
+
+    const sectionId = pendingDeleteSectionId;
+    const user = getCurrentUser();
+
+    if (!user) {
+        showNotification('❌ Usuário não identificado');
+        return;
+    }
+
+    // Fechar modal
+    closeDeleteSectionModal();
+
+    try {
+        const response = await fetch(`${SECTIONS_API}/${sectionId}?user_id=${user.id}`, {
+            method: 'DELETE',
+            headers: { 'x-user-id': user.id.toString() }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('🗑️ Seção excluída');
+
+            // Remover da lista local
+            if (window.currentSections) {
+                window.currentSections = window.currentSections.filter(s => s.id !== sectionId);
+            }
+
+            // Recarregar tarefas (as tarefas da seção agora ficam sem seção)
+            if (typeof loadAndDisplayTasksFromDatabase === 'function') {
+                await loadAndDisplayTasksFromDatabase();
+            } else if (typeof renderAllTasks === 'function') {
+                renderAllTasks();
+            }
+        } else {
+            showNotification('❌ Erro ao excluir seção');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao excluir seção:', error);
+        showNotification('❌ Erro de conexão');
+    }
+}
+
+// ===== EXCLUIR SEÇÃO (LEGADO - COM CONFIRM) =====
 async function deleteSection(sectionId) {
     const user = getCurrentUser();
     if (!user) return;
 
-    const section = window.userSections.find(s => s.id === sectionId);
+    const section = window.currentSections?.find(s => s.id === sectionId) ||
+                    window.userSections?.find(s => s.id === sectionId);
+
     if (!confirm(`Excluir seção "${section?.name}"? As tarefas serão movidas para "Sem Seção".`)) return;
 
     try {
@@ -536,9 +620,18 @@ async function saveEditedSectionName() {
 // ===== FECHAR COM ESC =====
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        const modal = document.getElementById('editSectionModal');
-        if (modal && modal.classList.contains('active')) {
+        // Fechar modal de editar seção
+        const editModal = document.getElementById('editSectionModal');
+        if (editModal && editModal.classList.contains('active')) {
             closeEditSectionModal();
+            return;
+        }
+
+        // Fechar modal de excluir seção
+        const deleteModal = document.getElementById('deleteSectionModalOverlay');
+        if (deleteModal && deleteModal.classList.contains('active')) {
+            closeDeleteSectionModal();
+            return;
         }
     }
 });
@@ -619,7 +712,8 @@ window.deleteSection = deleteSection;
 window.showCreateSectionModal = showCreateSectionModal;
 window.closeCreateSectionModal = closeCreateSectionModal;
 window.submitCreateSection = submitCreateSection;
-
-console.log('✅ sections.js carregado');
+window.showDeleteSectionModal = showDeleteSectionModal;
+window.closeDeleteSectionModal = closeDeleteSectionModal;
+window.confirmDeleteSection = confirmDeleteSection;
 
 console.log('✅ sections.js carregado');

@@ -431,14 +431,47 @@ footer a:hover strong::after {
 }
 
 /* ===== RESPONSIVO ===== */
-@media (max-width: 480px) {
+
+/* Tablets (até 768px) */
+@media (max-width: 768px) {
   main {
+    padding: 20px;
+    max-width: 420px;
+  }
+
+  section#logins {
+    border-radius: 18px;
+  }
+
+  div#imagem {
+    height: 110px;
+  }
+
+  div#text {
+    padding: 28px 28px 22px;
+  }
+
+  footer {
+    padding: 18px 28px 24px;
+  }
+}
+
+/* Mobile (até 480px) */
+@media (max-width: 480px) {
+  body {
     padding: 16px;
+    min-height: 100dvh;
+  }
+
+  main {
+    padding: 0;
     max-width: 100%;
+    width: 100%;
   }
 
   section#logins {
     border-radius: 16px;
+    width: 100%;
   }
 
   div#imagem {
@@ -451,15 +484,29 @@ footer a:hover strong::after {
   }
 
   div#text {
-    padding: 28px 24px 20px;
+    padding: 24px 20px 18px;
   }
 
   div#text h1 {
     font-size: 22px;
   }
 
+  div#text > p.subtitle {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  form {
+    gap: 16px;
+  }
+
   footer {
-    padding: 18px 24px 24px;
+    padding: 16px 20px 20px;
+  }
+
+  footer p,
+  footer a {
+    font-size: 13px;
   }
 
   input[type="text"],
@@ -470,6 +517,148 @@ footer a:hover strong::after {
 
   input#ienviar {
     padding: 14px 20px;
+    min-height: 48px;
+  }
+
+  .toggle-password {
+    padding: 8px;
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Mobile muito pequeno (até 360px) */
+@media (max-width: 360px) {
+  body {
+    padding: 12px;
+  }
+
+  section#logins {
+    border-radius: 14px;
+  }
+
+  div#imagem {
+    height: 90px;
+  }
+
+  div#imagem::after {
+    font-size: 24px;
+    letter-spacing: 3px;
+  }
+
+  div#text {
+    padding: 20px 16px 16px;
+  }
+
+  div#text h1 {
+    font-size: 20px;
+  }
+
+  div#text > p.subtitle {
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  .label-text {
+    font-size: 12px;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    padding: 11px 11px 11px 38px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  .input-icon {
+    left: 12px;
+    width: 16px;
+    height: 16px;
+  }
+
+  input#ienviar {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  footer {
+    padding: 14px 16px 18px;
+  }
+
+  footer p,
+  footer a {
+    font-size: 12px;
+  }
+}
+
+/* Safe area para dispositivos com notch */
+@supports (padding-top: env(safe-area-inset-top)) {
+  body {
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  input[type="text"],
+  input[type="password"],
+  input#ienviar,
+  .toggle-password,
+  footer a {
+    min-height: 44px;
+  }
+
+  input#ienviar:hover {
+    transform: none;
+    box-shadow: var(--shadow-primary);
+  }
+
+  input#ienviar:active {
+    transform: scale(0.98);
+  }
+
+  footer a:active {
+    opacity: 0.7;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  body {
+    padding: 16px;
+    min-height: auto;
+  }
+
+  section#logins {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  div#imagem {
+    height: 80px;
+  }
+
+  div#imagem::after {
+    font-size: 24px;
+  }
+
+  div#text {
+    padding: 20px 24px 16px;
+  }
+
+  div#text h1 {
+    font-size: 20px;
+  }
+
+  form {
+    gap: 14px;
+  }
+
+  footer {
+    padding: 14px 24px 18px;
   }
 }
 

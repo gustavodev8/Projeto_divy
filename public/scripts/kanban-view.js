@@ -226,16 +226,37 @@ console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
 function createCard(task) {
     const settings = window.nuraSettingsFunctions ? window.nuraSettingsFunctions.getSettings() : {};
     const showDetails = settings.showDetails || false;
-    
+
+    // Verificar se deve destacar urgentes
+    let highlightUrgent = settings.highlightUrgent;
+    if (highlightUrgent === undefined) {
+        highlightUrgent = localStorage.getItem('nura_highlightUrgent') !== 'false'; // default true
+    }
+
     const card = document.createElement('div');
     card.className = 'kanban-card';
     card.setAttribute('data-task-id', task.id);
     card.setAttribute('data-priority', task.priority || 'medium');
     card.setAttribute('draggable', 'true');
-    
+
     const isCompleted = task.status === 'completed' || task.status === 'concluída';
     if (isCompleted) {
         card.classList.add('is-completed');
+    }
+
+    // Aplicar estilos de destaque por prioridade
+    if (highlightUrgent && !isCompleted) {
+        const priority = task.priority || 'medium';
+        if (priority === 'high') {
+            card.style.borderLeft = '4px solid #e74c3c';
+            card.style.boxShadow = '0 2px 8px rgba(231, 76, 60, 0.25)';
+        } else if (priority === 'medium') {
+            card.style.borderLeft = '4px solid #f39c12';
+            card.style.boxShadow = '0 2px 8px rgba(243, 156, 18, 0.15)';
+        } else if (priority === 'low') {
+            card.style.borderLeft = '4px solid #2ecc71';
+            card.style.boxShadow = '0 2px 8px rgba(46, 204, 113, 0.15)';
+        }
     }
     
     // Header com checkbox

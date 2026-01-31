@@ -1924,65 +1924,89 @@ app.post('/api/enviar-resumo-todos', async (req, res) => {
 app.post("/api/gerar-rotina", async (req, res) => {
     console.log("📥 Recebendo requisição para gerar rotina");
     console.log("📝 Body:", req.body);
-    
+
     try {
         const { descricao, horaInicio = "08:00", horaFim = "18:00" } = req.body;
 
         if (!descricao) {
             console.log("❌ Descrição não fornecida");
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                error: "Descrição do dia é obrigatória" 
+                error: "Descrição do dia é obrigatória"
             });
         }
 
         if (!GEMINI_API_KEY) {
             console.log("❌ API Key não configurada");
-            return res.status(500).json({ 
+            return res.status(500).json({
                 success: false,
-                error: "Chave da API Gemini não configurada no servidor" 
+                error: "Chave da API Gemini não configurada no servidor"
             });
         }
 
         console.log("🧠 Gerando rotina com Gemini para:", descricao);
         console.log("⏰ Período:", horaInicio, "às", horaFim);
 
-        // Monta prompt para a IA
+        // Monta prompt para a IA - rotinas fiéis à descrição do usuário
         const prompt = `
-Com base nesta descrição: "${descricao}"
+Você é um assistente de organização pessoal. Crie uma rotina baseada EXATAMENTE no que a pessoa descreveu.
 
-Entre os Horários: ${horaInicio} às ${horaFim}
+DESCRIÇÃO DO USUÁRIO: "${descricao}"
 
-Crie uma rotina organizada em português com horários específicos, intervalos (se for necessário)
-uma rotina focada em produtividade e bem-estar.
+PERÍODO DISPONÍVEL: ${horaInicio} às ${horaFim}
 
-Use emojis para destacar cada atividade.
+REGRAS IMPORTANTES:
+1. SIGA FIELMENTE o que o usuário descreveu - NÃO invente atividades que ele não mencionou
+2. Se o usuário quer assistir série/filme/anime, a rotina deve ser sobre isso (blocos de 2-3 episódios)
+3. Se o usuário quer estudar, foque em estudo
+4. Se o usuário quer descansar/relaxar, respeite isso
+5. SEM EMOJIS - texto limpo e direto
+6. Inclua pequenas pausas naturais entre os blocos (5-15 min para água, banheiro, alongar)
+7. Seja realista - não force produtividade se a pessoa quer lazer
 
-caso a descrição seja escrita formalmente, adapte para um tom mais casual e profissional.
-caso a descrição seja escrita de forma informal, adapte para um tom mais informal e amigável.
+FORMATO OBRIGATÓRIO:
+NOME_SECAO: [Nome curto 2-4 palavras relacionado ao que a pessoa VAI FAZER]
+${horaInicio} → Primeira atividade baseada na descrição
+HH:MM → Próxima atividade
+...
 
-Evite longas explicações - vá direto ao ponto com atividades claras e objetivas neste exemplo de Formato:
+EXEMPLOS DE NOMES (escolha baseado no contexto):
+- Maratona de série/anime: "Maratona Naruto", "Tarde de Anime", "Sessão de Episódios"
+- Estudos: "Sessão de Estudos", "Foco nos Estudos"
+- Trabalho: "Sprint de Trabalho", "Foco no Projeto"
+- Lazer/descanso: "Tarde Relax", "Momento de Descanso"
 
-🕗 08:00-09:00 → Atividade
-🕘 09:00-09:15 → Intervalo
+IMPORTANTE: A rotina deve refletir EXATAMENTE o que o usuário pediu, não uma rotina genérica de produtividade.
 
-Apenas a rotina formatada, sem explicações.
+Gere APENAS a rotina no formato pedido, sem explicações.
 `;
 
         // Usa Gemini 2.5 Flash (mais rápido e eficiente)
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-        
+
         console.log("⏳ Aguardando resposta do Gemini 2.5 Flash...");
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        const rotina = response.text();
+        let rotinaCompleta = response.text();
+
+        // Extrair nome da seção da resposta
+        let nomeSecao = "Rotina do Dia";
+        const linhas = rotinaCompleta.split('\n');
+
+        if (linhas[0] && linhas[0].includes('NOME_SECAO:')) {
+            nomeSecao = linhas[0].replace('NOME_SECAO:', '').trim();
+            // Remover a linha do nome da rotina final
+            rotinaCompleta = linhas.slice(1).join('\n').trim();
+        }
 
         console.log("✅ Rotina gerada com sucesso!");
-        console.log("📄 Tamanho da resposta:", rotina.length, "caracteres");
+        console.log("📛 Nome da seção:", nomeSecao);
+        console.log("📄 Tamanho da resposta:", rotinaCompleta.length, "caracteres");
 
-        res.json({ 
-            success: true, 
-            rotina,
+        res.json({
+            success: true,
+            rotina: rotinaCompleta,
+            nomeSecao: nomeSecao,
             modeloUsado: "gemini-2.5-flash",
             descricaoOriginal: descricao,
             periodo: `${horaInicio} - ${horaFim}`,
@@ -1994,9 +2018,9 @@ Apenas a rotina formatada, sem explicações.
         console.error("Tipo:", err.name);
         console.error("Mensagem:", err.message);
         console.error("Stack:", err.stack);
-        
+
         let errorMessage = "Erro ao gerar rotina";
-        
+
         // Identifica tipo de erro
         if (err.message?.includes("API key")) {
             errorMessage = "API Key do Gemini inválida ou não configurada";
@@ -2005,8 +2029,8 @@ Apenas a rotina formatada, sem explicações.
         } else if (err.message?.includes("model")) {
             errorMessage = "Modelo do Gemini não disponível";
         }
-        
-        res.status(500).json({ 
+
+        res.status(500).json({
             success: false,
             error: errorMessage,
             details: err.message,

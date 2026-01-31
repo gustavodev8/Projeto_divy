@@ -878,6 +878,44 @@
     </div>
   </div>
 
+  <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE SEÇÃO -->
+  <div class="confirm-modal-overlay" id="deleteSectionModalOverlay" onclick="if(event.target === this) closeDeleteSectionModal()">
+    <div class="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="deleteSectionModalTitle">
+      <div class="confirm-modal-content">
+        <div class="confirm-modal-icon confirm-modal-icon-section">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </div>
+
+        <h3 class="confirm-modal-title" id="deleteSectionModalTitle">Excluir seção?</h3>
+        <p class="confirm-modal-message" id="deleteSectionModalMessage">
+          As tarefas desta seção serão movidas para "Tarefas" (sem seção).
+        </p>
+
+        <div class="confirm-modal-task-name" id="deleteSectionModalName">
+          Nome da seção
+        </div>
+
+        <div class="confirm-modal-actions">
+          <button class="confirm-modal-btn confirm-modal-btn-cancel" onclick="closeDeleteSectionModal()">
+            Cancelar
+          </button>
+          <button class="confirm-modal-btn confirm-modal-btn-delete" id="confirmDeleteSectionBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL DE RENOMEAR SEÇÃO KANBAN -->
   <div class="modal-overlay" id="renameSectionModalOverlay" onclick="closeRenameSectionModal()"></div>
 

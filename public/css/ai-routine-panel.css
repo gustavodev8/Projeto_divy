@@ -707,17 +707,313 @@
     visibility: visible;
 }
 
-/* Mobile */
+/* ========================================
+   RESPONSIVIDADE MOBILE COMPLETA
+   ======================================== */
+
+/* Mobile (até 768px) */
 @media (max-width: 768px) {
+    /* Botão flutuante */
+    .ai-float-button {
+        width: 3rem;
+        height: 3rem;
+        bottom: 1.25rem;
+        right: 1rem;
+        bottom: max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem));
+    }
+
+    .ai-float-button svg {
+        width: 1.125rem;
+        height: 1.125rem;
+    }
+
+    /* Painel como Bottom Sheet */
     #aiRoutinePanel {
         width: 100%;
-        height: 85vh;
-        height: 85dvh;
-        border-radius: 16px 16px 0 0;
-        transform: translateY(100%); /* Escondido por padrão */
+        height: 90vh;
+        height: 90dvh;
+        max-height: 90vh;
+        max-height: 90dvh;
+        top: auto;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+        border-left: none;
+        border-top: 1px solid hsl(var(--ai-border));
     }
-    
+
     #aiRoutinePanel.active {
         transform: translateY(0);
     }
+
+    /* Header */
+    .ai-panel-header {
+        padding: 1rem 1.25rem;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .ai-panel-header-content h2 {
+        font-size: 0.9375rem;
+    }
+
+    .ai-panel-close {
+        width: 2.25rem;
+        height: 2.25rem;
+        min-width: 2.25rem;
+        min-height: 2.25rem;
+    }
+
+    /* Body */
+    .ai-panel-body {
+        padding: 1.25rem;
+        padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
+    }
+
+    /* Form groups */
+    .ai-form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .ai-form-group label {
+        font-size: 0.8125rem;
+    }
+
+    /* Textarea */
+    .ai-textarea {
+        min-height: 6rem;
+        padding: 0.75rem;
+        font-size: 16px; /* Previne zoom no iOS */
+    }
+
+    /* Time inputs */
+    .ai-time-inputs {
+        gap: 0.625rem;
+    }
+
+    .ai-time-input {
+        padding: 0.75rem;
+        font-size: 16px; /* Previne zoom no iOS */
+        min-height: 48px;
+    }
+
+    /* Botão gerar */
+    .btn-generate-routine {
+        padding: 0.875rem 1rem;
+        font-size: 0.9375rem;
+        min-height: 48px;
+    }
+
+    /* Success state */
+    .ai-success-header {
+        padding: 0.875rem 1rem;
+    }
+
+    .ai-success-header h4 {
+        font-size: 0.8125rem;
+    }
+
+    /* Conteúdo da rotina */
+    .ai-routine-content {
+        padding: 0.875rem;
+        max-height: 12rem;
+    }
+
+    .routine-line {
+        padding: 0.5rem 0.625rem;
+        font-size: 0.8125rem;
+    }
+
+    /* Ações */
+    .ai-actions {
+        padding: 0.875rem;
+        flex-direction: column;
+        gap: 0.625rem;
+    }
+
+    .btn-save-routine,
+    .btn-new-routine {
+        padding: 0.875rem 1rem;
+        font-size: 0.875rem;
+        min-height: 48px;
+        width: 100%;
+    }
+
+    /* Loading e Error */
+    .ai-loading,
+    .ai-error {
+        padding: 1.5rem 1rem;
+    }
+
+    .ai-loading-spinner {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    /* Nome da seção */
+    .rotina-section-name {
+        padding: 0.625rem 0.875rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .rotina-section-label {
+        font-size: 0.75rem;
+    }
+
+    .rotina-section-value {
+        font-size: 0.875rem;
+    }
+}
+
+/* Mobile pequeno (até 480px) */
+@media (max-width: 480px) {
+    .ai-float-button {
+        width: 2.75rem;
+        height: 2.75rem;
+        bottom: 1rem;
+        right: 0.75rem;
+    }
+
+    .ai-float-button svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    #aiRoutinePanel {
+        height: 92vh;
+        height: 92dvh;
+    }
+
+    .ai-panel-header {
+        padding: 0.875rem 1rem;
+    }
+
+    .ai-panel-header-content h2 {
+        font-size: 0.875rem;
+    }
+
+    .ai-panel-body {
+        padding: 1rem;
+    }
+
+    .ai-form-group label {
+        font-size: 0.75rem;
+    }
+
+    .ai-textarea {
+        min-height: 5rem;
+        font-size: 16px;
+    }
+
+    .ai-routine-content {
+        max-height: 10rem;
+    }
+}
+
+/* Mobile muito pequeno (até 360px) */
+@media (max-width: 360px) {
+    .ai-float-button {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .ai-panel-header {
+        padding: 0.75rem;
+    }
+
+    .ai-panel-body {
+        padding: 0.875rem;
+    }
+
+    .ai-textarea {
+        min-height: 4.5rem;
+    }
+
+    .btn-generate-routine {
+        padding: 0.75rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .ai-float-button,
+    .ai-panel-close,
+    .btn-generate-routine,
+    .btn-save-routine,
+    .btn-new-routine,
+    .btn-retry,
+    .ai-time-input {
+        min-height: 44px;
+    }
+
+    .ai-float-button:hover {
+        transform: none;
+        box-shadow:
+            0 1px 2px 0 rgb(0 0 0 / 0.05),
+            0 0 0 1px rgb(0 0 0 / 0.05);
+    }
+
+    .ai-float-button:active {
+        transform: scale(0.95);
+    }
+
+    .btn-generate-routine:hover {
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+
+    .btn-generate-routine:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Safe area support */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    @media (max-width: 768px) {
+        .ai-float-button {
+            bottom: max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem));
+        }
+
+        .ai-panel-body {
+            padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
+        }
+
+        .ai-actions {
+            padding-bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem));
+        }
+    }
+}
+
+/* ===== NOME DA SEÇÃO GERADA ===== */
+.rotina-section-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, hsl(var(--ai-muted)), hsl(var(--ai-secondary)));
+    border: 1px solid hsl(var(--ai-border));
+    border-radius: var(--ai-radius);
+    border-left: 3px solid hsl(142 76% 36%);
+}
+
+.rotina-section-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: hsl(var(--ai-muted-foreground));
+}
+
+.rotina-section-value {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: hsl(var(--ai-foreground));
+    letter-spacing: -0.01em;
+}
+
+/* Dark mode ajuste */
+.dark-mode .rotina-section-name,
+[data-theme="dark"] .rotina-section-name {
+    background: linear-gradient(135deg, hsl(var(--ai-muted)), hsl(var(--ai-card)));
+    border-left-color: hsl(142 70% 45%);
 }

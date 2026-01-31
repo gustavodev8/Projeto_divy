@@ -2610,27 +2610,71 @@ body {
     justify-content: center !important;
 }
 
-/* Mobile */
+/* Mobile - List Modal Bottom Sheet */
 @media (max-width: 768px) {
     .list-modal-overlay {
         align-items: flex-end !important;
+        justify-content: center !important;
     }
-    
+
     .list-modal {
+        position: fixed !important;
+        top: auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        transform: none !important;
         width: 100% !important;
         max-width: 100% !important;
-        border-radius: 24px 24px 0 0 !important;
+        border-radius: 20px 20px 0 0 !important;
+        max-height: 90vh !important;
+        max-height: 90dvh !important;
     }
-    
+
+    .list-modal::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 8px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 36px !important;
+        height: 4px !important;
+        background: var(--border-subtle, #e0e0e0) !important;
+        border-radius: 2px !important;
+        z-index: 10 !important;
+    }
+
+    .list-modal-header {
+        padding: 20px 16px 16px !important;
+    }
+
+    .list-modal-title {
+        font-size: 1rem !important;
+    }
+
+    .list-modal-body {
+        padding: 16px !important;
+    }
+
+    .list-form-input {
+        padding: 12px 14px !important;
+        font-size: 16px !important;
+        min-height: 48px !important;
+    }
+
     .list-modal-footer {
         flex-direction: column-reverse !important;
-        gap: 12px !important;
+        gap: 10px !important;
+        padding: 16px !important;
+        padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 12px)) !important;
     }
-    
+
     .list-modal-footer .btn-cancel,
     .list-modal-footer .btn-save {
         width: 100% !important;
+        min-height: 48px !important;
         justify-content: center !important;
+        font-size: 0.9375rem !important;
     }
 }
 
@@ -3311,4 +3355,1044 @@ input[type="color"]:focus {
     border-radius: 50%;
     background: var(--nura-primary, #146551);
     flex-shrink: 0;
+}
+
+/* ========================================
+   RESPONSIVIDADE MOBILE COMPLETA
+   Design adaptativo para celulares/tablets
+   ======================================== */
+
+/* ===== SIDEBAR OVERLAY (MOBILE) ===== */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ===== BOTÃO FECHAR SIDEBAR (MOBILE) ===== */
+.btn-close-sidebar {
+    display: none;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--surface-hover);
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    transition: all 0.15s ease;
+}
+
+.btn-close-sidebar:hover {
+    background: var(--surface-active);
+    color: var(--text-strong);
+}
+
+/* ===== CLASSES UTILITÁRIAS ===== */
+.hide-desktop {
+    display: none !important;
+}
+
+.hide-mobile {
+    display: flex;
+}
+
+.hide-mobile-text {
+    display: inline;
+}
+
+/* ========================================
+   TABLET (769px - 1024px)
+   ======================================== */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar {
+        width: 240px;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .page-header {
+        padding: 12px 20px;
+    }
+
+    .stats-bar {
+        padding: 14px 20px;
+        gap: 20px;
+    }
+
+    .add-task-inline {
+        padding: 14px 20px;
+    }
+
+    .tasks-container {
+        padding: 0.5rem 1.25rem 2rem;
+    }
+}
+
+/* ========================================
+   MOBILE (até 768px)
+   ======================================== */
+@media (max-width: 768px) {
+    /* === APP CONTAINER === */
+    .app-container {
+        flex-direction: column;
+    }
+
+    /* === SIDEBAR COMO DRAWER === */
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        width: 85%;
+        max-width: 320px;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 1000;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: none;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .sidebar.active {
+        left: 0;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* === BOTÃO FECHAR SIDEBAR === */
+    .btn-close-sidebar {
+        display: flex !important;
+    }
+
+    .hide-desktop {
+        display: flex !important;
+    }
+
+    /* === SIDEBAR BRAND === */
+    .sidebar-brand {
+        padding: 16px;
+        position: sticky;
+        top: 0;
+        background: var(--surface-main);
+        z-index: 10;
+    }
+
+    /* === SIDEBAR USER === */
+    .sidebar-user {
+        padding: 12px 16px;
+    }
+
+    .user-name {
+        font-size: 0.875rem;
+    }
+
+    /* === SIDEBAR SECTIONS === */
+    .sidebar-section {
+        padding: 12px 14px;
+    }
+
+    .btn-add-task {
+        padding: 12px 14px;
+        font-size: 0.9375rem;
+    }
+
+    /* === NAVIGATION ITEMS === */
+    .sidebar-nav {
+        padding: 10px 10px;
+    }
+
+    .nav-item {
+        padding: 12px 12px;
+        border-radius: 8px;
+        min-height: 44px;
+    }
+
+    .nav-text {
+        font-size: 0.875rem;
+    }
+
+    /* === LISTAS === */
+    .sidebar-lists-section {
+        padding: 12px 14px;
+    }
+
+    .list-item {
+        padding: 10px 12px;
+        min-height: 44px;
+    }
+
+    .list-name {
+        font-size: 0.875rem;
+    }
+
+    .btn-add-list {
+        padding: 10px 12px;
+        min-height: 44px;
+    }
+
+    /* === SIDEBAR BOTTOM === */
+    .sidebar-bottom {
+        padding: 10px 10px 20px;
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+
+    .sidebar-bottom .nav-item {
+        padding: 12px 12px;
+        min-height: 44px;
+    }
+
+    /* === MAIN CONTENT === */
+    .main-content {
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+    }
+
+    /* === PAGE HEADER === */
+    .page-header {
+        padding: 12px 16px;
+        min-height: 56px;
+    }
+
+    .header-left {
+        gap: 12px;
+    }
+
+    /* === BOTÃO MENU HAMBÚRGUER (VISÍVEL) === */
+    .btn-menu-mobile {
+        display: flex !important;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .btn-menu-mobile svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* === PAGE TITLE === */
+    .page-title-group {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .page-title {
+        font-size: 1.125rem;
+        gap: 8px;
+    }
+
+    .title-emoji {
+        font-size: 1rem;
+    }
+
+    .task-count {
+        font-size: 0.75rem;
+    }
+
+    /* === HEADER RIGHT === */
+    .header-right {
+        gap: 2px;
+    }
+
+    .btn-header {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    /* === STATS BAR === */
+    .stats-bar {
+        padding: 12px 16px;
+        gap: 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .stat-mini {
+        flex-shrink: 0;
+        gap: 6px;
+    }
+
+    .stat-mini-value {
+        font-size: 1rem;
+    }
+
+    .stat-mini-label {
+        font-size: 0.6875rem;
+    }
+
+    .hide-mobile {
+        display: none !important;
+    }
+
+    /* === ADD TASK INLINE === */
+    .add-task-inline {
+        padding: 12px 16px;
+    }
+
+    .add-task-trigger {
+        padding: 14px 12px;
+        font-size: 0.9375rem;
+        min-height: 48px;
+    }
+
+    /* === TASKS CONTAINER === */
+    .tasks-container {
+        padding: 0.5rem 1rem 5rem;
+    }
+
+    /* === TASK ITEM === */
+    .task-item {
+        padding: 14px 12px;
+        gap: 12px;
+        border-radius: 10px;
+    }
+
+    .task-checkbox .checkmark {
+        width: 22px;
+        height: 22px;
+    }
+
+    .task-title {
+        font-size: 0.9375rem;
+    }
+
+    .task-subtitle {
+        font-size: 0.8125rem;
+    }
+
+    .task-meta {
+        gap: 8px;
+    }
+
+    .task-tag {
+        font-size: 0.6875rem;
+        padding: 3px 8px;
+    }
+
+    /* Task actions sempre visíveis em mobile */
+    .task-actions {
+        opacity: 1;
+    }
+
+    .task-action-btn {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+    }
+
+    /* === SECTION HEADERS === */
+    .section-header {
+        padding: 0 4px 8px;
+    }
+
+    .section-header-title {
+        font-size: 0.625rem;
+    }
+
+    /* === HIDE MOBILE TEXT === */
+    .hide-mobile-text {
+        display: none;
+    }
+}
+
+/* ========================================
+   MOBILE PEQUENO (até 480px)
+   ======================================== */
+@media (max-width: 480px) {
+    /* === SIDEBAR === */
+    .sidebar {
+        width: 90%;
+        max-width: 300px;
+    }
+
+    .sidebar-brand {
+        padding: 14px 12px;
+    }
+
+    .brand-name {
+        font-size: 0.9375rem;
+    }
+
+    .sidebar-user {
+        padding: 10px 12px;
+    }
+
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .user-name {
+        font-size: 0.8125rem;
+    }
+
+    .user-plan {
+        font-size: 0.625rem;
+    }
+
+    .btn-upgrade {
+        padding: 3px 8px;
+        font-size: 0.625rem;
+    }
+
+    /* === MAIN CONTENT === */
+    .page-header {
+        padding: 10px 12px;
+    }
+
+    .page-title {
+        font-size: 1rem;
+    }
+
+    .btn-menu-mobile {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+    }
+
+    .btn-header {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+    }
+
+    /* === STATS BAR === */
+    .stats-bar {
+        padding: 10px 12px;
+        gap: 12px;
+    }
+
+    .stat-mini-value {
+        font-size: 0.9375rem;
+    }
+
+    .stat-mini-label {
+        font-size: 0.625rem;
+    }
+
+    /* === ADD TASK === */
+    .add-task-inline {
+        padding: 10px 12px;
+    }
+
+    .add-task-trigger {
+        padding: 12px 10px;
+        font-size: 0.875rem;
+    }
+
+    /* === TASKS === */
+    .tasks-container {
+        padding: 0.5rem 0.75rem 5rem;
+    }
+
+    .task-item {
+        padding: 12px 10px;
+    }
+
+    .task-title {
+        font-size: 0.875rem;
+    }
+
+    .task-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .task-tag {
+        font-size: 0.625rem;
+        padding: 2px 6px;
+    }
+}
+
+/* ========================================
+   MOBILE MUITO PEQUENO (até 360px)
+   ======================================== */
+@media (max-width: 360px) {
+    .sidebar {
+        width: 95%;
+    }
+
+    .page-header {
+        padding: 8px 10px;
+    }
+
+    .page-title {
+        font-size: 0.9375rem;
+    }
+
+    .title-emoji {
+        font-size: 0.875rem;
+    }
+
+    .task-count {
+        font-size: 0.6875rem;
+    }
+
+    .btn-menu-mobile,
+    .btn-header {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        min-height: 34px;
+    }
+
+    .stats-bar {
+        padding: 8px 10px;
+        gap: 10px;
+    }
+
+    .stat-mini-value {
+        font-size: 0.875rem;
+    }
+
+    .add-task-inline {
+        padding: 8px 10px;
+    }
+
+    .add-task-trigger {
+        padding: 10px 8px;
+        font-size: 0.8125rem;
+    }
+
+    .tasks-container {
+        padding: 0.5rem 0.625rem 5rem;
+    }
+
+    .task-item {
+        padding: 10px 8px;
+        gap: 10px;
+    }
+
+    .task-checkbox .checkmark {
+        width: 20px;
+        height: 20px;
+    }
+
+    .task-title {
+        font-size: 0.8125rem;
+    }
+
+    .task-action-btn {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        min-height: 28px;
+    }
+}
+
+/* ========================================
+   SAFE AREA (dispositivos com notch)
+   ======================================== */
+@supports (padding-top: env(safe-area-inset-top)) {
+    @media (max-width: 768px) {
+        .page-header {
+            padding-top: max(12px, env(safe-area-inset-top));
+        }
+
+        .sidebar {
+            padding-top: env(safe-area-inset-top);
+        }
+
+        .sidebar-brand {
+            padding-top: max(16px, env(safe-area-inset-top));
+        }
+
+        .tasks-container {
+            padding-bottom: max(5rem, calc(env(safe-area-inset-bottom) + 4rem));
+        }
+    }
+}
+
+/* ========================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ======================================== */
+@media (hover: none) and (pointer: coarse) {
+    /* Mínimo 44px para elementos tocáveis */
+    .btn-menu-mobile,
+    .btn-header,
+    .btn-close-sidebar,
+    .nav-item,
+    .list-item,
+    .btn-add-task,
+    .btn-add-list,
+    .add-task-trigger,
+    .task-action-btn {
+        min-height: 44px;
+    }
+
+    /* Task actions sempre visíveis */
+    .task-actions {
+        opacity: 1;
+    }
+
+    /* List actions sempre visíveis */
+    .list-item-actions {
+        opacity: 1;
+    }
+
+    /* Remove hover effects em touch */
+    .task-item:hover {
+        background: var(--surface-main);
+    }
+
+    .task-item:active {
+        background: var(--surface-hover);
+    }
+
+    .nav-item:hover {
+        background: transparent;
+    }
+
+    .nav-item:active {
+        background: var(--surface-hover);
+    }
+
+    .list-item:hover {
+        background: transparent;
+    }
+
+    .list-item:active {
+        background: var(--surface-hover);
+    }
+}
+
+/* ========================================
+   LANDSCAPE MOBILE
+   ======================================== */
+@media (max-width: 768px) and (orientation: landscape) {
+    .sidebar {
+        width: 280px;
+    }
+
+    .page-header {
+        padding: 8px 16px;
+        min-height: 48px;
+    }
+
+    .stats-bar {
+        padding: 10px 16px;
+    }
+
+    .add-task-inline {
+        padding: 10px 16px;
+    }
+
+    .tasks-container {
+        padding: 0.5rem 1rem 3rem;
+    }
+
+    .task-item {
+        padding: 10px 12px;
+    }
+}
+
+/* ========================================
+   DARK MODE MOBILE ADJUSTMENTS
+   ======================================== */
+@media (max-width: 768px) {
+    .dark-mode .sidebar {
+        background: #141414;
+    }
+
+    .dark-mode .sidebar.active {
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .dark-mode .sidebar-overlay.active {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    .dark-mode .btn-close-sidebar {
+        background: #222;
+    }
+
+    .dark-mode .btn-close-sidebar:hover {
+        background: #2a2a2a;
+    }
+}
+
+/* ========================================
+   BOTÃO FLUTUANTE IA - MOBILE
+   ======================================== */
+@media (max-width: 768px) {
+    .ai-float-button {
+        bottom: 20px;
+        right: 16px;
+        width: 52px;
+        height: 52px;
+        bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px));
+    }
+}
+
+@media (max-width: 480px) {
+    .ai-float-button {
+        bottom: 16px;
+        right: 12px;
+        width: 48px;
+        height: 48px;
+        bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
+    }
+}
+
+/* ========================================
+   MODAIS - MOBILE BOTTOM SHEET STYLE
+   ======================================== */
+@media (max-width: 768px) {
+    /* Overlay com alinhamento no fundo */
+    .task-modal-overlay,
+    .modal-overlay {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    /* Modal de Criar/Editar Tarefa - Bottom Sheet */
+    .task-modal,
+    .modal-edit-section {
+        position: fixed;
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: translateY(100%);
+        max-width: 100%;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        max-height: 90vh;
+        max-height: 90dvh;
+        margin: 0;
+    }
+
+    .task-modal.active,
+    .modal-edit-section.active {
+        transform: translateY(0);
+    }
+
+    /* Handle/Indicator para arrastar */
+    .task-modal::before,
+    .modal-edit-section::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        background: var(--border-subtle);
+        border-radius: 2px;
+        z-index: 10;
+    }
+
+    .task-modal-header {
+        padding: 20px 16px 16px;
+    }
+
+    .task-modal-title {
+        font-size: 1rem;
+    }
+
+    .btn-close-modal {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+    }
+
+    .task-modal-body {
+        padding: 16px;
+        max-height: calc(90vh - 180px);
+        max-height: calc(90dvh - 180px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Campos inline em coluna no mobile */
+    .task-modal-inline-fields {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .task-modal-input,
+    .task-modal-textarea,
+    .task-modal-select {
+        padding: 12px 14px;
+        font-size: 16px; /* Previne zoom no iOS */
+        min-height: 48px;
+    }
+
+    .task-modal-textarea {
+        min-height: 80px;
+    }
+
+    .task-modal-footer {
+        padding: 16px;
+        padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 12px));
+        flex-direction: column-reverse;
+        gap: 10px;
+        border-radius: 0;
+    }
+
+    .task-modal-footer button,
+    .btn-modal-primary,
+    .btn-modal-secondary {
+        width: 100%;
+        min-height: 48px;
+        font-size: 0.9375rem;
+        justify-content: center;
+    }
+
+    /* Task Detail Panel - Bottom Sheet */
+    .task-detail-panel {
+        position: fixed;
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        max-height: 90vh;
+        max-height: 90dvh;
+        border-radius: 20px 20px 0 0;
+        transform: translateX(0) translateY(100%);
+    }
+
+    .task-detail-panel.active {
+        transform: translateX(0) translateY(0);
+    }
+
+    .task-detail-panel::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        background: var(--border-subtle);
+        border-radius: 2px;
+        z-index: 10;
+    }
+
+    .task-detail-header {
+        padding: 20px 16px 12px;
+    }
+
+    .task-detail-content {
+        padding: 16px;
+        padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+        max-height: calc(90vh - 80px);
+        max-height: calc(90dvh - 80px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* View Options Menu como Bottom Sheet */
+    .view-options-menu {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        max-height: 80vh;
+        max-height: 80dvh;
+        border-radius: 20px 20px 0 0;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        transform: translateY(100%);
+    }
+
+    .view-options-menu.active {
+        transform: translateY(0);
+    }
+
+    .view-options-menu::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        background: var(--border-subtle);
+        border-radius: 2px;
+    }
+
+    .menu-section:first-child {
+        padding-top: 20px;
+    }
+
+    .menu-item {
+        padding: 14px 16px;
+        min-height: 48px;
+    }
+
+    /* Confirm Modal - Bottom Sheet */
+    .confirm-modal-overlay {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .confirm-modal {
+        max-width: 100%;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        animation: slideUpModal 0.3s ease;
+    }
+
+    @keyframes slideUpModal {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .confirm-modal::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        background: var(--border-subtle);
+        border-radius: 2px;
+    }
+
+    .confirm-modal-content {
+        padding: 28px 20px 20px;
+        padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+    }
+
+    .confirm-modal-btn {
+        min-height: 48px;
+    }
+
+    /* Modal de Editar Seção */
+    .modal-edit-section {
+        position: fixed;
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: translateY(100%);
+        max-width: 100%;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .modal-edit-section.active {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        padding: 20px 16px 16px;
+    }
+
+    .modal-body {
+        padding: 16px;
+    }
+
+    .modal-footer {
+        padding: 16px;
+        padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 12px));
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .modal-footer button,
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        min-height: 48px;
+        justify-content: center;
+    }
+}
+
+/* Mobile pequeno - ajustes adicionais */
+@media (max-width: 480px) {
+    .task-modal,
+    .modal-edit-section {
+        max-height: 95vh;
+        max-height: 95dvh;
+    }
+
+    .task-modal-header {
+        padding: 18px 14px 14px;
+    }
+
+    .task-modal-title {
+        font-size: 0.9375rem;
+    }
+
+    .task-modal-body {
+        padding: 14px;
+        max-height: calc(95vh - 170px);
+        max-height: calc(95dvh - 170px);
+    }
+
+    .task-modal-footer {
+        padding: 14px;
+        padding-bottom: max(14px, calc(env(safe-area-inset-bottom) + 10px));
+    }
+
+    .task-detail-panel {
+        max-height: 95vh;
+        max-height: 95dvh;
+    }
+
+    .task-detail-content {
+        padding: 14px;
+        max-height: calc(95vh - 70px);
+        max-height: calc(95dvh - 70px);
+    }
+
+    .confirm-modal-content {
+        padding: 24px 16px 16px;
+        padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px));
+    }
+
+    .confirm-modal-title {
+        font-size: 1.125rem;
+    }
+
+    .confirm-modal-message {
+        font-size: 0.8125rem;
+    }
+
+    .confirm-modal-task-name {
+        padding: 10px 12px;
+        font-size: 0.875rem;
+    }
 }

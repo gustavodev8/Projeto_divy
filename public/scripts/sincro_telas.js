@@ -556,6 +556,13 @@ function renderListView(container) {
                                 <circle cx="12" cy="19" r="1"></circle>
                             </svg>
                         </button>
+                        <button class="btn-section-delete" onclick="event.stopPropagation(); showDeleteSectionModal(${section.id}, '${escapeHtml(section.name).replace(/'/g, "\\'")}')" title="Excluir seção">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
                     </div>
                     <div class="section-tasks" data-section-drop="${section.id}">
                         ${visibleSectionTasks.length === 0 ? (hideCompleted && allSectionTasks.length > 0 ? '<div class="section-empty" style="opacity:0.6">Todas as tarefas estão concluídas</div>' : '<div class="section-empty">Arraste tarefas para cá</div>') : ''}
@@ -703,25 +710,36 @@ window.toggleLocalSectionCollapse = toggleLocalSectionCollapse;
 function createTaskHTML(task) {
     const isCompleted = task.status === 'completed' || task.status === 'concluido' || task.status === 'concluída';
     const priorityLabels = { high: 'Alta', medium: 'Média', low: 'Baixa' };
-    
+
     // Verificar se deve mostrar detalhes
     const settings = window.nuraSettingsFunctions ? window.nuraSettingsFunctions.getSettings() : {};
     const showDetails = settings.showDetails || false;
 
-    // ✅ LOG DETALHADO
-    if (task.title === 'tarefa nadatoria pagar contas') {
-        console.log('🔍 DEBUG TAREFA ESPECÍFICA:');
-        console.log('   - Settings object:', settings);
-        console.log('   - showDetails:', showDetails);
-        console.log('   - settings.showDetails:', settings.showDetails);
-        console.log('   - Descrição existe?', !!task.description);
-        console.log('   - Data existe?', !!task.due_date);
+    // Verificar se deve destacar urgentes
+    let highlightUrgent = settings.highlightUrgent;
+    if (highlightUrgent === undefined) {
+        highlightUrgent = localStorage.getItem('nura_highlightUrgent') !== 'false'; // default true
     }
+
+    // Estilos de destaque por prioridade
+    let urgentStyle = '';
+    if (highlightUrgent && !isCompleted) {
+        const priority = task.priority || 'medium';
+        if (priority === 'high') {
+            urgentStyle = 'border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.08);';
+        } else if (priority === 'medium') {
+            urgentStyle = 'border-left: 4px solid #f39c12; background-color: rgba(243, 156, 18, 0.05);';
+        } else if (priority === 'low') {
+            urgentStyle = 'border-left: 4px solid #2ecc71; background-color: rgba(46, 204, 113, 0.05);';
+        }
+    }
+
     return `
-        <div class="task-item ${isCompleted ? 'completed' : ''}" 
-             data-task-id="${task.id}" 
+        <div class="task-item ${isCompleted ? 'completed' : ''}"
+             data-task-id="${task.id}"
              data-task-status="${isCompleted ? 'completed' : 'pending'}"
              data-priority="${task.priority || 'medium'}"
+             style="${urgentStyle}"
              draggable="true">
             
             <label class="task-checkbox">
@@ -1607,12 +1625,19 @@ async function gerarRotinaInteligente() {
         const result = await response.json();
 
         if (result.success) {
+            // Armazenar o nome da seção gerado pela IA
+            window.rotinaNomeSecao = result.nomeSecao || 'Rotina do Dia';
+
             resultadoDiv.innerHTML = `
                 <div class="ai-success">
                     <h4>📅 Sua Rotina Inteligente</h4>
+                    <div class="rotina-section-name">
+                        <span class="rotina-section-label">📁 Seção:</span>
+                        <span class="rotina-section-value">${window.rotinaNomeSecao}</span>
+                    </div>
                     <div class="rotina-content">${formatarRotina(result.rotina)}</div>
                     <button class="btn btn-primary mt-3" onclick="salvarTarefasDaRotina(\`${result.rotina.replace(/`/g, '\\`')}\`)">
-                        💾 Salvar Tarefas da Rotina
+                        💾 Salvar Tarefas na Seção "${window.rotinaNomeSecao}"
                     </button>
                 </div>
             `;
@@ -1633,28 +1658,79 @@ async function salvarTarefasDaRotina(rotinaTexto) {
         return;
     }
 
+    // Verificar se está em uma lista
+    if (!window.currentListId) {
+        showNotification('⚠️ Selecione uma lista para salvar a rotina');
+        return;
+    }
+
     const linhas = rotinaTexto.split('\n').filter(linha => linha.trim());
     let salvas = 0;
-    
+    let sectionId = null;
+
     console.log('🔍 Iniciando importação de', linhas.length, 'linhas');
-    
+
+    // ===== CRIAR SEÇÃO AUTOMATICAMENTE =====
+    const nomeSecao = window.rotinaNomeSecao || 'Rotina do Dia';
+    console.log('📁 Criando seção:', nomeSecao);
+
+    try {
+        const sectionResponse = await fetch(`${API_URL}/api/sections`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-ID': currentUser.id.toString()
+            },
+            body: JSON.stringify({
+                name: nomeSecao,
+                list_id: window.currentListId,
+                user_id: currentUser.id
+            })
+        });
+
+        const sectionResult = await sectionResponse.json();
+
+        if (sectionResult.success && sectionResult.section) {
+            sectionId = sectionResult.section.id;
+            console.log('✅ Seção criada com ID:', sectionId);
+
+            // Atualizar lista de seções localmente
+            if (!window.currentSections) window.currentSections = [];
+            window.currentSections.push(sectionResult.section);
+        } else {
+            console.error('❌ Erro ao criar seção:', sectionResult.error);
+            showNotification('⚠️ Erro ao criar seção, salvando sem seção');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao criar seção:', error);
+    }
+
+    // ===== SALVAR TAREFAS NA SEÇÃO =====
     for (const linha of linhas) {
-        if (linha.includes('→') || linha.match(/\d{1,2}:\d{2}/)) {
+        // Detectar linhas com horário (ex: 08:00 → Atividade)
+        if (linha.includes('→') || linha.match(/^\d{1,2}:\d{2}/)) {
             let texto = linha.split('→')[1] || linha;
-            texto = texto.replace(/[🔴🟡🟢🕗🕙🕛🕑🕓🕕📚💪☕🍽️📊🚀🎯]/g, '').trim();
-            
+
+            // Limpar texto (remover horários residuais)
+            texto = texto.replace(/^\d{1,2}:\d{2}(-\d{1,2}:\d{2})?\s*/, '').trim();
+
+            // Extrair horário
+            const timeMatch = linha.match(/^(\d{1,2}:\d{2})/);
+            const horario = timeMatch ? timeMatch[1] : null;
+
             if (texto && texto.length > 2) {
                 const priority = determinarPrioridadeAutomaticaFrontend(texto);
-                
-                console.log('📝', texto, '→ Prioridade:', priority);
-                
+
+                console.log('📝', texto, '→ Prioridade:', priority, '→ Seção:', sectionId);
+
                 const tarefa = {
                     title: texto.substring(0, 100),
-                    description: 'Importado da rotina IA',
+                    description: horario ? `Horário sugerido: ${horario}` : 'Importado da rotina IA',
                     priority: priority,
                     status: 'pending',
                     user_id: currentUser.id,
-                    list_id: window.currentListId || null
+                    list_id: window.currentListId,
+                    section_id: sectionId
                 };
 
                 try {
@@ -1675,8 +1751,13 @@ async function salvarTarefasDaRotina(rotinaTexto) {
         }
     }
 
-    console.log('✅ Total salvo:', salvas, 'tarefas');
-    showNotification(`✅ ${salvas} tarefas salvas!`);
+    console.log('✅ Total salvo:', salvas, 'tarefas na seção', nomeSecao);
+    showNotification(`✅ ${salvas} tarefas salvas na seção "${nomeSecao}"!`);
+
+    // Limpar nome da seção temporária
+    window.rotinaNomeSecao = null;
+
+    // Recarregar tarefas e seções
     loadAndDisplayTasksFromDatabase();
 }
 

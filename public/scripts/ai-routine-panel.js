@@ -133,8 +133,12 @@ async function generateAIRoutine() {
         
         if (result.success) {
             console.log('✅ Rotina gerada com sucesso');
-            
-            // Mostrar resultado
+
+            // Armazenar o nome da seção gerado pela IA
+            window.aiRoutineSectionName = result.nomeSecao || 'Rotina do Dia';
+            console.log('📁 Nome da seção:', window.aiRoutineSectionName);
+
+            // Mostrar resultado com nome da seção
             resultDiv.innerHTML = `
                 <div class="ai-success">
                     <div class="ai-success-header">
@@ -144,6 +148,10 @@ async function generateAIRoutine() {
                         </svg>
                         <h4>Rotina criada com sucesso!</h4>
                     </div>
+                    <div class="rotina-section-name">
+                        <span class="rotina-section-label">📁 Seção:</span>
+                        <span class="rotina-section-value">${window.aiRoutineSectionName}</span>
+                    </div>
                     <div class="ai-routine-content">${formatRoutineHTML(result.rotina)}</div>
                     <div class="ai-actions">
                         <button class="btn-save-routine" onclick="saveRoutineAsTasks(\`${escapeForJS(result.rotina)}\`)">
@@ -152,7 +160,7 @@ async function generateAIRoutine() {
                                 <polyline points="17 21 17 13 7 13 7 21"></polyline>
                                 <polyline points="7 3 7 8 15 8"></polyline>
                             </svg>
-                            Salvar como tarefas
+                            Salvar na seção "${window.aiRoutineSectionName}"
                         </button>
                         <button class="btn-new-routine" onclick="clearRoutineAndGenerate()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -165,7 +173,7 @@ async function generateAIRoutine() {
                     </div>
                 </div>
             `;
-            
+
             showNotification('✅ Rotina gerada com sucesso!');
         } else {
             console.error('❌ Erro ao gerar rotina:', result.error);
@@ -220,81 +228,123 @@ async function generateAIRoutine() {
 // ===== SALVAR ROTINA COMO TAREFAS =====
 async function saveRoutineAsTasks(routineText) {
     console.log('💾 Salvando rotina como tarefas');
-    
+
     const user = getCurrentUser();
     if (!user) {
         showNotification('❌ Usuário não identificado');
         return;
     }
-    
-    // Buscar seção "Tarefa" (caso exista)
-    let targetSectionId = null;
-    
-    if (window.currentSections && window.currentSections.length > 0) {
-        const tarefaSection = window.currentSections.find(s => 
-            s.name.toLowerCase() === 'tarefa' || 
-            s.name.toLowerCase() === 'tarefas'
-        );
-        
-        if (tarefaSection) {
-            targetSectionId = tarefaSection.id;
-            console.log('✅ Seção "Tarefa" encontrada:', targetSectionId);
-        } else {
-            console.log('⚠️ Seção "Tarefa" não encontrada, salvando sem seção');
-        }
-    }
-    
-    // Extrair tarefas da rotina
-    const lines = routineText.split('\n').filter(line => line.trim());
-    const tasks = [];
-    
-    for (const line of lines) {
-        // Detectar linhas com horário (ex: 🕗 08:00-09:00 → Atividade)
-        if (line.includes('→') || line.match(/\d{1,2}:\d{2}/)) {
-            let taskText = line.split('→')[1] || line;
-            
-            // Remover emojis e limpar
-            taskText = taskText.replace(/[🔴🟡🟢🕗🕙🕛🕑🕓🕕📚💪☕🍽️📊🚀🎯⏰📅]/g, '').trim();
-            
-            // Extrair horário se houver
-            const timeMatch = line.match(/(\d{1,2}:\d{2})/);
-            const time = timeMatch ? timeMatch[1] : null;
-            
-            if (taskText && taskText.length > 2) {
-                // Determinar prioridade baseada no conteúdo
-                const priority = determinePriorityFromText(taskText);
-                
-                tasks.push({
-                    title: taskText.substring(0, 100),
-                    description: time ? `⏰ Horário: ${time}` : 'Criada pela IA',
-                    priority: priority,
-                    status: 'pending',
-                    user_id: user.id,
-                    list_id: window.currentListId || null,
-                    section_id: targetSectionId
-                });
-                
-                console.log(`📝 Tarefa extraída: "${taskText}" (${priority})`);
-            }
-        }
-    }
-    
-    if (tasks.length === 0) {
-        showNotification('⚠️ Nenhuma tarefa encontrada na rotina');
+
+    // Verificar se está em uma lista
+    if (!window.currentListId) {
+        showNotification('⚠️ Selecione uma lista para salvar a rotina');
         return;
     }
-    
-    console.log(`📤 Salvando ${tasks.length} tarefas...`);
-    
+
     // Mostrar loading
     const saveBtn = document.querySelector('.btn-save-routine');
     if (saveBtn) {
         saveBtn.disabled = true;
-        saveBtn.innerHTML = '<div class="generating-spinner"></div> Salvando...';
+        saveBtn.innerHTML = '<div class="generating-spinner"></div> Criando seção...';
     }
-    
+
+    // ===== CRIAR SEÇÃO AUTOMATICAMENTE =====
+    const sectionName = window.aiRoutineSectionName || 'Rotina do Dia';
+    let targetSectionId = null;
+
+    console.log('📁 Criando seção:', sectionName);
+
+    try {
+        const sectionResponse = await fetch(`${AI_PANEL_API_URL}/api/sections`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-ID': user.id.toString()
+            },
+            body: JSON.stringify({
+                name: sectionName,
+                list_id: window.currentListId,
+                user_id: user.id
+            })
+        });
+
+        const sectionResult = await sectionResponse.json();
+
+        if (sectionResult.success && sectionResult.section) {
+            targetSectionId = sectionResult.section.id;
+            console.log('✅ Seção criada com ID:', targetSectionId);
+
+            // Atualizar lista de seções localmente
+            if (!window.currentSections) window.currentSections = [];
+            window.currentSections.push(sectionResult.section);
+        } else {
+            console.error('❌ Erro ao criar seção:', sectionResult.error);
+            showNotification('⚠️ Erro ao criar seção, salvando sem seção');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao criar seção:', error);
+    }
+
+    // Atualizar botão
+    if (saveBtn) {
+        saveBtn.innerHTML = '<div class="generating-spinner"></div> Salvando tarefas...';
+    }
+
+    // Extrair tarefas da rotina
+    const lines = routineText.split('\n').filter(line => line.trim());
+    const tasks = [];
+
+    for (const line of lines) {
+        // Detectar linhas com horário (ex: 08:00 → Atividade ou 08:00-09:00 → Atividade)
+        if (line.includes('→') || line.match(/^\d{1,2}:\d{2}/)) {
+            let taskText = line.split('→')[1] || line;
+
+            // Limpar texto (remover horários residuais e espaços extras)
+            taskText = taskText.replace(/^\d{1,2}:\d{2}(-\d{1,2}:\d{2})?\s*/, '').trim();
+
+            // Extrair horário do início da linha
+            const timeMatch = line.match(/^(\d{1,2}:\d{2})/);
+            const time = timeMatch ? timeMatch[1] : null;
+
+            if (taskText && taskText.length > 2) {
+                // Determinar prioridade baseada no conteúdo
+                const priority = determinePriorityFromText(taskText);
+
+                tasks.push({
+                    title: taskText.substring(0, 100),
+                    description: time ? `Horário sugerido: ${time}` : 'Criada pela IA',
+                    priority: priority,
+                    status: 'pending',
+                    user_id: user.id,
+                    list_id: window.currentListId,
+                    section_id: targetSectionId
+                });
+
+                console.log(`📝 Tarefa extraída: "${taskText}" (${priority}) → Seção: ${targetSectionId}`);
+            }
+        }
+    }
+
+    if (tasks.length === 0) {
+        showNotification('⚠️ Nenhuma tarefa encontrada na rotina');
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Salvar na seção "${sectionName}"
+            `;
+        }
+        return;
+    }
+
+    console.log(`📤 Salvando ${tasks.length} tarefas na seção "${sectionName}"...`);
+
     let savedCount = 0;
-    
+
     // Salvar cada tarefa
     for (const task of tasks) {
         try {
@@ -305,9 +355,9 @@ async function saveRoutineAsTasks(routineText) {
                 },
                 body: JSON.stringify(task)
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 savedCount++;
             } else {
@@ -317,22 +367,25 @@ async function saveRoutineAsTasks(routineText) {
             console.error('❌ Erro de conexão:', error);
         }
     }
-    
-    console.log(`✅ ${savedCount}/${tasks.length} tarefas salvas`);
-    
+
+    console.log(`✅ ${savedCount}/${tasks.length} tarefas salvas na seção "${sectionName}"`);
+
+    // Limpar nome da seção temporária
+    window.aiRoutineSectionName = null;
+
     if (savedCount > 0) {
-        showNotification(`✅ ${savedCount} tarefa${savedCount > 1 ? 's' : ''} criada${savedCount > 1 ? 's' : ''}!`);
-        
+        showNotification(`✅ ${savedCount} tarefa${savedCount > 1 ? 's' : ''} salva${savedCount > 1 ? 's' : ''} na seção "${sectionName}"!`);
+
         // Recarregar tarefas
         if (typeof loadAndDisplayTasksFromDatabase === 'function') {
             await loadAndDisplayTasksFromDatabase();
         }
-        
+
         // Atualizar contadores
         if (typeof updateSectionCounts === 'function') {
             updateSectionCounts();
         }
-        
+
         // Fechar painel
         setTimeout(() => {
             closeAIRoutinePanel();
@@ -340,7 +393,7 @@ async function saveRoutineAsTasks(routineText) {
     } else {
         showNotification('❌ Erro ao salvar tarefas');
     }
-    
+
     // Restaurar botão
     if (saveBtn) {
         saveBtn.disabled = false;

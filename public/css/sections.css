@@ -121,9 +121,36 @@
     color: var(--text-primary, #1a1d21);
 }
 
-.section-action-btn.btn-delete:hover {
+.section-action-btn.btn-delete:hover,
+.btn-section-delete:hover {
     background: #fee2e2;
     color: #dc2626;
+}
+
+/* Botão de excluir seção */
+.btn-section-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    color: var(--text-muted, #9ca3af);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    opacity: 0;
+}
+
+.section-header:hover .btn-section-delete {
+    opacity: 1;
+}
+
+.btn-section-delete svg {
+    width: 14px;
+    height: 14px;
 }
 
 /* ===== CONTAINER DAS TAREFAS ===== */
