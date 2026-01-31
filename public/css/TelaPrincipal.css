@@ -3303,3 +3303,12 @@ input[type="color"]:focus {
 .dark-mode .btn-cancel {
     border-color: #2a2a2a;
 }
+
+/* ===== BOLINHA DA LISTA NA SIDEBAR ===== */
+.list-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--nura-primary, #146551);
+    flex-shrink: 0;
+}

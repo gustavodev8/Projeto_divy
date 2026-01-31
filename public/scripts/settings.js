@@ -12,13 +12,13 @@ let nuraSettings = {
     hideCompleted: false,
     highlightUrgent: true,
     autoSuggestions: true,
-    detailLevel: 'Médio',
+    detailLevel: 'medio',
     darkMode: false,
     primaryColor: '#49a09d',
     currentPlan: 'free',
     planRenewalDate: '',
     viewMode: 'lista',
-    showDetails: false, 
+    showDetails: false,
     emailNotifications: true,
     weeklyReport: false,
     aiDescriptionsEnabled: true,
@@ -51,7 +51,7 @@ async function loadSettingsFromDatabase() {
         hideCompleted: false,
         highlightUrgent: true,
         autoSuggestions: true,
-        detailLevel: 'Médio',
+        detailLevel: 'medio',
         darkMode: false,
         primaryColor: '#49a09d',
         currentPlan: 'free',
@@ -96,13 +96,20 @@ Object.assign(nuraSettings, DEFAULTS, data.settings);
         nuraSettings = { ...DEFAULTS };
     }
     
-    // ✅ FALLBACK: localStorage
+    // ✅ FALLBACK: localStorage para showDetails
     const localShowDetails = localStorage.getItem('nura_showDetails');
     if (localShowDetails !== null) {
         nuraSettings.showDetails = localShowDetails === 'true';
         console.log('📦 showDetails do localStorage:', nuraSettings.showDetails);
     }
-    
+
+    // ✅ FALLBACK: localStorage para hideCompleted
+    const localHideCompleted = localStorage.getItem('nura_hideCompleted');
+    if (localHideCompleted !== null) {
+        nuraSettings.hideCompleted = localHideCompleted === 'true';
+        console.log('📦 hideCompleted do localStorage:', nuraSettings.hideCompleted);
+    }
+
     this.applySettings();
 }
 
@@ -225,10 +232,23 @@ function updateUIWithSettings() {
 async function setViewMode(mode) {
     const modeLower = mode.toLowerCase();
     nuraSettings.viewMode = modeLower;
-    
+
+    // Atualizar variável global
+    window.currentViewMode = modeLower;
+
+    // Salvar no localStorage para sincronização
+    localStorage.setItem('nura_viewMode', modeLower);
+
+    // Salvar no banco de dados
     await saveSettingsToDatabase();
+
+    // Disparar evento para sincronização
+    window.dispatchEvent(new CustomEvent('settingsUpdated', {
+        detail: { viewMode: modeLower }
+    }));
+
     showNotification(`📊 Modo de visualização: ${mode}`);
-    
+
     // Atualizar visualização se estiver na página de tarefas
     if (window.renderAllTasks) {
         window.renderAllTasks();
@@ -237,26 +257,54 @@ async function setViewMode(mode) {
 
 // ===== FILTRO: OCULTAR TAREFAS CONCLUÍDAS =====
 async function toggleHideCompleted(enabled) {
+    console.log('👁️ toggleHideCompleted:', enabled);
+
     nuraSettings.hideCompleted = enabled;
-    
-    // Atualizar UI imediatamente
+
+    // Atualizar UI imediatamente - toggle na tela de ajustes
     const toggle = Array.from(document.querySelectorAll('.toggle-switch')).find(t => {
         const row = t.closest('.setting-row');
         return row?.textContent.toLowerCase().includes('ocultar tarefas');
     });
     if (toggle) toggle.classList.toggle('active', enabled);
-    
-    document.querySelectorAll('[data-task-status="completed"]').forEach(task => {
-        task.style.display = enabled ? 'none' : '';
-    });
-    
-    // Ocultar coluna de concluídos no Kanban
-    const completedColumn = document.querySelector('[data-kanban-column="completed"]');
-    if (completedColumn) {
-        completedColumn.style.display = enabled ? 'none' : '';
+
+    // Atualizar checkbox no menu de 3 pontinhos
+    const menuCheckbox = document.getElementById('toggleHideCompletedCheckbox');
+    if (menuCheckbox) {
+        menuCheckbox.checked = enabled;
     }
-    
+
+    // Salvar no localStorage para sincronização
+    localStorage.setItem('nura_hideCompleted', enabled.toString());
+
+    // Salvar no banco de dados
     await saveSettingsToDatabase();
+
+    // Disparar evento para sincronização
+    window.dispatchEvent(new CustomEvent('settingsUpdated', {
+        detail: { hideCompleted: enabled }
+    }));
+
+    // Re-renderizar tarefas para aplicar o filtro
+    if (typeof renderAllTasks === 'function') {
+        console.log('🎨 Re-renderizando tarefas...');
+        renderAllTasks();
+    } else if (typeof window.renderAllTasks === 'function') {
+        console.log('🎨 Re-renderizando tarefas (window)...');
+        window.renderAllTasks();
+    } else {
+        // Fallback: aplicar diretamente no DOM
+        document.querySelectorAll('[data-task-status="completed"]').forEach(task => {
+            task.style.display = enabled ? 'none' : '';
+        });
+
+        // Ocultar coluna de concluídos no Kanban
+        const completedColumn = document.querySelector('[data-kanban-column="completed"]');
+        if (completedColumn) {
+            completedColumn.style.display = enabled ? 'none' : '';
+        }
+    }
+
     showNotification(enabled ? '👁️ Tarefas concluídas ocultadas' : '👁️ Tarefas concluídas visíveis');
 }
 
@@ -859,7 +907,7 @@ window.nuraSettingsFunctions = {
             hideCompleted: false,
             highlightUrgent: true,
             autoSuggestions: true,
-            detailLevel: 'Médio',
+            detailLevel: 'medio',
             darkMode: false,
             primaryColor: '#49a09d',
             currentPlan: 'free',
@@ -908,10 +956,16 @@ window.nuraSettingsFunctions = {
             nuraSettings.showDetails = localShowDetails === 'true';
             console.log('📦 showDetails do localStorage:', nuraSettings.showDetails);
         }
-        
+
+        const localHideCompleted = localStorage.getItem('nura_hideCompleted');
+        if (localHideCompleted !== null) {
+            nuraSettings.hideCompleted = localHideCompleted === 'true';
+            console.log('📦 hideCompleted do localStorage:', nuraSettings.hideCompleted);
+        }
+
         this.applySettings();
     },
-    
+
     saveSettingsToDatabase: async function() {
         const user = getCurrentUser();
         if (!user) {

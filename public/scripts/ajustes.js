@@ -142,12 +142,24 @@ function applySettings(settings) {
     if (aiSuggestionsToggle) {
         aiSuggestionsToggle.checked = settings.autoSuggestions || false;
     }
-    
+
     // Nível de Detalhamento IA
     const aiDetailLevel = document.getElementById('aiDetailLevel');
     if (aiDetailLevel) {
         const level = (settings.detailLevel || 'Médio').toLowerCase();
         aiDetailLevel.value = level === 'médio' ? 'medio' : level;
+    }
+
+    // Mostrar/ocultar nível de detalhamento baseado no toggle de sugestões
+    updateDetailLevelVisibility(settings.autoSuggestions || false);
+}
+
+// ===== CONTROLAR VISIBILIDADE DO NÍVEL DE DETALHAMENTO =====
+function updateDetailLevelVisibility(isEnabled) {
+    const detailLevelItem = document.getElementById('aiDetailLevelItem');
+    if (detailLevelItem) {
+        detailLevelItem.style.display = isEnabled ? 'flex' : 'none';
+        console.log('🎛️ Nível de detalhamento:', isEnabled ? 'visível' : 'oculto');
     }
 }
 
@@ -206,17 +218,15 @@ async function saveAllSettings() {
     
     // Depois salvar no servidor
     try {
-        const payload = { settings };
-        
-        console.log('📤 Payload enviado:', payload);
-        
+        console.log('📤 Settings enviados:', settings);
+
         const response = await fetch(`${API_URL}/api/settings/${currentUser.id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'x-user-id': currentUser.id.toString()
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(settings)  // Enviar diretamente, não como { settings: ... }
         });
         
         const data = await response.json();
@@ -283,12 +293,16 @@ function initializeEventListeners() {
     if (hideCompletedToggle) {
         hideCompletedToggle.addEventListener('change', async (e) => {
             const enabled = e.target.checked;
+
+            // Salvar individualmente no localStorage para sincronização
+            localStorage.setItem('nura_hideCompleted', enabled.toString());
+
             await saveAllSettings();
             showNotification('✅ ' + (enabled ? 'Concluídas ocultadas' : 'Concluídas visíveis'));
-            
+
             // ✅ Notificar outras páginas
-            window.dispatchEvent(new CustomEvent('settingsUpdated', { 
-                detail: { hideCompleted: enabled } 
+            window.dispatchEvent(new CustomEvent('settingsUpdated', {
+                detail: { hideCompleted: enabled }
             }));
         });
     }
@@ -313,12 +327,16 @@ function initializeEventListeners() {
     if (aiSuggestionsToggle) {
         aiSuggestionsToggle.addEventListener('change', async (e) => {
             const enabled = e.target.checked;
+
+            // ✅ Mostrar/ocultar nível de detalhamento
+            updateDetailLevelVisibility(enabled);
+
             await saveAllSettings();
             showNotification('✅ Sugestões de IA ' + (enabled ? 'ativadas' : 'desativadas'));
-            
+
             // ✅ Notificar outras páginas
-            window.dispatchEvent(new CustomEvent('settingsUpdated', { 
-                detail: { autoSuggestions: enabled } 
+            window.dispatchEvent(new CustomEvent('settingsUpdated', {
+                detail: { autoSuggestions: enabled }
             }));
         });
     }

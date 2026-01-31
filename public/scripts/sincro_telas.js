@@ -11,6 +11,83 @@ window.homeTasks = [];
 let currentViewMode = 'lista'; // Modo padrão
 window.currentListTasks = []; // Cache de tarefas filtradas por lista
 
+// ===== GERAR OU MELHORAR DESCRIÇÃO COM IA =====
+async function generateAIDescription(taskTitle, existingDescription = '') {
+    console.log('🤖 Verificando se deve processar descrição automática...');
+
+    // Verificar se sugestões automáticas estão ativadas
+    let autoSuggestions = false;
+    let detailLevel = 'medio';
+
+    if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.getSettings === 'function') {
+        const settings = window.nuraSettingsFunctions.getSettings();
+        autoSuggestions = settings.autoSuggestions || false;
+        detailLevel = settings.detailLevel || 'medio';
+    } else {
+        // Fallback: localStorage
+        const stored = localStorage.getItem('nura_settings');
+        if (stored) {
+            try {
+                const settings = JSON.parse(stored);
+                autoSuggestions = settings.autoSuggestions || false;
+                detailLevel = settings.detailLevel || 'medio';
+            } catch (e) {
+                console.error('❌ Erro ao parsear settings:', e);
+            }
+        }
+    }
+
+    if (!autoSuggestions) {
+        console.log('⏭️ Sugestões automáticas desativadas');
+        return null;
+    }
+
+    // Normalizar detailLevel (remover acentos, lowercase)
+    detailLevel = detailLevel.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+    // Garantir que é um valor válido
+    if (!['baixo', 'medio', 'alto'].includes(detailLevel)) {
+        detailLevel = 'medio';
+    }
+
+    const hasExisting = existingDescription && existingDescription.trim() !== '';
+    const mode = hasExisting ? 'melhorar' : 'gerar';
+
+    console.log(`🤖 ${mode === 'melhorar' ? 'Melhorando' : 'Gerando'} descrição IA para: "${taskTitle}" (Nível: ${detailLevel})`);
+
+    try {
+        const response = await fetch(`${API_URL}/api/ai/generate-description`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                taskTitle: taskTitle,
+                detailLevel: detailLevel,
+                existingDescription: existingDescription
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.description) {
+            console.log(`✅ Descrição ${mode === 'melhorar' ? 'melhorada' : 'gerada'}:`, data.description);
+            return data.description;
+        } else {
+            console.error('❌ Erro na resposta:', data.error);
+            return null;
+        }
+    } catch (error) {
+        console.error('❌ Erro ao processar descrição com IA:', error);
+        return null;
+    }
+}
+
+// Exportar função
+window.generateAIDescription = generateAIDescription;
+
 // ===== GARANTIR QUE KANBAN-VIEW.JS FOI CARREGADO =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📋 Verificando scripts carregados...');
@@ -235,62 +312,76 @@ function filterTasksByCurrentList() {
     console.log('📊 Total de tarefas carregadas:', homeTasks.length);
     console.log('📋 Lista atual (window.currentListId):', window.currentListId);
     console.log('🎯 Filtro inteligente (window.currentSmartFilter):', window.currentSmartFilter);
-    
+
     // Se há filtro inteligente ativo, não filtrar por lista
     if (window.currentSmartFilter) {
         console.log('⚡ Filtro inteligente ativo, delegando para smart-filters.js');
         return; // filterAndRenderTasks() já foi chamado
     }
-    
-    if (!window.currentListId) {
-        // Se não há lista selecionada, mostrar todas
-        currentListTasks = homeTasks;
+
+    let filteredTasks = homeTasks;
+
+    if (window.currentListId) {
+        // Converter currentListId para número
+        const listIdNumber = parseInt(window.currentListId);
+        console.log('🔢 Lista ID convertido para número:', listIdNumber);
+
+        // Filtrar tarefas pela lista
+        filteredTasks = homeTasks.filter(task => {
+            const taskListId = parseInt(task.list_id);
+            return taskListId === listIdNumber;
+        });
+    } else {
         console.log('⚠️ Nenhuma lista selecionada - mostrando todas as tarefas');
-        return;
     }
 
-    // Converter currentListId para número
-    const listIdNumber = parseInt(window.currentListId);
-    console.log('🔢 Lista ID convertido para número:', listIdNumber);
+    // NÃO aplicar hideCompleted aqui - será aplicado na renderização para manter seções visíveis
+    currentListTasks = filteredTasks;
 
-    // Filtrar tarefas
-    currentListTasks = homeTasks.filter(task => {
-        const taskListId = parseInt(task.list_id);
-        return taskListId === listIdNumber;
-    });
-
-    console.log(`📋 RESULTADO: ${currentListTasks.length} tarefas da lista ${listIdNumber}`);
+    console.log(`📋 RESULTADO: ${currentListTasks.length} tarefas`);
     console.log('🔍 ===== FIM DO FILTRO =====\n');
 }
 
 // ===== FILTRAR TAREFAS POR FILTRO INTELIGENTE =====
 function filterTasksBySmartFilter(filterType) {
     if (!filterType) return window.homeTasks || [];
-    
+
     const today = new Date().toISOString().split('T')[0];
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
-    
+
+    let tasks = [];
+
     switch (filterType) {
         case 'inbox':
-            return window.homeTasks.filter(t => !t.due_date && t.status !== 'completed');
-        
+            // Inbox sempre exclui concluídas (faz parte da lógica do filtro)
+            tasks = window.homeTasks.filter(t => !t.due_date && t.status !== 'completed');
+            break;
+
         case 'today':
-            return window.homeTasks.filter(t => t.due_date === today && t.status !== 'completed');
-        
+            // Hoje sempre exclui concluídas (faz parte da lógica do filtro)
+            tasks = window.homeTasks.filter(t => t.due_date === today && t.status !== 'completed');
+            break;
+
         case 'next7days':
-            return window.homeTasks.filter(t => {
+            // Próximos 7 dias sempre exclui concluídas (faz parte da lógica do filtro)
+            tasks = window.homeTasks.filter(t => {
                 if (!t.due_date || t.status === 'completed') return false;
                 const dueDate = new Date(t.due_date);
                 return dueDate >= new Date() && dueDate <= nextWeek;
             });
-        
+            break;
+
         case 'all':
-            return window.homeTasks || [];
-        
+            // "Todas" retorna todas - o filtro hideCompleted será aplicado na renderização
+            tasks = window.homeTasks || [];
+            break;
+
         default:
-            return window.homeTasks || [];
+            tasks = window.homeTasks || [];
     }
+
+    return tasks;
 }
 
 function renderAllTasks() {
@@ -345,58 +436,84 @@ function renderListView(container) {
     console.log('🎨 === RENDERIZANDO VISTA EM LISTA ===');
     console.log('   Filtro inteligente ativo:', window.currentSmartFilter);
     console.log('   Lista atual:', window.currentListId);
-    
+
     if (!container) {
         console.error('❌ Container não encontrado');
         return;
     }
-    
+
     container.innerHTML = '';
     container.className = 'tasks-container';
 
-    // ✅ Usar currentListTasks (já filtradas)
-    const tasks = window.currentListTasks || [];
-    
-    console.log('📊 Total de tarefas a renderizar:', tasks.length);
+    // ✅ Usar currentListTasks (todas as tarefas da lista)
+    const allTasks = window.currentListTasks || [];
 
-    // ===== SE NÃO TEM TAREFAS =====
-    if (tasks.length === 0) {
-        showEmptyState();
-        return;
+    // Verificar se deve ocultar tarefas concluídas
+    let hideCompleted = false;
+    if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.getSettings === 'function') {
+        hideCompleted = window.nuraSettingsFunctions.getSettings().hideCompleted;
+    } else {
+        hideCompleted = localStorage.getItem('nura_hideCompleted') === 'true';
     }
+    console.log('👁️ Ocultar concluídas:', hideCompleted);
+
+    // Função auxiliar para filtrar tarefas concluídas
+    const filterCompleted = (tasks) => {
+        if (!hideCompleted) return tasks;
+        return tasks.filter(t => {
+            const isCompleted = t.status === 'completed' || t.status === 'concluido' || t.status === 'concluída';
+            return !isCompleted;
+        });
+    };
+
+    console.log('📊 Total de tarefas:', allTasks.length);
 
     let html = '';
-    
+
     // ✅ SE ESTÁ EM FILTRO INTELIGENTE → SEM SEÇÕES
     if (window.currentSmartFilter) {
         console.log('⚡ Modo: FILTRO INTELIGENTE (sem seções)');
-        
-        // ✅ RENDERIZAR TODAS AS TAREFAS SEM AGRUPAR
+
+        const visibleTasks = filterCompleted(allTasks);
+
+        if (visibleTasks.length === 0) {
+            showEmptyState();
+            return;
+        }
+
         html += `
             <div class="task-section" data-section-id="filter">
                 <div class="section-header">
                     <h3 class="section-title">Tarefas Filtradas</h3>
-                    <span class="section-count">${tasks.length}</span>
+                    <span class="section-count">${visibleTasks.length}</span>
                 </div>
                 <div class="section-tasks">
-                    ${tasks.map(task => createTaskHTML(task)).join('')}
+                    ${visibleTasks.map(task => createTaskHTML(task)).join('')}
                 </div>
             </div>
         `;
-        
+
     } else {
         // ✅ MODO NORMAL: COM SEÇÕES
         console.log('📁 Modo: LISTA (com seções)');
-        
+
         const sections = window.currentSections || [];
         console.log('   Seções disponíveis:', sections.length);
-        
-        // ===== TAREFAS SEM SEÇÃO =====
-        const tasksWithoutSection = tasks.filter(t => !t.section_id);
 
-        if (tasksWithoutSection.length > 0) {
+        // Se não tem tarefas E não tem seções, mostrar estado vazio
+        if (allTasks.length === 0 && sections.length === 0) {
+            showEmptyState();
+            return;
+        }
+
+        // ===== TAREFAS SEM SEÇÃO =====
+        const allTasksWithoutSection = allTasks.filter(t => !t.section_id);
+        const visibleTasksWithoutSection = filterCompleted(allTasksWithoutSection);
+
+        // Mostrar seção "Tarefas" se tiver tarefas (visíveis ou não)
+        if (allTasksWithoutSection.length > 0) {
             const isCollapsed = localStorage.getItem('section-collapsed-none') === 'true';
-            
+
             html += `
                 <div class="task-section ${isCollapsed ? 'collapsed' : ''}" data-section-id="none">
                     <div class="section-header" onclick="toggleLocalSectionCollapse('none')">
@@ -406,10 +523,11 @@ function renderListView(container) {
                             </svg>
                         </button>
                         <h3 class="section-title">Tarefas</h3>
-                        <span class="section-count">${tasksWithoutSection.length}</span>
+                        <span class="section-count">${visibleTasksWithoutSection.length}${hideCompleted && allTasksWithoutSection.length !== visibleTasksWithoutSection.length ? ` <span style="opacity:0.5">(+${allTasksWithoutSection.length - visibleTasksWithoutSection.length} ocultas)</span>` : ''}</span>
                     </div>
                     <div class="section-tasks" data-section-drop="none">
-                        ${tasksWithoutSection.map(task => createTaskHTML(task)).join('')}
+                        ${visibleTasksWithoutSection.length === 0 && hideCompleted ? '<div class="section-empty" style="opacity:0.6">Todas as tarefas estão concluídas</div>' : ''}
+                        ${visibleTasksWithoutSection.map(task => createTaskHTML(task)).join('')}
                     </div>
                 </div>
             `;
@@ -417,9 +535,10 @@ function renderListView(container) {
 
         // ===== CADA SEÇÃO =====
         sections.forEach(section => {
-            const sectionTasks = tasks.filter(t => t.section_id === section.id);
+            const allSectionTasks = allTasks.filter(t => t.section_id === section.id);
+            const visibleSectionTasks = filterCompleted(allSectionTasks);
             const isCollapsed = localStorage.getItem(`section-collapsed-${section.id}`) === 'true';
-            
+
             html += `
                 <div class="task-section ${isCollapsed ? 'collapsed' : ''}" data-section-id="${section.id}">
                     <div class="section-header" onclick="toggleLocalSectionCollapse(${section.id})">
@@ -429,7 +548,7 @@ function renderListView(container) {
                             </svg>
                         </button>
                         <h3 class="section-title">${escapeHtml(section.name)}</h3>
-                        <span class="section-count">${sectionTasks.length}</span>
+                        <span class="section-count">${visibleSectionTasks.length}${hideCompleted && allSectionTasks.length !== visibleSectionTasks.length ? ` <span style="opacity:0.5">(+${allSectionTasks.length - visibleSectionTasks.length} ocultas)</span>` : ''}</span>
                         <button class="btn-section-more" onclick="event.stopPropagation(); openEditSectionModal(${section.id})" title="Editar seção">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="1"></circle>
@@ -439,8 +558,8 @@ function renderListView(container) {
                         </button>
                     </div>
                     <div class="section-tasks" data-section-drop="${section.id}">
-                        ${sectionTasks.length === 0 ? '<div class="section-empty">Arraste tarefas para cá</div>' : ''}
-                        ${sectionTasks.map(task => createTaskHTML(task)).join('')}
+                        ${visibleSectionTasks.length === 0 ? (hideCompleted && allSectionTasks.length > 0 ? '<div class="section-empty" style="opacity:0.6">Todas as tarefas estão concluídas</div>' : '<div class="section-empty">Arraste tarefas para cá</div>') : ''}
+                        ${visibleSectionTasks.map(task => createTaskHTML(task)).join('')}
                     </div>
                 </div>
             `;
@@ -1704,11 +1823,40 @@ function closeTaskModal() {
 // Atualizar função de salvar tarefa
 async function salvarNovaTarefa() {
     console.log('🚀 === INICIANDO SALVAMENTO DE TAREFA ===');
-    
+
     const titulo = document.getElementById('inputTituloTarefa').value.trim();
-    const descricao = document.getElementById('textareaDescricaoTarefa').value.trim();
+    let descricao = document.getElementById('textareaDescricaoTarefa').value.trim();
     const dataVencimento = document.getElementById('inputDataTarefa').value;
     const prioridade = document.getElementById('selectPrioridadeTarefa').value;
+
+    // ✅ PROCESSAR DESCRIÇÃO COM IA (GERAR OU MELHORAR)
+    if (titulo) {
+        const descricaoOriginal = descricao;
+
+        if (!descricao) {
+            // Sem descrição - gerar nova
+            console.log('📝 Descrição vazia, tentando gerar com IA...');
+            showNotification('🤖 Gerando descrição com IA...');
+        } else {
+            // Com descrição - melhorar existente
+            console.log('📝 Descrição existente, tentando melhorar com IA...');
+            showNotification('🤖 Melhorando descrição com IA...');
+        }
+
+        const aiDescription = await generateAIDescription(titulo, descricaoOriginal);
+
+        if (aiDescription) {
+            descricao = aiDescription;
+            console.log(`✅ Descrição ${descricaoOriginal ? 'melhorada' : 'gerada'} com sucesso pela IA`);
+            // Atualizar o campo de descrição visualmente
+            const textareaDescricao = document.getElementById('textareaDescricaoTarefa');
+            if (textareaDescricao) {
+                textareaDescricao.value = descricao;
+            }
+        } else {
+            console.log('⚠️ IA não processou descrição (desativada ou erro)');
+        }
+    }
     
     // ✅ PEGAR SEÇÃO DO SELECT
     const selectSecao = document.getElementById('selectSecaoTarefa');

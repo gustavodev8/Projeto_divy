@@ -622,7 +622,7 @@
         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
       </svg>
       <span>Esconder concluídas</span>
-      <input type="checkbox" id="toggleHideCompletedCheckbox" class="menu-checkbox" onclick="event.stopPropagation()">
+      <input type="checkbox" id="toggleHideCompletedCheckbox" class="menu-checkbox" onchange="toggleHideCompleted()" onclick="event.stopPropagation()">
     </button>
     
     <button class="menu-item" onclick="toggleShowDetails()" role="menuitem">
@@ -840,6 +840,44 @@
     </div>
   </div>
 
+  <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE LISTA -->
+  <div class="confirm-modal-overlay" id="deleteListModalOverlay">
+    <div class="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="deleteListModalTitle">
+      <div class="confirm-modal-content">
+        <div class="confirm-modal-icon confirm-modal-icon-list">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </div>
+
+        <h3 class="confirm-modal-title" id="deleteListModalTitle">Excluir lista?</h3>
+        <p class="confirm-modal-message" id="deleteListModalMessage">
+          Todas as tarefas e seções desta lista serão permanentemente excluídas.
+        </p>
+
+        <div class="confirm-modal-task-name" id="deleteListModalName">
+          Nome da lista
+        </div>
+
+        <div class="confirm-modal-actions">
+          <button class="confirm-modal-btn confirm-modal-btn-cancel" onclick="closeDeleteListModal()">
+            Cancelar
+          </button>
+          <button class="confirm-modal-btn confirm-modal-btn-delete" id="confirmDeleteListBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL DE RENOMEAR SEÇÃO KANBAN -->
   <div class="modal-overlay" id="renameSectionModalOverlay" onclick="closeRenameSectionModal()"></div>
 
@@ -894,15 +932,6 @@
 
       <!-- Body -->
       <div class="list-modal-body">
-        <!-- Emoji -->
-        <div class="form-group">
-          <label for="editListEmoji">Emoji</label>
-          <button type="button" class="emoji-picker-button" id="editListEmojiBtn" onclick="selectEmoji()">
-            📋
-          </button>
-        </div>
-
-        <!-- Nome -->
         <div class="form-group">
           <label for="editListName">Nome da Lista</label>
           <input
@@ -915,15 +944,9 @@
           />
         </div>
 
-        <!-- Cor -->
-        <div class="form-group">
-          <label for="editListColor">Cor</label>
-          <input
-            type="color"
-            id="editListColor"
-            value="#146551"
-          />
-        </div>
+        <!-- Campos ocultos (mantidos para compatibilidade) -->
+        <input type="hidden" id="editListColor" value="#146551" />
+        <input type="hidden" id="editListEmojiBtn" value="📋" />
       </div>
 
       <!-- Footer -->
@@ -959,7 +982,6 @@
   <script src="../scripts/view-options-menu.js"></script>
   <script src="../scripts/ai-routine-panel.js"></script>
   <script src="../scripts/subtasks.js"></script>
-  <script src="../scripts/edit-list-modal-fix.js"></script>
 
   <script>
     // ===== SIDEBAR MOBILE TOGGLE =====
@@ -1111,29 +1133,30 @@
     console.log('✅ Tela Inicial carregada com responsividade');
 
      // ===== MODAL DE EDITAR LISTA =====
-    let editingListId = null;
+    // Usa window.editingListId para compartilhar com lists.js
+    window.editingListId = window.editingListId || null;
 
 function openEditListModal(listId, listName, listColor, listEmoji) {
     console.log('📝 Abrindo modal de editar lista:', listId);
-    
-    editingListId = listId;
-    
+
+    window.editingListId = listId;
+
     // Remove foco de qualquer elemento antes
     document.activeElement?.blur();
-    
+
     document.getElementById('editListName').value = listName || '';
     document.getElementById('editListColor').value = listColor || '#146551';
     document.getElementById('editListEmojiBtn').textContent = listEmoji || '📋';
-    
+
     const overlay = document.getElementById('editListModalOverlay');
     const modal = document.getElementById('editListModal');
-    
+
     overlay.style.display = 'flex';
     overlay.classList.add('active');
     modal.classList.add('active');
-    
+
     document.body.style.overflow = 'hidden';
-    
+
     // Foco com delay maior e verificação
     setTimeout(() => {
         const input = document.getElementById('editListName');
@@ -1145,51 +1168,57 @@ function openEditListModal(listId, listName, listColor, listEmoji) {
 
     function closeEditListModal() {
         console.log('❌ Fechando modal de editar lista');
-        
+
         const overlay = document.getElementById('editListModalOverlay');
         const modal = document.getElementById('editListModal');
-        
+
         overlay.classList.remove('active');
         modal.classList.remove('active');
-        
+
         setTimeout(() => {
             overlay.style.display = 'none';
-            editingListId = null;
+            window.editingListId = null;
         }, 200);
-        
+
         document.body.style.overflow = '';
     }
 
     async function saveEditedList() {
-        if (!editingListId) {
+        if (!window.editingListId) {
             console.error('❌ Nenhuma lista selecionada');
             return;
         }
-        
+
         const name = document.getElementById('editListName').value.trim();
         const color = document.getElementById('editListColor').value;
         const emoji = document.getElementById('editListEmojiBtn').textContent;
-        
+
         if (!name) {
             alert('Por favor, insira um nome para a lista');
             document.getElementById('editListName').focus();
             return;
         }
-        
-        console.log('💾 Salvando lista editada:', { id: editingListId, name, color, emoji });
-        
+
+        const user = getCurrentUser();
+        if (!user || !user.id) {
+            alert('Erro: Usuário não identificado');
+            return;
+        }
+
+        console.log('💾 Salvando lista editada:', { id: window.editingListId, name, color, emoji });
+
         try {
-            const response = await fetch(`/api/lists/${editingListId}`, {
+            const response = await fetch(`/api/lists/${window.editingListId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-user-id': getUserId()
+                    'x-user-id': user.id.toString()
                 },
                 body: JSON.stringify({
                     name,
                     color,
                     emoji,
-                    user_id: getUserId()
+                    user_id: user.id
                 })
             });
             
@@ -1240,42 +1269,16 @@ function openEditListModal(listId, listName, listColor, listEmoji) {
   </script>
 
   <script>
-// ===== PROTEÇÃO ANTI-ABERTURA AUTOMÁTICA =====
+// ===== GARANTIR MODAL FECHADO NO INÍCIO =====
 (function() {
-    console.log('🛡️ Ativando proteção do modal...');
-    
-    // Garante que o modal inicie SEMPRE fechado
     const overlay = document.getElementById('editListModalOverlay');
     const modal = document.getElementById('editListModal');
-    
+
     if (overlay && modal) {
-        // Remove qualquer classe active
         overlay.classList.remove('active');
         modal.classList.remove('active');
-        
-        // Força display none
         overlay.style.display = 'none';
-        
-        console.log('✅ Modal protegido e fechado');
     }
-    
-    // Previne abertura acidental durante os primeiros 2 segundos
-    let protectionActive = true;
-    
-    const originalOpen = window.openEditListModal;
-    window.openEditListModal = function(...args) {
-        if (protectionActive) {
-            console.warn('🚫 Tentativa de abrir modal bloqueada (proteção ativa)');
-            return;
-        }
-        return originalOpen.apply(this, args);
-    };
-    
-    // Desativa proteção após 2 segundos
-    setTimeout(() => {
-        protectionActive = false;
-        console.log('✅ Proteção desativada - modal liberado');
-    }, 2000);
 })();
 </script>
 

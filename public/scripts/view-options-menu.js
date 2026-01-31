@@ -84,19 +84,37 @@ function updateMenuState() {
     document.querySelectorAll('[data-view]').forEach(btn => {
         btn.classList.remove('active');
     });
-    
-    const currentView = settings.viewMode || 'lista';
+
+    // Prioridade: window.currentViewMode > settings.viewMode > localStorage > 'lista'
+    let currentView = window.currentViewMode
+        || settings.viewMode
+        || localStorage.getItem('nura_viewMode')
+        || 'lista';
+
+    // Normalizar para lowercase
+    currentView = currentView.toLowerCase();
+
     const activeViewBtn = document.querySelector(`[data-view="${currentView}"]`);
     if (activeViewBtn) {
         activeViewBtn.classList.add('active');
         console.log('✅ Modo ativo:', currentView);
+    } else {
+        // Se não encontrou, marcar 'lista' como padrão
+        const listaBtn = document.querySelector('[data-view="lista"]');
+        if (listaBtn) listaBtn.classList.add('active');
     }
     
     // ✅ Atualizar checkbox "Esconder concluídas"
     const hideCompletedCheckbox = document.getElementById('toggleHideCompletedCheckbox');
     if (hideCompletedCheckbox) {
-        hideCompletedCheckbox.checked = settings.hideCompleted || false;
-        console.log('✅ Esconder concluídas:', settings.hideCompleted);
+        // Verificar também localStorage individual
+        const localHideCompleted = localStorage.getItem('nura_hideCompleted');
+        const hideCompletedValue = localHideCompleted !== null
+            ? localHideCompleted === 'true'
+            : (settings.hideCompleted || false);
+
+        hideCompletedCheckbox.checked = hideCompletedValue;
+        console.log('✅ Esconder concluídas:', hideCompletedValue);
     }
     
     // ✅ Atualizar checkbox "Mostrar detalhes"
@@ -108,19 +126,29 @@ function updateMenuState() {
 }
 
 // ===== MUDAR MODO DE VISUALIZAÇÃO =====
-// ===== MUDAR MODO DE VISUALIZAÇÃO =====
-function changeViewMode(mode) {
+async function changeViewMode(mode) {
     console.log('🔄 Mudando modo de visualização para:', mode);
-    
+
     // Atualizar variável global
     window.currentViewMode = mode;
-    
-    // Salvar nas configurações
-    if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.updateSettings === 'function') {
-        window.nuraSettingsFunctions.updateSettings({ viewMode: mode });
-        console.log('✅ Modo salvo nas configurações:', mode);
+
+    // Salvar nas configurações via settings.js (salva no banco de dados)
+    if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.setViewMode === 'function') {
+        await window.nuraSettingsFunctions.setViewMode(mode);
+        console.log('✅ Modo salvo no banco de dados:', mode);
+    } else {
+        // Fallback: salvar no localStorage
+        localStorage.setItem('nura_viewMode', mode);
+
+        // Atualizar objeto de settings se existir
+        if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.getSettings === 'function') {
+            const settings = window.nuraSettingsFunctions.getSettings();
+            settings.viewMode = mode;
+        }
+
+        console.log('⚠️ Modo salvo apenas no localStorage:', mode);
     }
-    
+
     // Atualizar indicadores visuais no menu
     document.querySelectorAll('.menu-item[data-view]').forEach(item => {
         const itemView = item.getAttribute('data-view');
@@ -130,10 +158,10 @@ function changeViewMode(mode) {
             item.classList.remove('active');
         }
     });
-    
+
     // Fechar menu
     closeViewOptionsMenu();
-    
+
     // Renderizar com o novo modo
     console.log('📊 Chamando renderAllTasks com modo:', mode);
     if (typeof renderAllTasks === 'function') {
@@ -150,31 +178,52 @@ window.changeViewMode = changeViewMode;
 
 // ===== ESCONDER CONCLUÍDAS =====
 async function toggleHideCompleted() {
-    console.log('👁️ Toggle: Esconder concluídas');
-    
-    // ✅ Salvar via settings.js
+    console.log('👁️ Toggle: Esconder concluídas (menu 3 pontinhos)');
+
+    // Pegar valor atual
+    let currentValue = false;
+
+    if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.getSettings === 'function') {
+        currentValue = window.nuraSettingsFunctions.getSettings().hideCompleted;
+    } else {
+        const stored = localStorage.getItem('nura_hideCompleted');
+        currentValue = stored === 'true';
+    }
+
+    const newValue = !currentValue;
+    console.log('   Valor atual:', currentValue);
+    console.log('   Novo valor:', newValue);
+
+    // Usar settings.js se disponível
     if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.toggleHideCompleted === 'function') {
-        const settings = window.nuraSettingsFunctions.getSettings();
-        const newValue = !settings.hideCompleted;
-        
-        console.log('   Valor atual:', settings.hideCompleted);
-        console.log('   Novo valor:', newValue);
-        
         await window.nuraSettingsFunctions.toggleHideCompleted(newValue);
     } else {
-        // FALLBACK: localStorage
-        const stored = localStorage.getItem('nura_settings') || '{}';
-        const settings = JSON.parse(stored);
-        settings.hideCompleted = !settings.hideCompleted;
-        localStorage.setItem('nura_settings', JSON.stringify(settings));
-        
-        // Aplicar filtros
-        if (typeof applyTaskFilters === 'function') {
-            applyTaskFilters();
+        // FALLBACK: salvar no localStorage e aplicar
+        localStorage.setItem('nura_hideCompleted', newValue.toString());
+
+        // Aplicar diretamente
+        document.querySelectorAll('[data-task-status="completed"]').forEach(task => {
+            task.style.display = newValue ? 'none' : '';
+        });
+
+        const completedColumn = document.querySelector('[data-kanban-column="completed"]');
+        if (completedColumn) {
+            completedColumn.style.display = newValue ? 'none' : '';
         }
+
+        // Re-renderizar se possível
+        if (typeof renderAllTasks === 'function') {
+            renderAllTasks();
+        }
+
+        showNotification(newValue ? '👁️ Tarefas concluídas ocultadas' : '👁️ Tarefas concluídas visíveis');
     }
-    
+
+    // Atualizar estado do menu
     updateMenuState();
+
+    // Fechar menu após toggle
+    closeViewOptionsMenu();
 }
 
 // ===== MOSTRAR DETALHES =====
@@ -278,10 +327,30 @@ window.addEventListener('settingsUpdated', (event) => {
 
 // ✅ OUVIR MUDANÇAS DE OUTRAS ABAS/PÁGINAS via localStorage
 window.addEventListener('storage', (event) => {
+    // Detectar mudança no hideCompleted
+    if (event.key === 'nura_hideCompleted') {
+        console.log('📢 Detectada mudança de hideCompleted em outra aba:', event.newValue);
+
+        // Atualizar settings global
+        if (window.nuraSettingsFunctions) {
+            const currentSettings = window.nuraSettingsFunctions.getSettings();
+            currentSettings.hideCompleted = event.newValue === 'true';
+        }
+
+        // Atualizar menu
+        updateMenuState();
+
+        // Re-renderizar tarefas
+        if (typeof renderAllTasks === 'function') {
+            renderAllTasks();
+        }
+        return;
+    }
+
     if (event.key === 'nura_settings_update_trigger') {
         console.log('📢 Detectada mudança de settings em outra aba!');
         console.log('   Timestamp:', event.newValue);
-        
+
         // Aguardar 300ms para localStorage estar atualizado
         setTimeout(() => {
             // Recarregar settings
@@ -290,7 +359,7 @@ window.addEventListener('storage', (event) => {
                 try {
                     const newSettings = JSON.parse(stored);
                     console.log('📥 Novos settings:', newSettings);
-                    
+
                     // ✅ Atualizar objeto global se existe
                     if (window.nuraSettingsFunctions) {
                         const currentSettings = window.nuraSettingsFunctions.getSettings();

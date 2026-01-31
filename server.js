@@ -1222,7 +1222,7 @@ app.put('/api/lists/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { name, emoji, color, position } = req.body;
-        const user_id = req.body.user_id || req.headers['x-user-id'];
+        const userId = req.body.user_id || req.headers['x-user-id'];
 
         if (!userId) {
             return res.status(401).json({
@@ -1284,7 +1284,7 @@ app.put('/api/lists/:id', async (req, res) => {
 app.delete('/api/lists/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const user_id = req.query.user_id || req.headers['x-user-id'];
+        const userId = req.query.user_id || req.headers['x-user-id'];
 
         if (!userId) {
             return res.status(401).json({
@@ -1293,7 +1293,9 @@ app.delete('/api/lists/:id', async (req, res) => {
             });
         }
 
-        // Verificar se a lista existe
+        console.log(`🗑️ Tentando excluir lista ${id} do usuário ${userId}`);
+
+        // Verificar se a lista existe (db.get funciona para ambos SQLite e PostgreSQL)
         const list = await db.get(
             "SELECT * FROM lists WHERE id = ? AND user_id = ?",
             [id, userId]
@@ -1314,11 +1316,24 @@ app.delete('/api/lists/:id', async (req, res) => {
             });
         }
 
-        // Remover list_id das tarefas associadas
-        await db.run(
-            "UPDATE tasks SET list_id = NULL WHERE list_id = ?",
+        // Contar tarefas que serão excluídas
+        const taskCount = await db.get(
+            "SELECT COUNT(*) as count FROM tasks WHERE list_id = ?",
             [id]
         );
+        const deletedTasks = taskCount ? taskCount.count : 0;
+
+        // Excluir subtarefas das tarefas da lista
+        await db.run(
+            "DELETE FROM subtasks WHERE task_id IN (SELECT id FROM tasks WHERE list_id = ?)",
+            [id]
+        );
+
+        // Excluir tarefas da lista
+        await db.run("DELETE FROM tasks WHERE list_id = ?", [id]);
+
+        // Excluir seções da lista
+        await db.run("DELETE FROM sections WHERE list_id = ?", [id]);
 
         // Excluir lista
         await db.run(
@@ -1326,7 +1341,7 @@ app.delete('/api/lists/:id', async (req, res) => {
             [id, userId]
         );
 
-        console.log(`✅ Lista "${list.name}" excluída`);
+        console.log(`✅ Lista "${list.name}" excluída com ${deletedTasks} tarefas`);
 
         res.json({
             success: true,
@@ -2000,10 +2015,10 @@ Apenas a rotina formatada, sem explicações.
     }
 });
 
-// ===== API - GERAR DESCRIÇÃO AUTOMÁTICA POR IA =====
+// ===== API - GERAR OU MELHORAR DESCRIÇÃO COM IA =====
 app.post('/api/ai/generate-description', async (req, res) => {
     try {
-        const { taskTitle, detailLevel = 'medio' } = req.body;
+        const { taskTitle, detailLevel = 'medio', existingDescription = '' } = req.body;
 
         if (!taskTitle || taskTitle.trim() === '') {
             return res.status(400).json({
@@ -2012,25 +2027,57 @@ app.post('/api/ai/generate-description', async (req, res) => {
             });
         }
 
-        console.log(`🤖 Gerando descrição IA para tarefa: "${taskTitle}" (Nível: ${detailLevel})`);
+        const hasExistingDescription = existingDescription && existingDescription.trim() !== '';
+        const mode = hasExistingDescription ? 'melhorar' : 'gerar';
+
+        console.log(`🤖 ${mode === 'melhorar' ? 'Melhorando' : 'Gerando'} descrição IA para tarefa: "${taskTitle}" (Nível: ${detailLevel})`);
 
         // Define o nível de detalhamento
         let detailPrompt = '';
         switch(detailLevel) {
             case 'baixo':
-                detailPrompt = 'Crie uma descrição MUITO BREVE (máximo 20 palavras) e direta.';
+                detailPrompt = hasExistingDescription
+                    ? 'Melhore a descrição mantendo-a MUITO BREVE (máximo 20 palavras) e direta.'
+                    : 'Crie uma descrição MUITO BREVE (máximo 20 palavras) e direta.';
                 break;
             case 'medio':
-                detailPrompt = 'Crie uma descrição equilibrada (30-50 palavras) com contexto relevante.';
+                detailPrompt = hasExistingDescription
+                    ? 'Melhore e expanda a descrição para algo equilibrado (30-50 palavras) com contexto relevante.'
+                    : 'Crie uma descrição equilibrada (30-50 palavras) com contexto relevante.';
                 break;
             case 'alto':
-                detailPrompt = 'Crie uma descrição DETALHADA (60-100 palavras) com passos, contexto e objetivos.';
+                detailPrompt = hasExistingDescription
+                    ? 'Melhore e expanda significativamente a descrição para algo DETALHADO (60-100 palavras) com passos, contexto e objetivos.'
+                    : 'Crie uma descrição DETALHADA (60-100 palavras) com passos, contexto e objetivos.';
                 break;
             default:
-                detailPrompt = 'Crie uma descrição equilibrada (30-50 palavras) com contexto relevante.';
+                detailPrompt = hasExistingDescription
+                    ? 'Melhore e expanda a descrição para algo equilibrado (30-50 palavras) com contexto relevante.'
+                    : 'Crie uma descrição equilibrada (30-50 palavras) com contexto relevante.';
         }
 
-        const prompt = `Você é um assistente de produtividade inteligente.
+        let prompt;
+
+        if (hasExistingDescription) {
+            // Prompt para MELHORAR descrição existente
+            prompt = `Você é um assistente de produtividade inteligente.
+
+Tarefa: "${taskTitle}"
+Descrição atual do usuário: "${existingDescription}"
+
+${detailPrompt}
+
+A descrição melhorada deve:
+- Manter a essência e intenção da descrição original do usuário
+- Expandir com mais detalhes e contexto relevante
+- Tornar o texto mais claro e profissional
+- Adicionar passos ou considerações úteis quando aplicável
+- Não usar emojis ou formatação especial
+
+Responda APENAS com a descrição melhorada, sem introduções ou explicações adicionais.`;
+        } else {
+            // Prompt para GERAR nova descrição
+            prompt = `Você é um assistente de produtividade inteligente.
 
 Tarefa: "${taskTitle}"
 
@@ -2044,6 +2091,7 @@ A descrição deve:
 - Não usar emojis ou formatação especial
 
 Responda APENAS com a descrição, sem introduções ou explicações adicionais.`;
+        }
 
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
@@ -2052,20 +2100,21 @@ Responda APENAS com a descrição, sem introduções ou explicações adicionais
         const response = await result.response;
         const description = response.text().trim();
 
-        console.log("✅ Descrição gerada com sucesso!");
+        console.log(`✅ Descrição ${mode === 'melhorar' ? 'melhorada' : 'gerada'} com sucesso!`);
 
         res.json({
             success: true,
             description,
             taskTitle,
             detailLevel,
+            mode,
             timestamp: new Date().toISOString()
         });
 
     } catch (err) {
-        console.error("💥 ERRO ao gerar descrição:", err.message);
+        console.error("💥 ERRO ao gerar/melhorar descrição:", err.message);
 
-        let errorMessage = "Erro ao gerar descrição automática";
+        let errorMessage = "Erro ao processar descrição automática";
 
         if (err.message?.includes("API key")) {
             errorMessage = "API Key do Gemini inválida";

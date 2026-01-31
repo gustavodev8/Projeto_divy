@@ -179,58 +179,85 @@ body {
     line-height: 1.4;
 }
 
-/* ===== SWITCH MODERNO ===== */
+/* ===== CHECKBOX MODERNO ===== */
 .switch {
+    display: block;
     position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 24px;
+    cursor: pointer;
+    font-size: 1rem;
+    user-select: none;
     flex-shrink: 0;
 }
 
 .switch input {
+    position: absolute;
     opacity: 0;
-    width: 0;
+    cursor: pointer;
     height: 0;
+    width: 0;
 }
 
 .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--settings-muted);
-    border: 1px solid var(--settings-border);
-    border-radius: 12px;
-    transition: all 150ms ease;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 16px;
-    width: 16px;
-    left: 3px;
-    bottom: 3px;
-    background: white;
+    --clr: #0B6E4F;
+    position: relative;
+    display: block;
+    height: 1.25em;
+    width: 1.25em;
+    background-color: var(--settings-border);
     border-radius: 50%;
-    transition: all 150ms ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: 300ms;
 }
 
 .switch input:checked + .slider {
-    background: var(--settings-primary);
-    border-color: var(--settings-primary);
+    background-color: var(--clr);
+    border-radius: 0.35rem;
+    animation: pulse 500ms ease-in-out;
 }
 
-.switch input:checked + .slider:before {
-    transform: translateX(20px);
+.slider:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.switch input:checked + .slider:after {
+    display: block;
+}
+
+.switch .slider:after {
+    left: 0.45em;
+    top: 0.22em;
+    width: 0.22em;
+    height: 0.45em;
+    border: solid #E0E0E2;
+    border-width: 0 0.12em 0.12em 0;
+    transform: rotate(45deg);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 #0B6E4F90;
+        rotate: 20deg;
+    }
+    50% {
+        rotate: -20deg;
+    }
+    75% {
+        box-shadow: 0 0 0 8px #0B6E4F60;
+    }
+    100% {
+        box-shadow: 0 0 0 10px #0B6E4F00;
+        rotate: 0;
+    }
 }
 
 .switch:hover .slider {
-    opacity: 0.9;
+    opacity: 0.85;
+}
+
+/* Dark mode ajuste */
+.dark-mode .slider {
+    background-color: var(--settings-muted);
 }
 
 /* ===== SELECT MINIMALISTA ===== */

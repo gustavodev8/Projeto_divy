@@ -16,56 +16,96 @@ console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
     // ===== RENDERIZAR KANBAN =====
     function renderKanbanView(container) {
         console.log('🎯 renderKanbanView() chamado');
-        
+
         if (!container) {
             console.error('❌ Container não encontrado');
             return;
         }
 
         const settings = window.nuraSettingsFunctions ? window.nuraSettingsFunctions.getSettings() : {};
-        
+
+        // Verificar se deve ocultar tarefas concluídas
+        let hideCompleted = false;
+        if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.getSettings === 'function') {
+            hideCompleted = window.nuraSettingsFunctions.getSettings().hideCompleted;
+        } else {
+            hideCompleted = localStorage.getItem('nura_hideCompleted') === 'true';
+        }
+        console.log('👁️ Kanban - Ocultar concluídas:', hideCompleted);
+
+        // Função auxiliar para filtrar tarefas concluídas
+        const filterCompleted = (tasks) => {
+            if (!hideCompleted) return tasks;
+            return tasks.filter(t => {
+                const isCompleted = t.status === 'completed' || t.status === 'concluido' || t.status === 'concluída';
+                return !isCompleted;
+            });
+        };
+
         container.innerHTML = '';
         container.className = 'kanban-board';
 
-        let tasks = window.currentSmartFilter 
+        let allTasks = window.currentSmartFilter
             ? filterTasksBySmartFilter(window.currentSmartFilter)
             : (window.currentListTasks || []);
-        
+
         const sections = window.currentSections || [];
-        
-        console.log('📊 Kanban:', tasks.length, 'tarefas |', sections.length, 'seções');
+
+        console.log('📊 Kanban:', allTasks.length, 'tarefas |', sections.length, 'seções');
 
         const columnsWrapper = document.createElement('div');
         columnsWrapper.className = 'kanban-columns';
 
         if (window.currentSmartFilter) {
             const statusColumns = {
-                pending: { title: '📋 Pendente', color: '#f39c12', tasks: [] },
-                in_progress: { title: '🔄 Em Progresso', color: '#3498db', tasks: [] },
-                completed: { title: '✅ Concluído', color: '#2ecc71', tasks: [] }
+                pending: { title: '📋 Pendente', color: '#f39c12', tasks: [], allTasks: [] },
+                in_progress: { title: '🔄 Em Progresso', color: '#3498db', tasks: [], allTasks: [] },
+                completed: { title: '✅ Concluído', color: '#2ecc71', tasks: [], allTasks: [] }
             };
 
-            tasks.forEach(task => {
+            allTasks.forEach(task => {
                 let status = task.status.toLowerCase();
                 if (status === 'concluída' || status === 'concluido') status = 'completed';
                 else if (status === 'progresso' || status === 'in_progress') status = 'in_progress';
                 else status = 'pending';
-                
-                statusColumns[status].tasks.push(task);
+
+                statusColumns[status].allTasks.push(task);
             });
 
+            // Aplicar filtro hideCompleted
             Object.keys(statusColumns).forEach(key => {
-                columnsWrapper.appendChild(createStatusColumn(key, statusColumns[key]));
+                statusColumns[key].tasks = filterCompleted(statusColumns[key].allTasks);
+            });
+
+            // Ocultar coluna "Concluído" se hideCompleted estiver ativo
+            Object.keys(statusColumns).forEach(key => {
+                if (hideCompleted && key === 'completed') return; // Pular coluna de concluídos
+                columnsWrapper.appendChild(createStatusColumn(key, statusColumns[key], hideCompleted));
             });
         } else {
-            const noSectionTasks = tasks.filter(t => !t.section_id);
-            if (noSectionTasks.length > 0 || sections.length === 0) {
-                columnsWrapper.appendChild(createColumn({ id: null, name: 'Tarefas', emoji: null }, noSectionTasks));
+            // Tarefas sem seção
+            const allNoSectionTasks = allTasks.filter(t => !t.section_id);
+            const visibleNoSectionTasks = filterCompleted(allNoSectionTasks);
+
+            if (allNoSectionTasks.length > 0 || sections.length === 0) {
+                columnsWrapper.appendChild(createColumn(
+                    { id: null, name: 'Tarefas', emoji: null },
+                    visibleNoSectionTasks,
+                    allNoSectionTasks.length,
+                    hideCompleted
+                ));
             }
 
+            // Cada seção
             sections.forEach(section => {
-                const sectionTasks = tasks.filter(t => t.section_id === section.id);
-                columnsWrapper.appendChild(createColumn(section, sectionTasks));
+                const allSectionTasks = allTasks.filter(t => t.section_id === section.id);
+                const visibleSectionTasks = filterCompleted(allSectionTasks);
+                columnsWrapper.appendChild(createColumn(
+                    section,
+                    visibleSectionTasks,
+                    allSectionTasks.length,
+                    hideCompleted
+                ));
             });
 
             if (window.currentListId) {
@@ -89,46 +129,52 @@ console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
         if (!window.currentSmartFilter) {
             initDragDrop();
         }
-        
+
         console.log('✅ Kanban renderizado');
     }
 
     // ===== CRIAR COLUNA POR STATUS =====
-    function createStatusColumn(statusKey, column) {
+    function createStatusColumn(statusKey, column, hideCompleted) {
         const div = document.createElement('div');
         div.className = 'kanban-column';
         div.setAttribute('data-kanban-status', statusKey);
-        
+
+        const hiddenCount = column.allTasks.length - column.tasks.length;
+        const hiddenText = hideCompleted && hiddenCount > 0 ? ` <span style="opacity:0.5">(+${hiddenCount})</span>` : '';
+
         div.innerHTML = `
             <div class="kanban-column-header" style="border-bottom: 3px solid ${column.color}">
                 <h3 class="kanban-column-title">${column.title}</h3>
-                <span class="kanban-column-count" style="background: ${column.color}">${column.tasks.length}</span>
+                <span class="kanban-column-count" style="background: ${column.color}">${column.tasks.length}${hiddenText}</span>
             </div>
             <div class="kanban-column-content">
                 ${column.tasks.length === 0 ? '<div class="kanban-empty">Nenhuma tarefa</div>' : ''}
             </div>
         `;
-        
+
         const content = div.querySelector('.kanban-column-content');
         column.tasks.forEach(task => {
             content.appendChild(createCard(task));
         });
-        
+
         return div;
     }
 
     // ===== CRIAR COLUNA POR SEÇÃO =====
-    function createColumn(section, tasks) {
+    function createColumn(section, visibleTasks, totalCount, hideCompleted) {
         const div = document.createElement('div');
         div.className = 'kanban-column';
         div.setAttribute('data-section-id', section.id || 'none');
-        
+
+        const hiddenCount = totalCount - visibleTasks.length;
+        const hiddenText = hideCompleted && hiddenCount > 0 ? ` <span style="opacity:0.5">(+${hiddenCount} ocultas)</span>` : '';
+
         const header = document.createElement('div');
         header.className = 'kanban-column-header';
         header.innerHTML = `
             <div class="kanban-column-info">
                 <h3 class="kanban-column-title">${section.emoji ? section.emoji + ' ' : ''}${section.name}</h3>
-                <span class="kanban-column-count">${tasks.filter(t => t.status !== 'completed').length}</span>
+                <span class="kanban-column-count">${visibleTasks.length}${hiddenText}</span>
             </div>
             <div class="kanban-column-actions">
                 <button class="btn-kanban-icon" onclick="window.addTaskToKanbanSection(${section.id || null})">
@@ -148,24 +194,28 @@ console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
                 ` : ''}
             </div>
         `;
-        
+
         const content = document.createElement('div');
         content.className = 'kanban-cards-container';
         content.setAttribute('data-section-drop', section.id || 'none');
-        
-        if (tasks.length === 0) {
+
+        if (visibleTasks.length === 0) {
+            const emptyMessage = hideCompleted && totalCount > 0
+                ? 'Todas as tarefas estão concluídas'
+                : 'Nenhuma tarefa';
+
             content.innerHTML = `
-                <div class="kanban-empty-state">
+                <div class="kanban-empty-state" ${hideCompleted && totalCount > 0 ? 'style="opacity:0.6"' : ''}>
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                     </svg>
-                    <p>Nenhuma tarefa</p>
+                    <p>${emptyMessage}</p>
                 </div>
             `;
         } else {
-            tasks.forEach(task => content.appendChild(createCard(task)));
+            visibleTasks.forEach(task => content.appendChild(createCard(task)));
         }
-        
+
         div.appendChild(header);
         div.appendChild(content);
         return div;

@@ -73,7 +73,7 @@ function renderLists() {
         
         listElement.innerHTML = `
             <div class="list-item-content" onclick="selectList(${list.id})">
-                <span class="list-emoji" style="background: ${list.color || '#146551'}; border-color: ${list.color || '#146551'}"></span>
+                <span class="list-dot"></span>
                 <span class="list-name">${list.name}</span>
                 <span class="list-count">0</span>
             </div>
@@ -215,6 +215,7 @@ function editList(listId) {
 
     // Guarda o ID da lista sendo editada
     window.editingListId = listId;
+    console.log('✅ window.editingListId definido como:', window.editingListId);
 
     // Abre o modal
     overlay.style.display = 'flex';
@@ -266,18 +267,60 @@ async function submitEditList(listId) {
 }
 
 // ===== EXCLUIR LISTA =====
-async function deleteList(listId) {
+let pendingDeleteListId = null;
+
+function deleteList(listId) {
     const list = window.userLists.find(l => l.id === listId);
     if (!list) return;
 
     if (list.is_default) {
-        alert('Não é possível excluir a lista padrão');
+        showNotification('❌ Não é possível excluir a lista padrão');
         return;
     }
 
-    if (!confirm(`Excluir lista "${list.name}"? As tarefas e seções serão movidas para a lista padrão.`)) return;
+    // Abrir modal de confirmação
+    pendingDeleteListId = listId;
+    showDeleteListModal(list.name);
+}
 
+// ===== MOSTRAR MODAL DE EXCLUIR LISTA =====
+function showDeleteListModal(listName) {
+    const overlay = document.getElementById('deleteListModalOverlay');
+    const nameElement = document.getElementById('deleteListModalName');
+
+    if (nameElement) {
+        nameElement.textContent = listName;
+    }
+
+    if (overlay) {
+        overlay.classList.add('active');
+    }
+
+    // Configurar botão de confirmar
+    const confirmBtn = document.getElementById('confirmDeleteListBtn');
+    if (confirmBtn) {
+        confirmBtn.onclick = confirmDeleteList;
+    }
+}
+
+// ===== FECHAR MODAL DE EXCLUIR LISTA =====
+function closeDeleteListModal() {
+    const overlay = document.getElementById('deleteListModalOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+    pendingDeleteListId = null;
+}
+
+// ===== CONFIRMAR EXCLUSÃO DA LISTA =====
+async function confirmDeleteList() {
+    if (!pendingDeleteListId) return;
+
+    const listId = pendingDeleteListId;
     const user = getCurrentUser();
+
+    // Fechar modal
+    closeDeleteListModal();
 
     try {
         const response = await fetch(`${LISTS_API}/${listId}?user_id=${user.id}`, {
@@ -289,7 +332,7 @@ async function deleteList(listId) {
 
         if (data.success) {
             showNotification('🗑️ Lista excluída');
-            
+
             // Se estava na lista excluída, voltar para lista padrão
             if (window.currentListId === listId) {
                 const defaultList = window.userLists.find(l => l.is_default);
@@ -297,92 +340,12 @@ async function deleteList(listId) {
                     await selectList(defaultList.id);
                 }
             }
-            
+
             await loadLists();
         }
     } catch (error) {
         console.error('❌ Erro ao excluir lista:', error);
         showNotification('❌ Erro ao excluir lista');
-    }
-}
-
-// ===== MODAL CRIAR LISTA =====
-function showCreateListModal() {
-    const modalHTML = `
-        <div class="list-modal-overlay active" id="listModalOverlay" onclick="closeCreateListModal()">
-            <div class="list-modal" onclick="event.stopPropagation()">
-                <div class="list-modal-header">
-                    <h3 class="list-modal-title">Nova Lista</h3>
-                    <button class="btn-close-modal" onclick="closeCreateListModal()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="list-modal-body">
-                    <div class="list-form-field">
-                        <label class="list-form-label">Nome da Lista</label>
-                        <input 
-                            type="text" 
-                            id="listNameInput" 
-                            class="list-form-input"
-                            placeholder="Ex: Trabalho, Estudos, Casa"
-                            autocomplete="off"
-                        />
-                    </div>
-                </div>
-                
-                <div class="list-modal-footer">
-                    <button class="list-btn-cancel" onclick="closeCreateListModal()">
-                        Cancelar
-                    </button>
-                    <button class="list-btn-save" onclick="saveNewList()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Criar Lista
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    document.body.style.overflow = 'hidden';
-    
-    // Focus no input
-    setTimeout(() => {
-        document.getElementById('listNameInput')?.focus();
-    }, 100);
-}
-
-function closeCreateListModal() {
-    const overlay = document.getElementById('listModalOverlay');
-    if (overlay) {
-        overlay.remove();
-    }
-    document.body.style.overflow = '';
-}
-
-async function submitCreateList() {
-    const name = document.getElementById('newListName').value.trim();
-    const emoji = document.getElementById('newListEmoji').value.trim() || '📋';
-    const color = document.getElementById('newListColor').value;
-
-    if (!name) {
-        alert('Digite um nome para a lista');
-        return;
-    }
-
-    const listId = await createList(name, emoji, color);
-    document.querySelector('.section-modal-overlay')?.remove();
-    
-    // Selecionar a nova lista
-    if (listId) {
-        await selectList(listId);
     }
 }
 
@@ -416,13 +379,13 @@ function showCreateListModal() {
                         </svg>
                     </button>
                 </div>
-                
+
                 <div class="list-modal-body">
                     <div class="list-form-field">
                         <label class="list-form-label">Nome da Lista</label>
-                        <input 
-                            type="text" 
-                            id="listNameInput" 
+                        <input
+                            type="text"
+                            id="listNameInput"
                             class="list-form-input"
                             placeholder="Ex: Trabalho, Estudos, Casa"
                             autocomplete="off"
@@ -430,7 +393,7 @@ function showCreateListModal() {
                         />
                     </div>
                 </div>
-                
+
                 <div class="list-modal-footer">
                     <button class="list-btn-cancel" onclick="closeCreateListModal()">
                         Cancelar
@@ -446,10 +409,10 @@ function showCreateListModal() {
             </div>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     document.body.style.overflow = 'hidden';
-    
+
     setTimeout(() => {
         document.getElementById('listNameInput')?.focus();
     }, 100);
@@ -465,25 +428,25 @@ function closeCreateListModal() {
 
 async function saveNewList() {
     console.log('💾 Salvando nova lista...');
-    
+
     const nameInput = document.getElementById('listNameInput');
     const listName = nameInput?.value.trim();
-    
+
     if (!listName) {
         alert('❌ Por favor, digite um nome para a lista');
         nameInput?.focus();
         return;
     }
-    
+
     const user = getCurrentUser();
     if (!user) {
         alert('❌ Usuário não encontrado. Faça login novamente.');
         return;
     }
-    
+
     try {
         console.log('📤 Enviando lista para o servidor:', listName);
-        
+
         const response = await fetch(`${API_URL}/api/lists`, {
             method: 'POST',
             headers: {
@@ -499,25 +462,21 @@ async function saveNewList() {
         
         if (result.success) {
             console.log('✅ Lista criada com sucesso:', result.list);
-            
+
             // Fechar modal
             closeCreateListModal();
-            
-            // Recarregar listas
-            if (typeof loadUserLists === 'function') {
-                await loadUserLists();
-            }
-            
+
+            // Recarregar listas na sidebar
+            await loadLists();
+
             // Mostrar notificação
-            if (typeof showNotification === 'function') {
-                showNotification('✅ Lista criada com sucesso!');
-            }
-            
+            showNotification('✅ Lista criada com sucesso!');
+
             // Selecionar a nova lista
             if (result.list && result.list.id) {
-                selectList(result.list.id);
+                await selectList(result.list.id);
             }
-            
+
         } else {
             console.error('❌ Erro ao criar lista:', result.error);
             alert('❌ Erro ao criar lista: ' + (result.error || 'Erro desconhecido'));
@@ -540,8 +499,12 @@ window.selectList = selectList;
 window.createList = createList;
 window.editList = editList;
 window.deleteList = deleteList;
+window.showDeleteListModal = showDeleteListModal;
+window.closeDeleteListModal = closeDeleteListModal;
+window.confirmDeleteList = confirmDeleteList;
 window.showCreateListModal = showCreateListModal;
-window.submitCreateList = submitCreateList;
+window.closeCreateListModal = closeCreateListModal;
+window.saveNewList = saveNewList;
 window.submitEditList = submitEditList;
 window.updateListTaskCounts = updateListTaskCounts;
 

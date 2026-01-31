@@ -5,27 +5,58 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' http://localhost:3000 https://*.railway.app; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Nura.ia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">     
 </head>
 
 <body>
     <main>
         <section id="logins">
-            <div id="imagem"></div>
+            <div id="imagem">
+                <span class="logo-icon">✦</span>
+            </div>
             
             <div id="text">
                 <h1>Bem-vindo de volta</h1>
-                <p class="subtitle">Entre com suas credenciais</p>
+                <p class="subtitle">Entre com suas credenciais para continuar</p>
                 
                 <form id="login-form">
                     <p id="usu">
-                        <label for="iusuario">Usuário ou E-mail</label>
-                        <input type="text" name="email" id="iusuario" placeholder="Digite seu usuário" required minlength="3">
+                        <label for="iusuario">
+                            <span class="label-text">Usuário ou E-mail</span>
+                        </label>
+                        <span class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <input type="text" name="email" id="iusuario" placeholder="Digite seu usuário" required minlength="3">
+                        </span>
                     </p>
 
                     <p id="sen">
-                        <label for="isenha">Senha</label>
-                        <input type="password" name="senha" id="isenha" placeholder="Digite sua senha" required minlength="8">
+                        <label for="isenha">
+                            <span class="label-text">Senha</span>
+                        </label>
+                        <span class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <input type="password" name="senha" id="isenha" placeholder="Digite sua senha" required minlength="8">
+                            <button type="button" class="toggle-password" aria-label="Mostrar senha">
+                                <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
+                        </span>
                         <a href="#" class="forgot-password">Esqueceu a senha?</a>
                     </p>
 
@@ -33,7 +64,7 @@
                         <input type="submit" value="Entrar" id="ienviar">
                     </p>
                     
-                    <div id="login-message" style="text-align: center; margin-top: 10px; display: none; padding: 10px; border-radius: 5px;"></div>
+                    <div id="login-message"></div>
                 </form>
             </div>
 
@@ -45,5 +76,23 @@
     </main>
 
     <script src="../scripts/login.js?v=3"></script>
+    <script>
+        // Toggle password visibility
+        document.querySelector('.toggle-password')?.addEventListener('click', function() {
+            const input = document.getElementById('isenha');
+            const eyeOpen = this.querySelector('.eye-open');
+            const eyeClosed = this.querySelector('.eye-closed');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeOpen.style.display = 'none';
+                eyeClosed.style.display = 'block';
+            } else {
+                input.type = 'password';
+                eyeOpen.style.display = 'block';
+                eyeClosed.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
