@@ -1162,6 +1162,7 @@ body {
   z-index: 999;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: all 250ms ease;
 }
 
@@ -1169,6 +1170,7 @@ body {
 .modal-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .task-modal,
@@ -1498,10 +1500,12 @@ body {
   height: 100%;
   z-index: 999;
   display: none;
+  pointer-events: none;
 }
 
 .view-options-overlay.active {
   display: block;
+  pointer-events: auto;
 }
 
 /* ===== TASK DETAIL PANEL ===== */
@@ -1534,6 +1538,7 @@ body {
   backdrop-filter: blur(2px);
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: all 200ms ease;
   z-index: 499;
 }
@@ -1541,6 +1546,7 @@ body {
 .task-detail-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .task-detail-header {
@@ -2374,12 +2380,14 @@ body {
     align-items: center;
     justify-content: center;
     opacity: 0;
+    pointer-events: none;
     transition: opacity 200ms ease;
 }
 
 .confirm-modal-overlay.active {
     display: flex !important;
     opacity: 1 !important;
+    pointer-events: auto !important;
 }
 
 .confirm-modal {
@@ -2543,11 +2551,13 @@ body {
     display: none !important;
     align-items: center !important;
     justify-content: center !important;
+    pointer-events: none !important;
 }
 
 .list-modal-overlay.active {
     display: flex !important;
     opacity: 1 !important;
+    pointer-events: auto !important;
 }
 
 .list-modal {
@@ -2612,7 +2622,7 @@ body {
 
 /* Mobile - List Modal Bottom Sheet */
 @media (max-width: 768px) {
-    .list-modal-overlay {
+    .list-modal-overlay.active {
         align-items: flex-end !important;
         justify-content: center !important;
     }
@@ -3105,12 +3115,14 @@ input[type="color"]:focus {
     align-items: center;
     justify-content: center;
     opacity: 0;
+    pointer-events: none;
     transition: opacity 200ms ease;
 }
 
 .list-modal-overlay.active {
     display: flex !important;
     opacity: 1 !important;
+    pointer-events: auto !important;
 }
 
 .list-modal {
@@ -3300,10 +3312,10 @@ input[type="color"]:focus {
         border-radius: 24px 24px 0 0;
     }
     
-    .list-modal-overlay {
+    .list-modal-overlay.active {
         align-items: flex-end;
     }
-    
+
     .list-modal-footer {
         flex-direction: column-reverse;
         gap: 12px;
@@ -3364,7 +3376,6 @@ input[type="color"]:focus {
 
 /* ===== SIDEBAR OVERLAY (MOBILE) ===== */
 .sidebar-overlay {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -3375,12 +3386,15 @@ input[type="color"]:focus {
     -webkit-backdrop-filter: blur(4px);
     z-index: 999;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.3s ease;
 }
 
 .sidebar-overlay.active {
-    display: block;
     opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 /* ===== BOTÃO FECHAR SIDEBAR (MOBILE) ===== */
@@ -4062,9 +4076,9 @@ input[type="color"]:focus {
    MODAIS - MOBILE BOTTOM SHEET STYLE
    ======================================== */
 @media (max-width: 768px) {
-    /* Overlay com alinhamento no fundo */
-    .task-modal-overlay,
-    .modal-overlay {
+    /* Overlay com alinhamento no fundo - SOMENTE QUANDO ATIVO */
+    .task-modal-overlay.active,
+    .modal-overlay.active {
         display: flex;
         align-items: flex-end;
         justify-content: center;
@@ -4252,8 +4266,8 @@ input[type="color"]:focus {
         min-height: 48px;
     }
 
-    /* Confirm Modal - Bottom Sheet */
-    .confirm-modal-overlay {
+    /* Confirm Modal - Bottom Sheet - SOMENTE QUANDO ATIVO */
+    .confirm-modal-overlay.active {
         display: flex;
         align-items: flex-end;
         justify-content: center;

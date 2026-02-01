@@ -4,6 +4,7 @@
    ======================================== */
 
 /* ===== OVERLAYS - TODOS OS TIPOS ===== */
+/* Estado base: ESCONDIDO */
 .section-modal-overlay,
 .list-modal-overlay,
 .modal-overlay,
@@ -21,11 +22,27 @@
     backdrop-filter: blur(4px) !important;
     -webkit-backdrop-filter: blur(4px) !important;
     z-index: 9998 !important;
+    box-sizing: border-box !important;
+    /* FECHADO POR PADRÃO */
+    display: none !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Estado ATIVO: VISÍVEL */
+.section-modal-overlay.active,
+.list-modal-overlay.active,
+.modal-overlay.active,
+.edit-list-modal-overlay.active,
+.confirm-modal-overlay.active {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     padding: 20px !important;
-    box-sizing: border-box !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }
 
 /* ===== MODAIS - TODOS OS TIPOS ===== */
@@ -274,10 +291,11 @@
 
 /* ===== MOBILE ===== */
 @media (max-width: 480px) {
-    .section-modal-overlay,
-    .list-modal-overlay,
-    .modal-overlay {
-        padding: 16px !important;
+    /* SOMENTE QUANDO ATIVO - Bottom Sheet */
+    .section-modal-overlay.active,
+    .list-modal-overlay.active,
+    .modal-overlay.active {
+        padding: 0 !important;
         align-items: flex-end !important; /* Modal vem de baixo */
     }
     
