@@ -2,7 +2,11 @@
    TAREFAS CONCLUÍDAS - JavaScript
    ======================================== */
 
-const API_URL = 'http://localhost:3000';
+// Detectar URL base automaticamente
+const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : window.location.origin;
+
 let completedTasks = [];
 let currentFilter = 'all';
 
@@ -13,11 +17,13 @@ async function loadCompletedTasks() {
         window.location.href = 'Tela_Login.html';
         return;
     }
-    
+
     try {
         console.log('📋 Carregando tarefas concluídas...');
-        
-        const response = await fetch(`${API_URL}/api/tasks/completed?user_id=${user.id}`);
+
+        // Usa rota alternativa "done" para evitar bloqueio de ad blockers
+        // A palavra "completed" é frequentemente bloqueada por extensões
+        const response = await fetch(`${API_URL}/api/tasks/done?user_id=${user.id}`);
         
         if (!response.ok) {
             throw new Error('Erro ao carregar tarefas');

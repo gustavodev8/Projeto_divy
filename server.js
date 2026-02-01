@@ -710,7 +710,61 @@ app.get('/api/tasks', async (req, res) => {
 
 // ✅ ROTAS ESPECÍFICAS - DEVEM VIR ANTES DE /api/tasks/:id
 
-// GET - TODAS AS TAREFAS CONCLUÍDAS
+// GET - TODAS AS TAREFAS CONCLUÍDAS (rota alternativa para evitar bloqueio de ad blockers)
+app.get('/api/tasks/done', async (req, res) => {
+    const { user_id } = req.query;
+
+    if (!user_id) {
+        return res.status(400).json({
+            success: false,
+            error: 'user_id é obrigatório'
+        });
+    }
+
+    try {
+        console.log('📋 Buscando todas tarefas concluídas do usuário:', user_id);
+
+        let query, params;
+
+        if (db.isPostgres) {
+            query = `
+                SELECT * FROM tasks
+                WHERE user_id = $1
+                AND status = 'completed'
+                ORDER BY updated_at DESC
+            `;
+            params = [user_id];
+        } else {
+            query = `
+                SELECT * FROM tasks
+                WHERE user_id = ?
+                AND status = 'completed'
+                ORDER BY updated_at DESC
+            `;
+            params = [user_id];
+        }
+
+        const tasks = await db.query(query, params);
+
+        console.log(`✅ ${tasks.length} tarefas concluídas encontradas`);
+
+        res.json({
+            success: true,
+            tasks: tasks,
+            total: tasks.length
+        });
+
+    } catch (error) {
+        console.error('❌ Erro ao buscar tarefas concluídas:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao buscar tarefas concluídas',
+            details: error.message
+        });
+    }
+});
+
+// GET - TODAS AS TAREFAS CONCLUÍDAS (rota original - pode ser bloqueada por ad blockers)
 app.get('/api/tasks/completed', async (req, res) => {
     const { user_id } = req.query;
     
