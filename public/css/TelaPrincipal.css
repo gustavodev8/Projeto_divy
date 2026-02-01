@@ -2135,6 +2135,68 @@ body {
     font-weight: 500;
 }
 
+/* ===== CONTAINER DE DETALHES DO CARD ===== */
+.kanban-card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 30px;
+    margin-top: 2px;
+    overflow: hidden;
+}
+
+/* Linha de meta info (prioridade, horário, data) */
+.kanban-card-meta-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 10px;
+}
+
+/* Badge de prioridade */
+.kanban-priority-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.kanban-priority-badge.priority-high {
+    background: rgba(231, 76, 60, 0.15);
+    color: #e74c3c;
+}
+
+.kanban-priority-badge.priority-medium {
+    background: rgba(243, 156, 18, 0.15);
+    color: #f39c12;
+}
+
+.kanban-priority-badge.priority-low {
+    background: rgba(46, 204, 113, 0.15);
+    color: #2ecc71;
+}
+
+/* Horário */
+.kanban-card-time {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Descrição dentro do container de detalhes */
+.kanban-card-details .kanban-card-description {
+    padding-left: 0;
+    font-size: 11px;
+    line-height: 1.35;
+    -webkit-line-clamp: 2;
+    margin: 0;
+}
+
 /* ===== MENU DE AÇÕES (3 PONTINHOS) ===== */
 .kanban-card-menu-btn {
     position: absolute;
@@ -2327,7 +2389,7 @@ body {
     .kanban-card {
         padding: 10px;
         min-height: auto;
-        gap: 6px;
+        gap: 4px;
         overflow: hidden;
     }
 
@@ -2341,88 +2403,110 @@ body {
     }
 
     .kanban-card-title {
-        font-size: 13px;
-        line-height: 1.35;
+        font-size: 12px;
+        line-height: 1.3;
         flex: 1;
         min-width: 0;
         word-break: break-word;
         overflow-wrap: break-word;
         display: -webkit-box;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        padding-right: 20px;
+    }
+
+    /* Container de detalhes compacto no mobile */
+    .kanban-card-details {
+        padding-left: 26px;
+        gap: 4px;
+        margin-top: 0;
+    }
+
+    /* Meta line compacta */
+    .kanban-card-meta-line {
+        gap: 6px;
+        font-size: 9px;
+    }
+
+    .kanban-priority-badge {
+        font-size: 8px;
+        padding: 1px 5px;
+    }
+
+    .kanban-card-time {
+        font-size: 9px;
+    }
+
+    .kanban-card-date {
+        font-size: 9px;
+    }
+
+    /* Descrição compacta */
+    .kanban-card-details .kanban-card-description {
+        font-size: 10px;
+        -webkit-line-clamp: 1;
+        line-height: 1.3;
+        max-height: 14px;
     }
 
     /* Descrição - limitar linhas e evitar sobreposição */
     .kanban-card-description {
-        font-size: 11px;
-        line-height: 1.35;
-        padding-left: 28px;
+        font-size: 10px;
+        line-height: 1.3;
+        padding-left: 26px;
         margin: 0;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-height: 30px;
+        max-height: 14px;
         word-break: break-word;
         color: var(--text-muted);
     }
 
     /* Meta info - data e prioridade */
     .kanban-card-meta {
-        padding-left: 28px;
-        margin-top: 4px;
+        padding-left: 26px;
+        margin-top: 2px;
         display: flex;
         align-items: center;
         gap: 6px;
         flex-wrap: wrap;
     }
 
-    .kanban-card-date {
-        font-size: 10px;
-    }
-
     /* Checkbox menor no mobile */
     .kanban-card-checkbox {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         flex-shrink: 0;
     }
 
     .kanban-card-checkbox .checkmark {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
     }
 
     .kanban-card-checkbox .checkmark:after {
-        left: 5px;
+        left: 4px;
         top: 1px;
         width: 4px;
-        height: 8px;
+        height: 7px;
     }
 
     /* Menu sempre visível no mobile */
     .kanban-card-menu-btn {
         opacity: 1;
-        top: 8px;
-        right: 8px;
-        width: 24px;
-        height: 24px;
+        top: 6px;
+        right: 6px;
+        width: 22px;
+        height: 22px;
     }
 
-    /* Subtarefas no card */
-    .kanban-card-subtasks {
-        padding-left: 28px;
-        margin-top: 4px;
-        font-size: 10px;
-        color: var(--text-muted);
-    }
-
-    /* Tags/badges de prioridade */
-    .kanban-card-priority {
-        font-size: 9px;
-        padding: 2px 6px;
+    .kanban-card-menu-btn svg {
+        width: 14px;
+        height: 14px;
     }
 }
 
@@ -2435,16 +2519,42 @@ body {
 
     .kanban-card {
         padding: 8px;
+        gap: 3px;
     }
 
     .kanban-card-title {
-        font-size: 12px;
+        font-size: 11px;
         -webkit-line-clamp: 2;
-        padding-right: 24px;
+        padding-right: 20px;
+        line-height: 1.25;
+    }
+
+    .kanban-card-details {
+        padding-left: 24px;
+        gap: 3px;
+    }
+
+    .kanban-card-meta-line {
+        gap: 4px;
+    }
+
+    .kanban-priority-badge {
+        font-size: 7px;
+        padding: 1px 4px;
+    }
+
+    .kanban-card-time,
+    .kanban-card-date {
+        font-size: 8px;
+    }
+
+    .kanban-card-details .kanban-card-description {
+        font-size: 9px;
+        max-height: 12px;
     }
 
     .kanban-card-description {
-        font-size: 10px;
+        font-size: 9px;
         -webkit-line-clamp: 1;
         max-height: 15px;
         padding-left: 26px;
@@ -2463,19 +2573,20 @@ body {
 }
 
 /* ===== KANBAN CARDS - COM DETALHES VISÍVEIS ===== */
-/* Estilos para garantir layout correto quando descrição/data estão visíveis */
-.kanban-card:has(.kanban-card-description),
-.kanban-card:has(.kanban-card-meta) {
-    gap: 6px;
+/* Estilos para garantir layout correto quando detalhes estão visíveis */
+.kanban-card:has(.kanban-card-details) {
+    gap: 4px;
 }
 
-.kanban-card:has(.kanban-card-description):has(.kanban-card-meta) {
-    gap: 4px;
+@media (max-width: 768px) {
+    .kanban-card:has(.kanban-card-details) {
+        gap: 3px;
+    }
 }
 
 /* Fallback para navegadores sem suporte a :has() */
 @supports not (selector(:has(*))) {
-    .kanban-card .kanban-card-description + .kanban-card-meta {
+    .kanban-card .kanban-card-details {
         margin-top: 2px;
     }
 }

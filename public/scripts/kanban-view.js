@@ -287,26 +287,61 @@ function createCard(task) {
     cardHeader.appendChild(title);
     
     card.appendChild(cardHeader);
-    
-    // Descrição (opcional)
-    if (showDetails && task.description) {
-        const desc = document.createElement('p');
-        desc.className = 'kanban-card-description';
-        desc.textContent = task.description;
-        card.appendChild(desc);
-    }
-    
-    // Data (opcional)
-    if (showDetails && task.due_date) {
-        const meta = document.createElement('div');
-        meta.className = 'kanban-card-meta';
-        
-        const date = document.createElement('span');
-        date.className = 'kanban-card-date';
-        date.textContent = `📅 ${formatDate(task.due_date)}`;
-        
-        meta.appendChild(date);
-        card.appendChild(meta);
+
+    // Quando showDetails está ativo, mostrar info compacta
+    if (showDetails) {
+        // Container de detalhes compacto
+        const detailsContainer = document.createElement('div');
+        detailsContainer.className = 'kanban-card-details';
+
+        // Linha de meta info (prioridade, horário, data)
+        const metaLine = document.createElement('div');
+        metaLine.className = 'kanban-card-meta-line';
+
+        // Badge de prioridade
+        const priority = task.priority || 'medium';
+        const priorityBadge = document.createElement('span');
+        priorityBadge.className = `kanban-priority-badge priority-${priority}`;
+        const priorityLabels = { high: 'Alta', medium: 'Média', low: 'Baixa' };
+        priorityBadge.textContent = priorityLabels[priority] || 'Média';
+        metaLine.appendChild(priorityBadge);
+
+        // Horário (se tiver due_date com hora)
+        if (task.due_date) {
+            const dateObj = new Date(task.due_date);
+            const hours = dateObj.getHours();
+            const minutes = dateObj.getMinutes();
+
+            // Mostrar horário se não for meia-noite (00:00)
+            if (hours !== 0 || minutes !== 0) {
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'kanban-card-time';
+                timeSpan.textContent = `🕐 ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                metaLine.appendChild(timeSpan);
+            }
+
+            // Data
+            const dateSpan = document.createElement('span');
+            dateSpan.className = 'kanban-card-date';
+            dateSpan.textContent = `📅 ${formatDate(task.due_date)}`;
+            metaLine.appendChild(dateSpan);
+        }
+
+        detailsContainer.appendChild(metaLine);
+
+        // Descrição (truncada)
+        if (task.description) {
+            const desc = document.createElement('p');
+            desc.className = 'kanban-card-description';
+            // Limitar texto a 60 caracteres no mobile
+            const maxLength = window.innerWidth <= 768 ? 60 : 100;
+            desc.textContent = task.description.length > maxLength
+                ? task.description.substring(0, maxLength) + '...'
+                : task.description;
+            detailsContainer.appendChild(desc);
+        }
+
+        card.appendChild(detailsContainer);
     }
     
     // ✅ BOTÃO DE MENU (3 PONTINHOS)
