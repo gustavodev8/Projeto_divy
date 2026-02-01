@@ -811,20 +811,28 @@ body {
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: 1000;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    animation: fadeIn 150ms ease;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 150ms ease, visibility 150ms ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.task-modal-overlay[style*="display: flex"],
+.task-modal-overlay.active {
+    display: flex !important;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .task-modal {
+    position: relative;
     background: var(--bg-card);
     border-radius: 12px;
     width: 100%;
@@ -834,6 +842,7 @@ body {
     flex-direction: column;
     box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
     animation: slideUp 200ms ease;
+    overflow: hidden;
 }
 
 @keyframes slideUp {
@@ -1091,30 +1100,166 @@ body {
     background: var(--primary-hover);
 }
 
-/* ===== RESPONSIVE MODAL ===== */
+/* ===== RESPONSIVE MODAL - BOTTOM SHEET ===== */
 @media (max-width: 768px) {
     .task-modal-overlay {
-        padding: 12px;
+        padding: 0;
         align-items: flex-end;
+        justify-content: center;
     }
 
     .task-modal {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        max-width: 100%;
+        width: 100%;
         max-height: 90vh;
-        border-radius: 16px 16px 0 0;
-        margin-bottom: 0;
+        max-height: 90dvh;
+        border-radius: 20px 20px 0 0;
+        margin: 0;
+        animation: slideUpModal 250ms ease-out;
+    }
+
+    @keyframes slideUpModal {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Handle/Indicator para arrastar */
+    .task-modal::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        z-index: 10;
     }
 
     .task-modal-header {
-        padding: 20px 16px;
+        padding: 24px 20px 16px 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .task-modal-title {
+        font-size: 17px;
+        font-weight: 600;
+        padding-right: 40px;
+    }
+
+    .modal-close-btn {
+        position: absolute;
+        top: 20px;
+        right: 16px;
+    }
+
+    .task-modal-body {
+        padding: 20px;
+        gap: 20px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-info-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .modal-section-header h3 {
+        font-size: 14px;
+    }
+
+    .modal-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-tertiary);
+    }
+
+    .modal-value {
+        font-size: 14px;
+    }
+
+    .modal-description {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .modal-subtask-item {
+        padding: 12px 14px;
+        border-radius: 8px;
+    }
+
+    .modal-subtask-title {
+        font-size: 13px;
+    }
+
+    .task-modal-footer {
+        padding: 16px 20px;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        gap: 12px;
+        border-top: 1px solid var(--border);
+        flex-direction: column;
+    }
+
+    .btn-modal-secondary,
+    .btn-modal-primary {
+        height: 48px;
+        width: 100%;
+        padding: 0 16px;
+        font-size: 15px;
+        font-weight: 500;
+        border-radius: 10px;
+    }
+
+    .btn-modal-primary {
+        order: -1; /* Botão principal primeiro */
+    }
+}
+
+@media (max-width: 480px) {
+    .task-modal {
+        max-height: 92vh;
+        max-height: 92dvh;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .task-modal::before {
+        width: 32px;
+        height: 4px;
+        top: 6px;
+    }
+
+    .task-modal-header {
+        padding: 20px 16px 14px 16px;
     }
 
     .task-modal-title {
         font-size: 16px;
     }
 
+    .modal-close-btn {
+        width: 32px;
+        height: 32px;
+        top: 16px;
+        right: 12px;
+    }
+
     .task-modal-body {
-        padding: 20px 16px;
-        gap: 20px;
+        padding: 16px;
+        gap: 16px;
     }
 
     .modal-info-grid {
@@ -1122,87 +1267,58 @@ body {
         gap: 12px;
     }
 
-    .modal-section-header h3 {
-        font-size: 13px;
+    .modal-info-item {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-light);
+        gap: 12px;
+    }
+
+    .modal-info-item:last-child {
+        border-bottom: none;
     }
 
     .modal-label {
-        font-size: 11px;
+        font-size: 13px;
+        text-transform: none;
+        letter-spacing: normal;
+        color: var(--text-secondary);
     }
 
     .modal-value {
-        font-size: 13px;
-    }
-
-    .modal-description {
-        font-size: 13px;
-    }
-
-    .modal-subtask-item {
-        padding: 8px 10px;
-    }
-
-    .modal-subtask-title {
-        font-size: 12px;
-    }
-
-    .task-modal-footer {
-        padding: 16px;
-        gap: 10px;
-    }
-
-    .btn-modal-secondary,
-    .btn-modal-primary {
-        height: 44px;
-        flex: 1;
-        padding: 0 16px;
-        font-size: 13px;
-    }
-}
-
-@media (max-width: 480px) {
-    .task-modal-overlay {
-        padding: 0;
-    }
-
-    .task-modal {
-        max-height: 95vh;
-        border-radius: 20px 20px 0 0;
-    }
-
-    .task-modal-header {
-        padding: 16px 14px;
-    }
-
-    .task-modal-title {
-        font-size: 15px;
-    }
-
-    .modal-close-btn {
-        width: 32px;
-        height: 32px;
-    }
-
-    .task-modal-body {
-        padding: 16px 14px;
-    }
-
-    .modal-info-item {
-        gap: 4px;
+        font-size: 14px;
+        text-align: right;
     }
 
     .modal-subtask-checkbox {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
     }
 
     .task-modal-footer {
-        padding: 14px;
-        flex-direction: column;
+        padding: 14px 16px;
+        padding-bottom: max(14px, calc(env(safe-area-inset-bottom) + 8px));
     }
 
     .btn-modal-secondary,
     .btn-modal-primary {
-        width: 100%;
+        height: 46px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+}
+
+/* Touch device - melhorar feedback */
+@media (hover: none) and (pointer: coarse) {
+    .btn-modal-secondary:active,
+    .btn-modal-primary:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+
+    .modal-close-btn:active {
+        background: var(--bg-hover);
     }
 }
