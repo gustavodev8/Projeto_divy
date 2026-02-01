@@ -1947,38 +1947,113 @@ app.post("/api/gerar-rotina", async (req, res) => {
         console.log("🧠 Gerando rotina com Gemini para:", descricao);
         console.log("⏰ Período:", horaInicio, "às", horaFim);
 
-        // Monta prompt para a IA - rotinas fiéis à descrição do usuário
+        // Calcular duração disponível
+        const [inicioH, inicioM] = horaInicio.split(':').map(Number);
+        const [fimH, fimM] = horaFim.split(':').map(Number);
+        const duracaoMinutos = (fimH * 60 + fimM) - (inicioH * 60 + inicioM);
+        const duracaoHoras = Math.floor(duracaoMinutos / 60);
+        const duracaoRestoMin = duracaoMinutos % 60;
+
+        // Monta prompt para a IA - rotinas realistas e práticas
         const prompt = `
-Você é um assistente de organização pessoal. Crie uma rotina baseada EXATAMENTE no que a pessoa descreveu.
+Você é um planejador de rotinas especialista. Sua tarefa é criar um PLANO DE AÇÃO REALISTA e PRÁTICO que a pessoa possa seguir passo a passo.
 
-DESCRIÇÃO DO USUÁRIO: "${descricao}"
+═══════════════════════════════════════════════════
+📋 INFORMAÇÕES DO USUÁRIO
+═══════════════════════════════════════════════════
+DESCRIÇÃO: "${descricao}"
+HORÁRIO: ${horaInicio} até ${horaFim} (${duracaoHoras}h${duracaoRestoMin > 0 ? duracaoRestoMin + 'min' : ''} disponíveis)
 
-PERÍODO DISPONÍVEL: ${horaInicio} às ${horaFim}
+═══════════════════════════════════════════════════
+📌 PRINCÍPIOS FUNDAMENTAIS
+═══════════════════════════════════════════════════
+1. FIDELIDADE: Crie atividades APENAS baseadas no que o usuário descreveu
+2. REALISMO: Considere tempo real para cada atividade (incluindo preparação e transição)
+3. PRATICIDADE: Cada item deve ser uma AÇÃO CLARA e EXECUTÁVEL
+4. RITMO HUMANO: Inclua pausas naturais - ninguém mantém foco 100% por horas
+5. FLEXIBILIDADE: Blocos de 15-45 minutos são mais realistas que horários exatos
 
-REGRAS IMPORTANTES:
-1. SIGA FIELMENTE o que o usuário descreveu - NÃO invente atividades que ele não mencionou
-2. Se o usuário quer assistir série/filme/anime, a rotina deve ser sobre isso (blocos de 2-3 episódios)
-3. Se o usuário quer estudar, foque em estudo
-4. Se o usuário quer descansar/relaxar, respeite isso
-5. SEM EMOJIS - texto limpo e direto
-6. Inclua pequenas pausas naturais entre os blocos (5-15 min para água, banheiro, alongar)
-7. Seja realista - não force produtividade se a pessoa quer lazer
+═══════════════════════════════════════════════════
+🎯 COMO ESTRUTURAR CADA ATIVIDADE
+═══════════════════════════════════════════════════
+- Seja ESPECÍFICO: em vez de "estudar", diga "Revisar capítulo 3 de matemática"
+- Inclua CONTEXTO: "Preparar ambiente de estudo (organizar mesa, água, silenciar celular)"
+- Considere TRANSIÇÕES: tempo para ir ao banheiro, pegar água, alongar
 
-FORMATO OBRIGATÓRIO:
-NOME_SECAO: [Nome curto 2-4 palavras relacionado ao que a pessoa VAI FAZER]
-${horaInicio} → Primeira atividade baseada na descrição
-HH:MM → Próxima atividade
-...
+═══════════════════════════════════════════════════
+⏰ DISTRIBUIÇÃO DE TEMPO SUGERIDA
+═══════════════════════════════════════════════════
+- Bloco de foco intenso: 25-45 minutos
+- Pausa curta: 5-10 minutos (a cada 45-60 min)
+- Pausa maior: 15-20 minutos (a cada 2h)
+- Para lazer/série: episódios de ~20-45 min cada
 
-EXEMPLOS DE NOMES (escolha baseado no contexto):
-- Maratona de série/anime: "Maratona Naruto", "Tarde de Anime", "Sessão de Episódios"
-- Estudos: "Sessão de Estudos", "Foco nos Estudos"
-- Trabalho: "Sprint de Trabalho", "Foco no Projeto"
-- Lazer/descanso: "Tarde Relax", "Momento de Descanso"
+═══════════════════════════════════════════════════
+📝 FORMATO DE SAÍDA (OBRIGATÓRIO)
+═══════════════════════════════════════════════════
+NOME_SECAO: [Nome descritivo de 2-4 palavras baseado na atividade principal]
 
-IMPORTANTE: A rotina deve refletir EXATAMENTE o que o usuário pediu, não uma rotina genérica de produtividade.
+${horaInicio} → [Atividade inicial - preparação ou início direto]
+HH:MM → [Próxima atividade específica]
+HH:MM → [Pausa se necessário]
+HH:MM → [Continuar atividade]
+...continue até ${horaFim}
 
-Gere APENAS a rotina no formato pedido, sem explicações.
+═══════════════════════════════════════════════════
+💡 EXEMPLOS DE CONTEXTOS
+═══════════════════════════════════════════════════
+
+Se usuário quer ESTUDAR para prova:
+NOME_SECAO: Sessão de Estudos
+08:00 → Organizar material e ambiente de estudo
+08:10 → Revisar anotações do tema principal
+08:40 → Resolver exercícios práticos
+09:15 → Pausa - alongar e tomar água
+09:25 → Fazer resumo dos pontos-chave
+09:55 → Revisar erros e dúvidas
+10:20 → Pausa maior - descanso mental
+10:35 → Simulado ou exercícios finais
+
+Se usuário quer ASSISTIR SÉRIE/ANIME:
+NOME_SECAO: Maratona de [Nome da série]
+14:00 → Preparar lanche e acomodar-se
+14:10 → Episódio 1 - [pode incluir nome se souber]
+14:35 → Episódio 2
+15:00 → Pausa - ir ao banheiro, pegar água
+15:10 → Episódio 3
+15:35 → Episódio 4
+16:00 → Intervalo maior - alongar, lanche
+16:15 → Episódio 5
+16:40 → Episódio 6
+
+Se usuário quer TRABALHAR em projeto:
+NOME_SECAO: Sprint de Trabalho
+09:00 → Revisar tarefas e prioridades do dia
+09:15 → Foco na tarefa mais importante
+10:00 → Pausa rápida - café e alongamento
+10:10 → Continuar tarefa principal ou próxima
+10:55 → Responder mensagens/emails pendentes
+11:15 → Foco em tarefa secundária
+12:00 → Encerrar e anotar progresso
+
+Se usuário quer EXERCÍCIOS/TREINO:
+NOME_SECAO: Treino do Dia
+06:00 → Aquecimento leve (5-10 min)
+06:10 → Série principal de exercícios
+06:40 → Exercícios complementares
+07:00 → Alongamento e relaxamento
+07:15 → Banho e recuperação
+
+═══════════════════════════════════════════════════
+⚠️ REGRAS FINAIS
+═══════════════════════════════════════════════════
+- NÃO use emojis no resultado final
+- NÃO invente atividades que o usuário não mencionou
+- NÃO force produtividade se a pessoa quer relaxar
+- Distribua o tempo de forma REALISTA dentro do período ${horaInicio}-${horaFim}
+- Cada linha deve ser uma AÇÃO que a pessoa pode executar
+
+Gere APENAS a rotina no formato pedido. Sem introduções, explicações ou comentários.
 `;
 
         // Usa Gemini 2.5 Flash (mais rápido e eficiente)

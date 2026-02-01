@@ -139,17 +139,25 @@ body {
     opacity: 0.7;
 }
 
+/* ===== SETTINGS GROUP (agrupa itens) ===== */
+.settings-group {
+    background: var(--settings-card);
+    border: 1px solid var(--settings-border);
+    border-radius: var(--settings-radius);
+    overflow: hidden;
+}
+
 /* ===== SETTING ITEM ===== */
 .setting-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem;
+    padding: 1rem 1.25rem;
     background: var(--settings-card);
     border: 1px solid var(--settings-border);
     border-radius: var(--settings-radius);
-    margin-bottom: 0.75rem;
-    transition: all 150ms ease;
+    margin-bottom: 0.5rem;
+    transition: background 150ms ease;
 }
 
 .setting-item:last-child {
@@ -163,10 +171,11 @@ body {
 .setting-info {
     flex: 1;
     padding-right: 1rem;
+    min-width: 0;
 }
 
 .setting-label {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 500;
     color: var(--settings-foreground);
     margin-bottom: 0.25rem;
@@ -176,15 +185,14 @@ body {
 .setting-description {
     font-size: 0.8125rem;
     color: var(--settings-muted-foreground);
-    line-height: 1.4;
+    line-height: 1.45;
 }
 
-/* ===== CHECKBOX MODERNO ===== */
+/* ===== CHECKBOX/TOGGLE MODERNO ===== */
 .switch {
     display: block;
     position: relative;
     cursor: pointer;
-    font-size: 1rem;
     user-select: none;
     flex-shrink: 0;
 }
@@ -198,66 +206,57 @@ body {
 }
 
 .slider {
-    --clr: #0B6E4F;
+    --toggle-color: #146551;
     position: relative;
-    display: block;
-    height: 1.25em;
-    width: 1.25em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
     background-color: var(--settings-border);
-    border-radius: 50%;
-    transition: 300ms;
+    border-radius: 6px;
+    transition: all 200ms ease;
 }
 
 .switch input:checked + .slider {
-    background-color: var(--clr);
-    border-radius: 0.35rem;
-    animation: pulse 500ms ease-in-out;
+    background-color: var(--toggle-color);
 }
 
+/* Checkmark */
 .slider:after {
     content: "";
     position: absolute;
     display: none;
+    left: 8px;
+    top: 4px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
 }
 
 .switch input:checked + .slider:after {
     display: block;
 }
 
-.switch .slider:after {
-    left: 0.45em;
-    top: 0.22em;
-    width: 0.22em;
-    height: 0.45em;
-    border: solid #E0E0E2;
-    border-width: 0 0.12em 0.12em 0;
-    transform: rotate(45deg);
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 #0B6E4F90;
-        rotate: 20deg;
-    }
-    50% {
-        rotate: -20deg;
-    }
-    75% {
-        box-shadow: 0 0 0 8px #0B6E4F60;
-    }
-    100% {
-        box-shadow: 0 0 0 10px #0B6E4F00;
-        rotate: 0;
-    }
-}
-
+/* Hover state */
 .switch:hover .slider {
-    opacity: 0.85;
+    opacity: 0.9;
+}
+
+/* Active/pressed state */
+.switch:active .slider {
+    transform: scale(0.95);
 }
 
 /* Dark mode ajuste */
 .dark-mode .slider {
-    background-color: var(--settings-muted);
+    background-color: hsl(0, 0%, 22%);
+}
+
+.dark-mode .switch input:checked + .slider {
+    background-color: #0B6E4F;
 }
 
 /* ===== SELECT MINIMALISTA ===== */
@@ -440,98 +439,194 @@ body {
     }
 }
 
-/* Mobile e Small Tablets (até 768px) */
+/* ========================================
+   MOBILE - DESIGN HARMONICO E LINEAR
+   ======================================== */
 @media (max-width: 768px) {
     .settings-container {
         max-width: 100%;
     }
 
     .settings-header {
-        padding: 1rem;
+        padding: 16px 20px;
         position: sticky;
         top: 0;
         z-index: 100;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--settings-border);
     }
 
     .settings-header h1 {
         font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .btn-back {
+        width: 40px;
+        height: 40px;
     }
 
     .settings-content {
-        padding: 1rem;
-        padding-bottom: 2rem;
+        padding: 20px;
+        padding-bottom: 40px;
     }
 
+    /* === SECTIONS === */
     .settings-section {
-        margin-bottom: 2rem;
+        margin-bottom: 32px;
     }
 
     .section-title {
-        font-size: 0.75rem;
-        margin-bottom: 0.75rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: var(--settings-muted-foreground);
+        margin-bottom: 12px;
+        padding-left: 4px;
+        letter-spacing: 0.08em;
     }
 
+    .section-title svg {
+        width: 14px;
+        height: 14px;
+        opacity: 0.8;
+    }
+
+    /* === SETTING ITEMS - HORIZONTAL LINEAR === */
     .setting-item {
-        padding: 0.875rem;
-        margin-bottom: 0.5rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        margin-bottom: 8px;
+        border-radius: 12px;
+        min-height: 72px;
+    }
+
+    .setting-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .setting-info {
+        flex: 1;
+        padding-right: 16px;
+        min-width: 0;
     }
 
     .setting-label {
-        font-size: 0.8125rem;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: var(--settings-foreground);
+        margin-bottom: 4px;
+        line-height: 1.3;
     }
 
     .setting-description {
-        font-size: 0.75rem;
+        font-size: 0.8125rem;
+        color: var(--settings-muted-foreground);
+        line-height: 1.4;
     }
 
-    /* Account section */
+    /* === SWITCH/TOGGLE MELHORADO === */
+    .switch {
+        flex-shrink: 0;
+    }
+
+    .slider {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* === SELECT === */
+    .select-minimal {
+        min-width: 100px;
+        padding: 10px 12px;
+        font-size: 0.875rem;
+        border-radius: 8px;
+    }
+
+    /* === ACCOUNT SECTION === */
     .account-info {
-        padding: 1rem;
-        gap: 0.875rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 16px;
+        gap: 14px;
+        border-radius: 12px;
+        margin-bottom: 12px;
     }
 
     .account-avatar {
-        width: 3.5rem;
-        height: 3.5rem;
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
     }
 
     .account-avatar svg {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
+    }
+
+    .account-details {
+        flex: 1;
+        min-width: 0;
     }
 
     .account-name {
-        font-size: 0.9375rem;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 2px;
     }
 
     .account-email {
         font-size: 0.8125rem;
-        word-break: break-word;
+        color: var(--settings-muted-foreground);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .btn-signout {
-        padding: 0.875rem 1rem;
-        font-size: 0.8125rem;
+        padding: 14px 16px;
+        font-size: 0.875rem;
+        border-radius: 12px;
+        min-height: 48px;
     }
 
-    /* About section */
+    /* === ABOUT SECTION === */
+    .about-info {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
     .about-item {
-        padding: 0.875rem 1rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        min-height: 48px;
     }
 
-    .about-label,
+    .about-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--settings-foreground);
+    }
+
     .about-value {
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
+        color: var(--settings-muted-foreground);
+        text-align: right;
     }
 }
 
-/* Mobile pequeno (até 480px) */
+/* Mobile menor (até 480px) - Mantém layout horizontal */
 @media (max-width: 480px) {
     .settings-header {
-        padding: 0.875rem;
-        gap: 0.75rem;
+        padding: 14px 16px;
+        gap: 12px;
     }
 
     .settings-header h1 {
@@ -539,87 +634,74 @@ body {
     }
 
     .btn-back {
-        width: 2.25rem;
-        height: 2.25rem;
-    }
-
-    .settings-content {
-        padding: 0.875rem;
-    }
-
-    .settings-section {
-        margin-bottom: 1.5rem;
-    }
-
-    .section-title {
-        font-size: 0.6875rem;
-        gap: 0.375rem;
-    }
-
-    .section-title svg {
-        width: 1rem;
-        height: 1rem;
-    }
-
-    /* Setting items - layout vertical */
-    .setting-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-        padding: 0.75rem;
-    }
-
-    .setting-info {
-        padding-right: 0;
-        width: 100%;
-    }
-
-    .setting-label {
-        font-size: 0.8125rem;
-        margin-bottom: 0.125rem;
-    }
-
-    .setting-description {
-        font-size: 0.6875rem;
-        line-height: 1.5;
-    }
-
-    /* Toggle e Select posicionados à direita */
-    .switch {
-        align-self: flex-end;
-        margin-top: -0.25rem;
-    }
-
-    .select-minimal {
-        width: 100%;
-        padding: 0.625rem 0.75rem;
-        font-size: 0.8125rem;
-    }
-
-    /* Account section mobile */
-    .account-info {
-        flex-direction: column;
-        text-align: center;
-        padding: 1.25rem 1rem;
-        gap: 0.75rem;
-    }
-
-    .account-avatar {
-        width: 4rem;
-        height: 4rem;
-    }
-
-    .account-avatar svg {
         width: 36px;
         height: 36px;
     }
 
-    .account-details {
-        width: 100%;
+    .btn-back svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .settings-content {
+        padding: 16px;
+    }
+
+    .settings-section {
+        margin-bottom: 28px;
+    }
+
+    .section-title {
+        font-size: 0.625rem;
+        margin-bottom: 10px;
+    }
+
+    /* Setting items - SEMPRE horizontal */
+    .setting-item {
+        padding: 14px;
+        min-height: 64px;
+        margin-bottom: 6px;
+        border-radius: 10px;
+    }
+
+    .setting-info {
+        padding-right: 12px;
+    }
+
+    .setting-label {
+        font-size: 0.875rem;
+        margin-bottom: 2px;
+    }
+
+    .setting-description {
+        font-size: 0.75rem;
+    }
+
+    /* Switch um pouco maior para facilitar toque */
+    .slider {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Account */
+    .account-info {
+        padding: 14px;
+        gap: 12px;
+        border-radius: 10px;
+    }
+
+    .account-avatar {
+        width: 44px;
+        height: 44px;
+    }
+
+    .account-avatar svg {
+        width: 24px;
+        height: 24px;
     }
 
     .account-name {
-        font-size: 1rem;
+        font-size: 0.9375rem;
     }
 
     .account-email {
@@ -627,35 +709,38 @@ body {
     }
 
     .btn-signout {
-        padding: 0.75rem;
+        padding: 12px 14px;
         font-size: 0.8125rem;
+        border-radius: 10px;
         min-height: 44px;
     }
 
-    /* About items */
+    /* About */
+    .about-info {
+        border-radius: 10px;
+    }
+
     .about-item {
-        padding: 0.75rem;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
+        padding: 12px 14px;
+        min-height: 44px;
     }
 
-    .about-label {
-        font-size: 0.75rem;
-        color: var(--settings-muted-foreground);
-    }
-
+    .about-label,
     .about-value {
         font-size: 0.8125rem;
-        color: var(--settings-foreground);
-        font-weight: 600;
+    }
+
+    .select-minimal {
+        min-width: 90px;
+        padding: 8px 10px;
+        font-size: 0.8125rem;
     }
 }
 
 /* Mobile muito pequeno (até 360px) */
 @media (max-width: 360px) {
     .settings-header {
-        padding: 0.75rem;
+        padding: 12px 14px;
     }
 
     .settings-header h1 {
@@ -663,8 +748,8 @@ body {
     }
 
     .btn-back {
-        width: 2rem;
-        height: 2rem;
+        width: 32px;
+        height: 32px;
     }
 
     .btn-back svg {
@@ -673,40 +758,69 @@ body {
     }
 
     .settings-content {
-        padding: 0.75rem;
+        padding: 14px;
+    }
+
+    .settings-section {
+        margin-bottom: 24px;
     }
 
     .section-title {
-        font-size: 0.625rem;
+        font-size: 0.5625rem;
     }
 
     .setting-item {
-        padding: 0.625rem;
+        padding: 12px;
+        min-height: 56px;
+    }
+
+    .setting-info {
+        padding-right: 10px;
     }
 
     .setting-label {
-        font-size: 0.75rem;
+        font-size: 0.8125rem;
     }
 
     .setting-description {
-        font-size: 0.625rem;
+        font-size: 0.6875rem;
+    }
+
+    .slider {
+        width: 20px;
+        height: 20px;
     }
 
     .account-info {
-        padding: 1rem 0.75rem;
+        padding: 12px;
+        gap: 10px;
     }
 
     .account-avatar {
-        width: 3.5rem;
-        height: 3.5rem;
+        width: 40px;
+        height: 40px;
     }
 
     .account-name {
-        font-size: 0.9375rem;
+        font-size: 0.875rem;
     }
 
     .account-email {
         font-size: 0.6875rem;
+    }
+
+    .btn-signout {
+        padding: 10px 12px;
+        font-size: 0.75rem;
+    }
+
+    .about-item {
+        padding: 10px 12px;
+    }
+
+    .about-label,
+    .about-value {
+        font-size: 0.75rem;
     }
 }
 
@@ -724,11 +838,12 @@ body {
 /* ===== TOUCH DEVICE OPTIMIZATIONS ===== */
 @media (hover: none) and (pointer: coarse) {
     .setting-item {
-        min-height: 56px;
+        min-height: 64px;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .switch {
-        transform: scale(1.15);
+        transform: scale(1.1);
         transform-origin: center right;
     }
 
@@ -736,6 +851,7 @@ body {
     .btn-signout,
     .select-minimal {
         min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
     }
 
     /* Remove hover effects em touch */
@@ -751,7 +867,6 @@ body {
     /* Active states para touch */
     .setting-item:active {
         background: var(--settings-muted);
-        transform: scale(0.99);
     }
 
     .btn-back:active {
@@ -760,43 +875,44 @@ body {
     }
 
     .btn-signout:active {
-        transform: scale(0.98);
+        opacity: 0.9;
+    }
+
+    .about-item:active {
+        background: var(--settings-muted);
     }
 }
 
 /* ===== LANDSCAPE MOBILE ===== */
-@media (max-width: 768px) and (orientation: landscape) {
+@media (max-width: 896px) and (orientation: landscape) {
     .settings-header {
-        padding: 0.75rem 1rem;
+        padding: 10px 16px;
+    }
+
+    .settings-header h1 {
+        font-size: 1.125rem;
     }
 
     .settings-content {
-        padding: 1rem;
+        padding: 16px;
+        padding-bottom: 24px;
+    }
+
+    .settings-section {
+        margin-bottom: 24px;
     }
 
     .setting-item {
-        flex-direction: row;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .setting-info {
-        padding-right: 1rem;
-    }
-
-    .switch {
-        align-self: center;
-        margin-top: 0;
+        padding: 12px 14px;
+        min-height: 56px;
     }
 
     .account-info {
-        flex-direction: row;
-        text-align: left;
+        padding: 12px 14px;
     }
 
     .about-item {
-        flex-direction: row;
-        justify-content: space-between;
+        padding: 10px 14px;
     }
 }
 
