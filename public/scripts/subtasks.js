@@ -3,6 +3,11 @@
    Integrado com IA do Google Gemini
    ======================================== */
 
+// ===== URL DA API (detecta automaticamente localhost ou produção) =====
+const SUBTASKS_API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : window.location.origin;
+
 // ===== VARIÁVEIS GLOBAIS =====
 let currentTaskSubtasks = [];
 let currentTaskIdForSubtasks = null;
@@ -14,7 +19,7 @@ async function loadSubtasks(taskId) {
     try {
         console.log(`📋 Carregando subtarefas da tarefa ${taskId}`);
         
-        const response = await fetch(`http://localhost:3000/subtasks/${taskId}`);
+        const response = await fetch(`${SUBTASKS_API_URL}/subtasks/${taskId}`);
         
         if (!response.ok) {
             throw new Error('Erro ao carregar subtarefas');
@@ -150,7 +155,7 @@ async function toggleSubtask(checkbox) {
     try {
         console.log(`🔄 Toggle subtarefa ${subtaskId}: ${completed}`);
         
-        const response = await fetch(`http://localhost:3000/subtasks/${subtaskId}`, {
+        const response = await fetch(`${SUBTASKS_API_URL}/subtasks/${subtaskId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ completed })
@@ -263,7 +268,7 @@ async function saveNewSubtask() {
         
         const position = currentTaskSubtasks.length;
         
-        const response = await fetch('http://localhost:3000/subtasks', {
+        const response = await fetch(`${SUBTASKS_API_URL}/subtasks`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -347,7 +352,7 @@ async function editSubtask(button) {
         try {
             console.log(`✏️ Editando subtarefa ${subtaskId}: "${newTitle}"`);
             
-            const response = await fetch(`http://localhost:3000/subtasks/${subtaskId}`, {
+            const response = await fetch(`${SUBTASKS_API_URL}/subtasks/${subtaskId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ title: newTitle })
@@ -408,7 +413,7 @@ async function deleteSubtask(button) {
     try {
         console.log(`🗑️ Deletando subtarefa ${subtaskId}`);
         
-        const response = await fetch(`http://localhost:3000/subtasks/${subtaskId}`, {
+        const response = await fetch(`${SUBTASKS_API_URL}/subtasks/${subtaskId}`, {
             method: 'DELETE'
         });
         
@@ -503,7 +508,7 @@ Exemplo de formato:
 2. Segunda subtarefa
 3. Terceira subtarefa`;
 
-        const response = await fetch('http://localhost:3000/gemini/generate', {
+        const response = await fetch(`${SUBTASKS_API_URL}/gemini/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt })
@@ -533,7 +538,7 @@ Exemplo de formato:
             const title = subtaskTitles[i];
             const position = currentTaskSubtasks.length + i;
             
-            const createResponse = await fetch('http://localhost:3000/subtasks', {
+            const createResponse = await fetch(`${SUBTASKS_API_URL}/subtasks`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

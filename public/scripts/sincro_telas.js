@@ -1652,17 +1652,36 @@ async function gerarRotinaInteligente() {
 }
 
 // ===== SALVAR TAREFAS DA ROTINA COM PRIORIDADE INTELIGENTE =====
+// Flag para evitar cliques múltiplos ao salvar rotina
+let isSavingRoutine = false;
+
 async function salvarTarefasDaRotina(rotinaTexto) {
-    if (!currentUser) {
-        alert('❌ Erro: Usuário não identificado!');
+    // ✅ PROTEÇÃO CONTRA CLIQUES MÚLTIPLOS
+    if (isSavingRoutine) {
+        console.log('⚠️ Salvamento de rotina já em andamento');
         return;
+    }
+    isSavingRoutine = true;
+
+    // Desabilitar botão de salvar rotina
+    const btnSalvarRotina = document.querySelector('[onclick*="salvarTarefasDaRotina"]');
+    if (btnSalvarRotina) {
+        btnSalvarRotina.disabled = true;
+        btnSalvarRotina.style.opacity = '0.6';
+        btnSalvarRotina.textContent = 'Salvando...';
     }
 
-    // Verificar se está em uma lista
-    if (!window.currentListId) {
-        showNotification('⚠️ Selecione uma lista para salvar a rotina');
-        return;
-    }
+    try {
+        if (!currentUser) {
+            alert('❌ Erro: Usuário não identificado!');
+            return;
+        }
+
+        // Verificar se está em uma lista
+        if (!window.currentListId) {
+            showNotification('⚠️ Selecione uma lista para salvar a rotina');
+            return;
+        }
 
     const linhas = rotinaTexto.split('\n').filter(linha => linha.trim());
     let salvas = 0;
@@ -1751,14 +1770,24 @@ async function salvarTarefasDaRotina(rotinaTexto) {
         }
     }
 
-    console.log('✅ Total salvo:', salvas, 'tarefas na seção', nomeSecao);
-    showNotification(`✅ ${salvas} tarefas salvas na seção "${nomeSecao}"!`);
+        console.log('✅ Total salvo:', salvas, 'tarefas na seção', nomeSecao);
+        showNotification(`✅ ${salvas} tarefas salvas na seção "${nomeSecao}"!`);
 
-    // Limpar nome da seção temporária
-    window.rotinaNomeSecao = null;
+        // Limpar nome da seção temporária
+        window.rotinaNomeSecao = null;
 
-    // Recarregar tarefas e seções
-    loadAndDisplayTasksFromDatabase();
+        // Recarregar tarefas e seções
+        loadAndDisplayTasksFromDatabase();
+    } finally {
+        // ✅ SEMPRE RESETAR FLAG E BOTÃO
+        isSavingRoutine = false;
+        const btnSalvarRotina = document.querySelector('[onclick*="salvarTarefasDaRotina"]');
+        if (btnSalvarRotina) {
+            btnSalvarRotina.disabled = false;
+            btnSalvarRotina.style.opacity = '';
+            btnSalvarRotina.textContent = 'Salvar como Tarefas';
+        }
+    }
 }
 
 // ===== DETERMINAR PRIORIDADE BASEADA NO CONTEÚDO (FRONTEND) =====
@@ -1901,8 +1930,40 @@ function closeTaskModal() {
     console.log('✅ Modal fechado');
 }
 
+// Flag para evitar cliques múltiplos
+let isSavingTask = false;
+
+// Função auxiliar para resetar o botão de salvar
+function resetSaveButton() {
+    isSavingTask = false;
+    const btnSalvar = document.getElementById('btnSalvar');
+    if (btnSalvar) {
+        btnSalvar.disabled = false;
+        btnSalvar.style.opacity = '';
+        btnSalvar.style.cursor = '';
+        btnSalvar.textContent = 'Salvar';
+    }
+}
+
 // Atualizar função de salvar tarefa
 async function salvarNovaTarefa() {
+    // ✅ PROTEÇÃO CONTRA CLIQUES MÚLTIPLOS
+    if (isSavingTask) {
+        console.log('⚠️ Salvamento já em andamento, ignorando clique duplicado');
+        return;
+    }
+
+    isSavingTask = true;
+
+    // Desabilitar botão visualmente
+    const btnSalvar = document.getElementById('btnSalvar');
+    if (btnSalvar) {
+        btnSalvar.disabled = true;
+        btnSalvar.style.opacity = '0.6';
+        btnSalvar.style.cursor = 'not-allowed';
+        btnSalvar.textContent = 'Salvando...';
+    }
+
     console.log('🚀 === INICIANDO SALVAMENTO DE TAREFA ===');
 
     const titulo = document.getElementById('inputTituloTarefa').value.trim();
@@ -1971,12 +2032,14 @@ async function salvarNovaTarefa() {
     if (!titulo) {
         showNotification('❌ Por favor, insira um título');
         document.getElementById('inputTituloTarefa').focus();
+        resetSaveButton();
         return;
     }
 
     const user = getCurrentUser();
     if (!user) {
         showNotification('❌ Usuário não logado');
+        resetSaveButton();
         return;
     }
 
@@ -2013,22 +2076,22 @@ async function salvarNovaTarefa() {
 
         if (result.success) {
             showNotification('✅ Tarefa criada com sucesso!');
-            
+
             closeTaskModal();
-            
+
             // Recarregar tarefas
             await loadAndDisplayTasksFromDatabase();
-            
+
             // Atualizar contadores
             if (typeof updateSectionCounts === 'function') {
                 updateSectionCounts();
             }
-            
+
             // ✅ ATUALIZAR TÍTULO DA PÁGINA
             if (typeof updatePageTitle === 'function') {
                 updatePageTitle();
             }
-            
+
         } else {
             showNotification('❌ Erro ao criar tarefa');
             console.error('❌ Erro do servidor:', result);
@@ -2036,6 +2099,9 @@ async function salvarNovaTarefa() {
     } catch (error) {
         console.error('❌ Erro ao salvar tarefa:', error);
         showNotification('❌ Erro de conexão');
+    } finally {
+        // ✅ SEMPRE RESETAR FLAG E BOTÃO (sucesso ou erro)
+        resetSaveButton();
     }
 }
 

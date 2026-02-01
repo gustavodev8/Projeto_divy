@@ -225,19 +225,31 @@ async function generateAIRoutine() {
     }
 }
 
+// Flag para evitar cliques múltiplos
+let isSavingAIRoutine = false;
+
 // ===== SALVAR ROTINA COMO TAREFAS =====
 async function saveRoutineAsTasks(routineText) {
+    // ✅ PROTEÇÃO CONTRA CLIQUES MÚLTIPLOS
+    if (isSavingAIRoutine) {
+        console.log('⚠️ Salvamento de rotina já em andamento');
+        return;
+    }
+    isSavingAIRoutine = true;
+
     console.log('💾 Salvando rotina como tarefas');
 
     const user = getCurrentUser();
     if (!user) {
         showNotification('❌ Usuário não identificado');
+        isSavingAIRoutine = false;
         return;
     }
 
     // Verificar se está em uma lista
     if (!window.currentListId) {
         showNotification('⚠️ Selecione uma lista para salvar a rotina');
+        isSavingAIRoutine = false;
         return;
     }
 
@@ -394,7 +406,8 @@ async function saveRoutineAsTasks(routineText) {
         showNotification('❌ Erro ao salvar tarefas');
     }
 
-    // Restaurar botão
+    // Restaurar botão e flag
+    isSavingAIRoutine = false;
     if (saveBtn) {
         saveBtn.disabled = false;
         saveBtn.innerHTML = `

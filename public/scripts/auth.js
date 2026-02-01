@@ -1,27 +1,90 @@
 /* ========================================
-   PROTEÇÃO DE AUTENTICAÇÃO - MINIMALISTA
+   PROTEÇÃO DE AUTENTICAÇÃO - NURA
    Arquivo: auth.js
-   
+
    ⚠️ Inclua este arquivo APENAS nas páginas
    que precisam de login:
    - Tela_Inicial.html
    - Tela_Gerenciamento.html
-   
+   - Tela_Ajustes.html
+   - Tela_Concluidas.html
+
    Uso: <script src="../scripts/auth.js"></script>
    ======================================== */
+
+// ===== LISTA DE PÁGINAS PÚBLICAS (NÃO REQUEREM LOGIN) =====
+const PUBLIC_PAGES = [
+    'login',
+    'Tela_Login',
+    'criar-conta',
+    'Tela_CriaConta',
+    'Tela_Lading',
+    'landing'
+];
+
+// ===== VERIFICAR SE É PÁGINA PÚBLICA =====
+function isPublicPage(pathname) {
+    // Página raiz é pública (landing page)
+    if (pathname === '/' || pathname === '') {
+        return true;
+    }
+
+    // Verificar se contém algum termo de página pública
+    return PUBLIC_PAGES.some(page => pathname.toLowerCase().includes(page.toLowerCase()));
+}
+
+// ===== VERIFICAÇÃO IMEDIATA (ANTES DO DOM CARREGAR) =====
+(function() {
+    const currentPage = window.location.pathname;
+
+    // Não verificar nas páginas públicas
+    if (isPublicPage(currentPage)) {
+        return;
+    }
+
+    const isLoggedIn = localStorage.getItem('nura_logged_in');
+    const userData = localStorage.getItem('nura_user');
+
+    // Se não estiver logado, esconder body e redirecionar IMEDIATAMENTE
+    if (isLoggedIn !== 'true' || !userData) {
+        // Esconder conteúdo imediatamente para evitar flash
+        document.documentElement.style.visibility = 'hidden';
+        document.documentElement.style.opacity = '0';
+        document.documentElement.style.background = '#0a0a0a';
+
+        console.log('❌ Usuário não autenticado, redirecionando...');
+        window.location.replace('/login');
+        return;
+    }
+
+    // Validar se o userData é JSON válido
+    try {
+        const user = JSON.parse(userData);
+        if (!user || !user.id) {
+            throw new Error('Dados de usuário inválidos');
+        }
+    } catch (error) {
+        document.documentElement.style.visibility = 'hidden';
+        document.documentElement.style.background = '#0a0a0a';
+        localStorage.removeItem('nura_user');
+        localStorage.removeItem('nura_logged_in');
+        window.location.replace('/login');
+        return;
+    }
+})();
 
 // ===== VERIFICAR SE USUÁRIO ESTÁ LOGADO =====
 function checkAuthentication() {
     const isLoggedIn = localStorage.getItem('nura_logged_in');
     const userData = localStorage.getItem('nura_user');
-    
+
     // Se não estiver logado, redirecionar para login
     if (isLoggedIn !== 'true' || !userData) {
         console.log('❌ Usuário não autenticado, redirecionando...');
-        window.location.href = '/login';
+        window.location.replace('/login');
         return false;
     }
-    
+
     try {
         const user = JSON.parse(userData);
         console.log('✅ Usuário autenticado:', user.username);
@@ -29,7 +92,7 @@ function checkAuthentication() {
     } catch (error) {
         console.error('❌ Erro ao verificar autenticação:', error);
         localStorage.clear();
-        window.location.href = 'Tela_Login.html';
+        window.location.replace('/login');
         return false;
     }
 }
@@ -52,25 +115,30 @@ function getCurrentUser() {
 function logout() {
     if (confirm('⚠️ Tem certeza que deseja sair?')) {
         console.log('🚪 Realizando logout...');
-        
+
         localStorage.removeItem('nura_user');
         localStorage.removeItem('nura_logged_in');
-        
-        window.location.href = 'Tela_Login.html';
+
+        window.location.replace('/login');
     }
 }
 
 // ===== INICIALIZAÇÃO AUTOMÁTICA =====
 document.addEventListener('DOMContentLoaded', function() {
     const currentPage = window.location.pathname;
-    
+
     // Não verificar nas páginas públicas
-    if (currentPage.includes('Tela_Login.html') || currentPage.includes('Tela_CriaConta.html')) {
+    if (isPublicPage(currentPage)) {
         return;
     }
-    
-    // Verificar autenticação
-    checkAuthentication();
+
+    // Verificar autenticação novamente
+    if (checkAuthentication()) {
+        // Mostrar conteúdo apenas se autenticado
+        document.documentElement.style.visibility = 'visible';
+        document.documentElement.style.opacity = '1';
+        document.documentElement.style.background = '';
+    }
 });
 
 // ===== TORNAR FUNÇÕES GLOBAIS =====

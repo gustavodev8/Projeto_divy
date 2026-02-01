@@ -655,7 +655,10 @@ async function saveEditedSection() {
     try {
         console.log(`📝 Salvando edição da seção ${sectionId}: "${newName}"`);
         
-        const response = await fetch(`http://localhost:3000/sections/${sectionId}`, {
+        const baseUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000'
+            : window.location.origin;
+        const response = await fetch(`${baseUrl}/sections/${sectionId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: newName })
