@@ -12,27 +12,30 @@ let currentUser = null;
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('⚙️ Inicializando sistema de ajustes...');
-    
+
     // Verificar autenticação
     currentUser = getCurrentUser();
-    
+
     if (!currentUser) {
         console.error('❌ Usuário não autenticado');
         window.location.href = 'Tela_Login.html';
         return;
     }
-    
+
     console.log('👤 Usuário:', currentUser.username);
-    
+
     // Atualizar informações da conta
     updateAccountInfo();
-    
+
     // Carregar configurações salvas
     await loadSettings();
-    
+
+    // Carregar informações do plano
+    await loadPlanInfo();
+
     // Inicializar event listeners
     initializeEventListeners();
-    
+
     console.log('✅ Sistema de ajustes carregado');
 });
 
@@ -40,14 +43,322 @@ document.addEventListener('DOMContentLoaded', async () => {
 function updateAccountInfo() {
     const nameElement = document.querySelector('.account-name');
     const emailElement = document.querySelector('.account-email');
-    
+
     if (nameElement) {
         nameElement.textContent = currentUser.username || 'Usuário';
     }
-    
+
     if (emailElement) {
         emailElement.textContent = currentUser.email || 'email@exemplo.com';
     }
+}
+
+// ===== CARREGAR INFORMAÇÕES DO PLANO =====
+async function loadPlanInfo() {
+    console.log('💎 Carregando informações do plano...');
+
+    const container = document.getElementById('plan-info-container');
+    if (!container) return;
+
+    try {
+        // Usar o PlanService se disponível
+        let planData = null;
+
+        if (window.PlanService) {
+            planData = await window.PlanService.getMyPlan(true);
+        } else {
+            // Fallback: fazer requisição direta
+            const response = await fetch(`${API_URL}/api/plans/my-plan?user_id=${currentUser.id}`);
+            planData = await response.json();
+        }
+
+        if (!planData || !planData.success) {
+            container.innerHTML = `<div class="plan-error">Não foi possível carregar informações do plano</div>`;
+            return;
+        }
+
+        const { plan, usage, features } = planData;
+
+        // Cores e ícones por plano
+        const planStyles = {
+            normal: { color: '#6c757d', icon: 'fa-user', gradient: 'linear-gradient(135deg, #6c757d, #495057)' },
+            pro: { color: '#4f46e5', icon: 'fa-star', gradient: 'linear-gradient(135deg, #4f46e5, #7c3aed)' },
+            promax: { color: '#f59e0b', icon: 'fa-crown', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)' }
+        };
+
+        const style = planStyles[plan.id] || planStyles.normal;
+
+        // Formatar data de expiração
+        let expirationText = '';
+        if (plan.expiresAt) {
+            const expDate = new Date(plan.expiresAt);
+            const daysLeft = Math.ceil((expDate - new Date()) / (1000 * 60 * 60 * 24));
+            expirationText = `<span class="plan-expiration">Expira em ${daysLeft} dias (${expDate.toLocaleDateString('pt-BR')})</span>`;
+        }
+
+        // Função para criar barra de progresso
+        const createProgressBar = (current, limit, unlimited) => {
+            if (unlimited) {
+                return `<span class="usage-unlimited"><i class="fas fa-infinity"></i> Ilimitado</span>`;
+            }
+            const percentage = Math.min((current / limit) * 100, 100);
+            const colorClass = percentage >= 90 ? 'critical' : percentage >= 70 ? 'warning' : 'normal';
+            return `
+                <div class="usage-bar-container">
+                    <div class="usage-bar ${colorClass}" style="width: ${percentage}%"></div>
+                </div>
+                <span class="usage-text">${current} / ${limit}</span>
+            `;
+        };
+
+        container.innerHTML = `
+            <div class="plan-header-minimal">
+                <div class="plan-badge-minimal ${plan.id}">
+                    ${plan.name}
+                </div>
+                <span class="plan-price-minimal">${plan.isPaid ? `R$ ${plan.price?.toFixed(2).replace('.', ',')}/mês` : 'Gratuito'}</span>
+            </div>
+
+            <div class="plan-usage-minimal">
+                <div class="usage-row">
+                    <span class="usage-name">Tarefas</span>
+                    <span class="usage-value">${usage.tasks.unlimited ? '∞' : `${usage.tasks.current}/${usage.tasks.limit}`}</span>
+                </div>
+                <div class="usage-row">
+                    <span class="usage-name">Listas</span>
+                    <span class="usage-value">${usage.lists.unlimited ? '∞' : `${usage.lists.current}/${usage.lists.limit}`}</span>
+                </div>
+                <div class="usage-row">
+                    <span class="usage-name">IA</span>
+                    <span class="usage-value ${!usage.ai.enabled ? 'locked' : ''}">${usage.ai.enabled ? (usage.ai.routines.unlimited ? '∞' : `${usage.ai.routines.current}/${usage.ai.routines.limit} rotinas`) : 'Pro'}</span>
+                </div>
+            </div>
+
+            <div class="plan-features-minimal">
+                <div class="feature-row ${features.kanban ? '' : 'disabled'}">
+                    <span class="feature-check">${features.kanban ? '✓' : '—'}</span>
+                    <span>Kanban</span>
+                </div>
+                <div class="feature-row ${features.dragAndDrop ? '' : 'disabled'}">
+                    <span class="feature-check">${features.dragAndDrop ? '✓' : '—'}</span>
+                    <span>Drag & Drop</span>
+                </div>
+                <div class="feature-row ${features.smartFilters ? '' : 'disabled'}">
+                    <span class="feature-check">${features.smartFilters ? '✓' : '—'}</span>
+                    <span>Filtros</span>
+                </div>
+                <div class="feature-row">
+                    <span class="feature-check">✓</span>
+                    <span>Modo Escuro</span>
+                </div>
+            </div>
+
+            ${plan.id !== 'promax' ? `
+                <button class="btn-upgrade-minimal" onclick="window.PlanService?.showUpgradeModal('Desbloqueie mais recursos', '${plan.id}', '${plan.id === 'normal' ? 'pro' : 'promax'}')">
+                    Fazer upgrade
+                </button>
+            ` : ''}
+        `;
+
+        // Adicionar estilos específicos para a seção de plano
+        addPlanSectionStyles();
+
+        console.log('✅ Informações do plano carregadas');
+
+    } catch (error) {
+        console.error('❌ Erro ao carregar plano:', error);
+        container.innerHTML = `<div class="plan-error">Erro ao carregar informações do plano</div>`;
+    }
+}
+
+// ===== ESTILOS DA SEÇÃO DE PLANO =====
+function addPlanSectionStyles() {
+    if (document.getElementById('plan-section-styles')) return;
+
+    const styles = document.createElement('style');
+    styles.id = 'plan-section-styles';
+    styles.textContent = `
+        /* Design Minimalista Preto e Branco */
+        .plan-header-minimal {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .plan-badge-minimal {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 4px;
+            background: #111;
+            color: #fff;
+        }
+
+        .plan-badge-minimal.pro {
+            background: #333;
+        }
+
+        .plan-badge-minimal.promax {
+            background: #000;
+        }
+
+        .plan-price-minimal {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .plan-usage-minimal {
+            margin-bottom: 20px;
+        }
+
+        .usage-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            font-size: 14px;
+        }
+
+        .usage-row:last-child {
+            border-bottom: none;
+        }
+
+        .usage-name {
+            color: #333;
+        }
+
+        .usage-value {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .usage-value.locked {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .plan-features-minimal {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .feature-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #333;
+            padding: 8px 0;
+        }
+
+        .feature-row.disabled {
+            color: #bbb;
+        }
+
+        .feature-check {
+            font-weight: 600;
+            width: 16px;
+        }
+
+        .feature-row.disabled .feature-check {
+            color: #ccc;
+        }
+
+        .btn-upgrade-minimal {
+            width: 100%;
+            padding: 12px 20px;
+            background: #111;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-upgrade-minimal:hover {
+            background: #333;
+        }
+
+        .plan-loading, .plan-error {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .plan-error {
+            color: #c00;
+        }
+
+        /* Dark mode adaptações */
+        [data-theme="dark"] .plan-header-minimal {
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        [data-theme="dark"] .plan-badge-minimal {
+            background: #fff;
+            color: #111;
+        }
+
+        [data-theme="dark"] .plan-badge-minimal.pro,
+        [data-theme="dark"] .plan-badge-minimal.promax {
+            background: #fff;
+            color: #111;
+        }
+
+        [data-theme="dark"] .plan-price-minimal {
+            color: #999;
+        }
+
+        [data-theme="dark"] .usage-row {
+            border-color: rgba(255,255,255,0.08);
+        }
+
+        [data-theme="dark"] .usage-name {
+            color: #eee;
+        }
+
+        [data-theme="dark"] .usage-value {
+            color: #aaa;
+        }
+
+        [data-theme="dark"] .feature-row {
+            color: #eee;
+        }
+
+        [data-theme="dark"] .feature-row.disabled {
+            color: #555;
+        }
+
+        [data-theme="dark"] .feature-row.disabled .feature-check {
+            color: #444;
+        }
+
+        [data-theme="dark"] .btn-upgrade-minimal {
+            background: #fff;
+            color: #111;
+        }
+
+        [data-theme="dark"] .btn-upgrade-minimal:hover {
+            background: #eee;
+        }
+
+        /* Responsivo */
+        @media (max-width: 480px) {
+            .plan-features-minimal {
+                grid-template-columns: 1fr;
+            }
+        }
+    `;
+
+    document.head.appendChild(styles);
 }
 
 // ===== CARREGAR CONFIGURAÇÕES DO SERVIDOR =====

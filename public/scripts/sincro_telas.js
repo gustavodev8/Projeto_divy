@@ -57,6 +57,10 @@ async function generateAIDescription(taskTitle, existingDescription = '') {
 
     console.log(`🤖 ${mode === 'melhorar' ? 'Melhorando' : 'Gerando'} descrição IA para: "${taskTitle}" (Nível: ${detailLevel})`);
 
+    // Obter user_id para verificação de plano
+    const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
+    const userId = userData.id;
+
     try {
         const response = await fetch(`${API_URL}/api/ai/generate-description`, {
             method: 'POST',
@@ -66,7 +70,8 @@ async function generateAIDescription(taskTitle, existingDescription = '') {
             body: JSON.stringify({
                 taskTitle: taskTitle,
                 detailLevel: detailLevel,
-                existingDescription: existingDescription
+                existingDescription: existingDescription,
+                user_id: userId
             })
         });
 
@@ -77,6 +82,14 @@ async function generateAIDescription(taskTitle, existingDescription = '') {
             return data.description;
         } else {
             console.error('❌ Erro na resposta:', data.error);
+
+            // Verificar se é erro de limite de plano
+            if (data.code === 'AI_NOT_AVAILABLE' || data.code === 'AI_LIMIT_REACHED') {
+                if (window.PlanService && typeof window.PlanService.handlePlanLimitError === 'function') {
+                    window.PlanService.handlePlanLimitError(data);
+                }
+            }
+
             return null;
         }
     } catch (error) {
@@ -105,42 +118,78 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 2000);
 });
 
+// ===== CARREGAR PLANO DO USUÁRIO NA SIDEBAR =====
+async function loadUserPlanBadge() {
+    const planBadge = document.getElementById('user-plan-badge');
+    if (!planBadge) return;
+
+    try {
+        const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
+        const userId = userData.id;
+
+        if (!userId) {
+            planBadge.textContent = 'Plano Free';
+            return;
+        }
+
+        const response = await fetch(`${API_URL}/api/plans/my-plan?user_id=${userId}`);
+        const data = await response.json();
+
+        if (data.success && data.plan) {
+            const planNames = {
+                normal: 'Plano Free',
+                pro: 'Plano Pro',
+                promax: 'Plano ProMax'
+            };
+            planBadge.textContent = planNames[data.plan.id] || 'Plano Free';
+        } else {
+            planBadge.textContent = 'Plano Free';
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar plano:', error);
+        planBadge.textContent = 'Plano Free';
+    }
+}
+
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Iniciando sistema de tarefas...');
-    
+
     currentUser = getCurrentUser();
-    
+
     if (!currentUser) {
         console.error('❌ Usuário não está logado!');
         window.location.href = '/login';
         return;
     }
-    
+
     console.log('👤 Usuário logado:', currentUser.username);
-    
+
     initializeTaskSystem();
-    
+
+    // Carregar plano do usuário na sidebar
+    loadUserPlanBadge();
+
     // Aguardar settings carregar
     if (window.nuraSettingsFunctions) {
         await window.nuraSettingsFunctions.loadSettingsFromDatabase();
     }
-    
+
     // Carregar listas primeiro
     if (typeof loadLists === 'function') {
         await loadLists();
         console.log('📋 Listas carregadas, lista atual:', window.currentListId);
     }
-    
+
     // Carregar seções da lista atual
     if (typeof loadSections === 'function' && window.currentListId) {
         await loadSections(window.currentListId);
         console.log('📁 Seções da lista', window.currentListId, 'carregadas');
     }
-    
+
     loadAndDisplayTasksFromDatabase();
 
-        if (typeof updateAddTaskButtonState === 'function') {
+    if (typeof updateAddTaskButtonState === 'function') {
         updateAddTaskButtonState();
     }
 });
@@ -2093,7 +2142,26 @@ async function salvarNovaTarefa() {
             }
 
         } else {
-            showNotification('❌ Erro ao criar tarefa');
+            // ===== VERIFICAR SE É ERRO DE LIMITE DE PLANO =====
+            if (result.code === 'PLAN_LIMIT_REACHED' || result.code === 'FEATURE_NOT_AVAILABLE') {
+                // Fechar modal de criar tarefa primeiro
+                closeTaskModal();
+
+                // Pequeno delay para garantir que o modal fechou
+                setTimeout(() => {
+                    if (window.PlanService && typeof window.PlanService.showUpgradeModal === 'function') {
+                        window.PlanService.showUpgradeModal(
+                            result.error || 'Você atingiu o limite do seu plano.',
+                            result.plan || 'normal',
+                            result.upgrade || 'pro'
+                        );
+                    } else {
+                        showNotification(`❌ ${result.error}`);
+                    }
+                }, 100);
+            } else {
+                showNotification('❌ Erro ao criar tarefa');
+            }
             console.error('❌ Erro do servidor:', result);
         }
     } catch (error) {

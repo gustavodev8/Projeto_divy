@@ -180,6 +180,25 @@ async function createList(name, emoji = '📋', color = '#146551') {
             showNotification(`✅ Lista "${name}" criada!`);
             await loadLists();
             return data.listId;
+        } else {
+            // Verificar se é erro de limite de plano
+            if (data.code === 'PLAN_LIMIT_REACHED' && window.PlanService) {
+                // Fechar modal de criar lista primeiro (se existir)
+                if (typeof closeCreateListModal === 'function') {
+                    closeCreateListModal();
+                }
+
+                // Pequeno delay para garantir que o modal fechou
+                setTimeout(() => {
+                    window.PlanService.showUpgradeModal(
+                        data.error || 'Você atingiu o limite de listas do seu plano.',
+                        data.plan || 'normal',
+                        data.upgrade || 'pro'
+                    );
+                }, 100);
+            } else {
+                showNotification('❌ ' + (data.error || 'Erro ao criar lista'));
+            }
         }
     } catch (error) {
         console.error('❌ Erro ao criar lista:', error);
@@ -479,12 +498,28 @@ async function saveNewList() {
 
         } else {
             console.error('❌ Erro ao criar lista:', result.error);
-            alert('❌ Erro ao criar lista: ' + (result.error || 'Erro desconhecido'));
+
+            // Verificar se é erro de limite de plano
+            if (result.code === 'PLAN_LIMIT_REACHED' && window.PlanService) {
+                // Fechar modal de criar lista primeiro
+                closeCreateListModal();
+
+                // Pequeno delay para garantir que o modal fechou
+                setTimeout(() => {
+                    window.PlanService.showUpgradeModal(
+                        result.error || 'Você atingiu o limite de listas do seu plano.',
+                        result.plan || 'normal',
+                        result.upgrade || 'pro'
+                    );
+                }, 100);
+            } else {
+                showNotification('❌ ' + (result.error || 'Erro ao criar lista'));
+            }
         }
-        
+
     } catch (error) {
         console.error('❌ Erro na requisição:', error);
-        alert('❌ Erro ao criar lista. Verifique sua conexão.');
+        showNotification('❌ Erro ao criar lista. Verifique sua conexão.');
     }
 }
 

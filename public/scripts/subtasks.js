@@ -268,35 +268,54 @@ async function saveNewSubtask() {
         
         const position = currentTaskSubtasks.length;
         
+        // Obter user_id para verificação de limite
+        const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
+
         const response = await fetch(`${SUBTASKS_API_URL}/subtasks`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 task_id: currentTaskIdForSubtasks,
                 title: title,
-                position: position
+                position: position,
+                user_id: userData.id
             })
         });
-        
-        if (!response.ok) {
-            throw new Error('Erro ao criar subtarefa');
+
+        const result = await response.json();
+
+        // Verificar se é erro de limite de plano
+        if (!response.ok || result.code === 'PLAN_LIMIT_REACHED') {
+            if (result.code === 'PLAN_LIMIT_REACHED' && window.PlanService) {
+                hideSubtaskInput();
+
+                // Pequeno delay para garantir que o input fechou
+                setTimeout(() => {
+                    window.PlanService.showUpgradeModal(
+                        result.error || 'Você atingiu o limite de subtarefas do seu plano.',
+                        result.plan || 'normal',
+                        result.upgrade || 'pro'
+                    );
+                }, 100);
+                return;
+            }
+            throw new Error(result.error || 'Erro ao criar subtarefa');
         }
-        
-        const newSubtask = await response.json();
-        console.log('✅ Subtarefa criada:', newSubtask);
-        
+
+        console.log('✅ Subtarefa criada:', result);
+
         // Adicionar ao array local
-        currentTaskSubtasks.push(newSubtask);
-        
+        currentTaskSubtasks.push(result);
+
         // Renderizar novamente
         renderSubtasks(currentTaskSubtasks);
         updateSubtasksProgress();
-        
+
         // Limpar e ocultar input
         hideSubtaskInput();
-        
+
         showNotification('Subtarefa adicionada!', 'success');
-        
+
     } catch (error) {
         console.error('❌ Erro ao salvar subtarefa:', error);
         showNotification('Erro ao adicionar subtarefa', 'error');

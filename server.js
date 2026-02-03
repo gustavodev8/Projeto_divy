@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const helmet = require('helmet');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const db = require('./database'); // Conexão com banco (SQLite local ou PostgreSQL produção)
 const cron = require('node-cron');
@@ -10,14 +11,41 @@ const { enviarResumoParaTodos, enviarResumoDiario } = require('./emailService');
 const { inicializarBot, notificarNovaTarefaUrgente, getBot, getToken } = require('./telegramService');
 const fetch = require('node-fetch'); // Para keep-alive
 
+// Novos imports para segurança
+const { generalLimiter, aiLimiter } = require('./middleware/rateLimiter');
+const { authenticateToken, optionalAuth } = require('./middleware/auth');
+const { success, error, notFound, badRequest, asyncHandler } = require('./utils/response');
+const { hashPassword, comparePassword, isHashedPassword } = require('./utils/password');
+
 dotenv.config(); // Carrega variáveis do .env
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ===== MIDDLEWARES =====
+// ===== MIDDLEWARES DE SEGURANÇA =====
+app.use(helmet({
+    contentSecurityPolicy: false, // Desabilita CSP para permitir scripts inline
+    crossOriginEmbedderPolicy: false
+}));
 app.use(cors()); // Permite requisições de outros domínios
-app.use(express.json()); // Permite receber JSON no body
+app.use(express.json({ limit: '10mb' })); // Permite receber JSON no body (limite de 10MB)
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Rate limiting geral (100 req/min)
+app.use('/api/', generalLimiter);
+app.use('/v1/', generalLimiter);
+
+// ===== ROTAS DA API V1 (NOVA VERSÃO COM JWT) =====
+const authRoutesV1 = require('./routes/v1/auth')(db.isPostgres ? db : db, db.isPostgres);
+app.use('/v1/auth', authRoutesV1);
+
+// ===== ROTAS DE PLANOS V1 =====
+const plansRoutesV1 = require('./routes/v1/plans')(db.isPostgres ? db : db, db.isPostgres);
+app.use('/v1/plans', plansRoutesV1);
+app.use('/api/plans', plansRoutesV1); // Também disponível na API legada
+
+console.log('🔐 API v1 com JWT ativada em /v1/auth');
+console.log('💎 API de planos ativada em /v1/plans e /api/plans');
 
 // ===== INICIALIZAR WHATSAPP BOT =====
 console.log('🤖 Carregando bot WhatsApp...');
@@ -576,6 +604,115 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     }
 })();
 
+// ===== MIGRATION: SISTEMA DE PLANOS =====
+(async () => {
+    try {
+        console.log('🔄 Verificando sistema de planos...');
+
+        if (db.isPostgres) {
+            // PostgreSQL - verificar se coluna 'plan' já existe
+            const checkPlan = await db.query(`
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'users' AND column_name = 'plan'
+            `);
+
+            if (checkPlan.length === 0) {
+                console.log('🔄 Adicionando colunas de plano na tabela users...');
+                await db.query(`ALTER TABLE users ADD COLUMN plan VARCHAR(20) DEFAULT 'normal'`);
+                await db.query(`ALTER TABLE users ADD COLUMN plan_expires_at TIMESTAMP`);
+                console.log('✅ Colunas plan e plan_expires_at adicionadas');
+            }
+
+            // Criar tabela ai_usage
+            await db.query(`
+                CREATE TABLE IF NOT EXISTS ai_usage (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    type VARCHAR(50) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            // Índices para ai_usage
+            await db.query(`CREATE INDEX IF NOT EXISTS idx_ai_usage_user_id ON ai_usage(user_id)`);
+            await db.query(`CREATE INDEX IF NOT EXISTS idx_ai_usage_created_at ON ai_usage(created_at)`);
+
+            // Criar tabela subscriptions
+            await db.query(`
+                CREATE TABLE IF NOT EXISTS subscriptions (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    plan VARCHAR(20) NOT NULL,
+                    status VARCHAR(20) DEFAULT 'active',
+                    payment_method VARCHAR(50),
+                    payment_id VARCHAR(255),
+                    amount DECIMAL(10, 2),
+                    currency VARCHAR(3) DEFAULT 'BRL',
+                    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    expires_at TIMESTAMP,
+                    cancelled_at TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            // Atualizar usuários sem plano
+            await db.query(`UPDATE users SET plan = 'normal' WHERE plan IS NULL`);
+
+            console.log('✅ Sistema de planos configurado');
+
+        } else {
+            // SQLite
+            const tableInfo = db.prepare("PRAGMA table_info(users)").all();
+            const hasPlan = tableInfo.some(col => col.name === 'plan');
+
+            if (!hasPlan) {
+                console.log('🔄 Adicionando colunas de plano (SQLite)...');
+                db.prepare("ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'normal'").run();
+                db.prepare("ALTER TABLE users ADD COLUMN plan_expires_at TEXT").run();
+            }
+
+            // Criar tabela ai_usage
+            db.prepare(`
+                CREATE TABLE IF NOT EXISTS ai_usage (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    type TEXT NOT NULL,
+                    created_at TEXT DEFAULT (datetime('now')),
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
+            `).run();
+
+            // Criar tabela subscriptions
+            db.prepare(`
+                CREATE TABLE IF NOT EXISTS subscriptions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    plan TEXT NOT NULL,
+                    status TEXT DEFAULT 'active',
+                    payment_method TEXT,
+                    payment_id TEXT,
+                    amount REAL,
+                    currency TEXT DEFAULT 'BRL',
+                    started_at TEXT DEFAULT (datetime('now')),
+                    expires_at TEXT,
+                    cancelled_at TEXT,
+                    created_at TEXT DEFAULT (datetime('now')),
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
+            `).run();
+
+            // Atualizar usuários sem plano
+            db.prepare("UPDATE users SET plan = 'normal' WHERE plan IS NULL").run();
+
+            console.log('✅ Sistema de planos configurado (SQLite)');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao configurar sistema de planos:', error.message);
+    }
+})();
+
 // ===== INICIALIZAR BOT DO TELEGRAM =====
 inicializarBot(); // Inicia o bot do Telegram com todos os comandos e notificações
 
@@ -678,7 +815,7 @@ app.get('/api/tasks', async (req, res) => {
         }
 
         const rows = await db.query(
-            "SELECT * FROM tasks WHERE user_id = ? ORDER BY created_at DESC",
+            "SELECT * FROM tasks WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC",
             [userId]
         );
 
@@ -909,17 +1046,41 @@ app.get('/api/tasks/:id', async (req, res) => {
 // POST - Criar nova tarefa
 app.post('/api/tasks', async (req, res) => {
     console.log('📥 POST /api/tasks - Criar tarefa');
-    
+
     const { title, description, due_date, priority, status, user_id, list_id, section_id } = req.body;
 
     if (!title || !user_id) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'Título e usuário são obrigatórios' 
+        return res.status(400).json({
+            success: false,
+            error: 'Título e usuário são obrigatórios'
         });
     }
 
     try {
+        // ===== VERIFICAR LIMITE DE TAREFAS DO PLANO =====
+        const { getUserPlan, countUserResources } = require('./middleware/planLimits');
+        const { getLimit, isLimitReached, getLimitMessage } = require('./config/plans');
+
+        const userPlan = await getUserPlan(db, db.isPostgres, user_id);
+        const taskLimit = getLimit(userPlan, 'tasks');
+
+        if (taskLimit !== -1) { // -1 = ilimitado
+            const currentTasks = await countUserResources(db, db.isPostgres, user_id, 'tasks');
+
+            if (isLimitReached(currentTasks, taskLimit)) {
+                return res.status(403).json({
+                    success: false,
+                    error: getLimitMessage('tasks', userPlan),
+                    code: 'PLAN_LIMIT_REACHED',
+                    limit: taskLimit,
+                    current: currentTasks,
+                    plan: userPlan,
+                    upgrade: userPlan === 'normal' ? 'pro' : 'promax'
+                });
+            }
+        }
+        // ===== FIM VERIFICAÇÃO DE LIMITE =====
+
         if (db.isPostgres) {
             const query = `
                 INSERT INTO tasks (
@@ -1132,52 +1293,233 @@ app.put('/api/tasks/:id', async (req, res) => {
     }
 });
 
-// DELETE - Excluir tarefa
+// DELETE - Mover tarefa para lixeira (Soft Delete)
 app.delete('/api/tasks/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const userId = req.query.user_id || req.headers['x-user-id'];
-        
+        const permanent = req.query.permanent === 'true'; // Para exclusão permanente
+
         if (!userId) {
             return res.status(401).json({
                 success: false,
                 error: 'Usuário não identificado'
             });
         }
-        
-        console.log(`🗑️ Excluindo tarefa ${id} do usuário ${userId}...`);
-        
+
         // Busca o título antes de excluir (para log)
         const task = await db.get(
             "SELECT title FROM tasks WHERE id = ? AND user_id = ?",
             [id, userId]
         );
-        
+
         if (!task) {
             return res.status(404).json({
                 success: false,
                 error: 'Tarefa não encontrada'
             });
         }
-        
-        const result = await db.run(
-            "DELETE FROM tasks WHERE id = ? AND user_id = ?",
-            [id, userId]
-        );
-        
-        console.log(`✅ Tarefa "${task.title}" excluída!`);
-        
-        res.json({
-            success: true,
-            message: 'Tarefa excluída com sucesso!',
-            changes: result.changes
-        });
-        
+
+        let result;
+
+        if (permanent) {
+            // Exclusão permanente (da lixeira)
+            console.log(`🗑️ Excluindo permanentemente tarefa ${id}...`);
+
+            // Deletar subtarefas primeiro
+            await db.run(
+                "DELETE FROM subtasks WHERE task_id = ?",
+                [id]
+            );
+
+            result = await db.run(
+                "DELETE FROM tasks WHERE id = ? AND user_id = ?",
+                [id, userId]
+            );
+
+            console.log(`✅ Tarefa "${task.title}" excluída permanentemente!`);
+
+            res.json({
+                success: true,
+                message: 'Tarefa excluída permanentemente!',
+                changes: result.changes
+            });
+        } else {
+            // Soft delete - mover para lixeira
+            console.log(`🗑️ Movendo tarefa ${id} para lixeira...`);
+
+            const now = new Date().toISOString();
+            result = await db.run(
+                "UPDATE tasks SET deleted_at = ? WHERE id = ? AND user_id = ?",
+                [now, id, userId]
+            );
+
+            console.log(`✅ Tarefa "${task.title}" movida para lixeira!`);
+
+            res.json({
+                success: true,
+                message: 'Tarefa movida para lixeira!',
+                changes: result.changes
+            });
+        }
+
     } catch (err) {
         console.error('❌ Erro ao excluir tarefa:', err);
         res.status(500).json({
             success: false,
             error: 'Erro ao excluir tarefa do banco'
+        });
+    }
+});
+
+// ===== API - LIXEIRA =====
+
+// GET - Listar tarefas na lixeira
+app.get('/api/trash', async (req, res) => {
+    try {
+        const userId = req.query.user_id || req.headers['x-user-id'];
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não identificado'
+            });
+        }
+
+        console.log(`🗑️ Buscando lixeira do usuário ${userId}...`);
+
+        const tasks = await db.query(
+            `SELECT t.*, l.name as list_name
+             FROM tasks t
+             LEFT JOIN lists l ON t.list_id = l.id
+             WHERE t.user_id = ? AND t.deleted_at IS NOT NULL
+             ORDER BY t.deleted_at DESC`,
+            [userId]
+        );
+
+        console.log(`📋 ${tasks.length} tarefas na lixeira`);
+
+        res.json({
+            success: true,
+            tasks: tasks,
+            total: tasks.length
+        });
+
+    } catch (err) {
+        console.error('❌ Erro ao buscar lixeira:', err);
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
+// POST - Restaurar tarefa da lixeira
+app.post('/api/trash/:id/restore', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.query.user_id || req.body.user_id || req.headers['x-user-id'];
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não identificado'
+            });
+        }
+
+        console.log(`♻️ Restaurando tarefa ${id}...`);
+
+        // Verificar se a tarefa existe na lixeira
+        const task = await db.get(
+            "SELECT * FROM tasks WHERE id = ? AND user_id = ? AND deleted_at IS NOT NULL",
+            [id, userId]
+        );
+
+        if (!task) {
+            return res.status(404).json({
+                success: false,
+                error: 'Tarefa não encontrada na lixeira'
+            });
+        }
+
+        // Restaurar tarefa (remover deleted_at)
+        await db.run(
+            "UPDATE tasks SET deleted_at = NULL WHERE id = ? AND user_id = ?",
+            [id, userId]
+        );
+
+        console.log(`✅ Tarefa "${task.title}" restaurada!`);
+
+        res.json({
+            success: true,
+            message: 'Tarefa restaurada com sucesso!',
+            task: { ...task, deleted_at: null }
+        });
+
+    } catch (err) {
+        console.error('❌ Erro ao restaurar tarefa:', err);
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
+// DELETE - Esvaziar lixeira (excluir todas permanentemente)
+app.delete('/api/trash/empty', async (req, res) => {
+    try {
+        const userId = req.query.user_id || req.headers['x-user-id'];
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não identificado'
+            });
+        }
+
+        console.log(`🗑️ Esvaziando lixeira do usuário ${userId}...`);
+
+        // Buscar IDs das tarefas na lixeira
+        const trashTasks = await db.query(
+            "SELECT id FROM tasks WHERE user_id = ? AND deleted_at IS NOT NULL",
+            [userId]
+        );
+
+        if (trashTasks.length === 0) {
+            return res.json({
+                success: true,
+                message: 'Lixeira já está vazia',
+                deleted: 0
+            });
+        }
+
+        const taskIds = trashTasks.map(t => t.id);
+
+        // Deletar subtarefas das tarefas na lixeira
+        await db.run(
+            `DELETE FROM subtasks WHERE task_id IN (${taskIds.join(',')})`,
+            []
+        );
+
+        // Deletar tarefas permanentemente
+        const result = await db.run(
+            "DELETE FROM tasks WHERE user_id = ? AND deleted_at IS NOT NULL",
+            [userId]
+        );
+
+        console.log(`✅ ${result.changes} tarefas excluídas permanentemente!`);
+
+        res.json({
+            success: true,
+            message: 'Lixeira esvaziada com sucesso!',
+            deleted: result.changes
+        });
+
+    } catch (err) {
+        console.error('❌ Erro ao esvaziar lixeira:', err);
+        res.status(500).json({
+            success: false,
+            error: err.message
         });
     }
 });
@@ -1222,7 +1564,7 @@ app.get('/api/lists', async (req, res) => {
 app.post('/api/lists', async (req, res) => {
     try {
         const { name, emoji, color } = req.body;
-        const user_id = req.body.user_id || req.headers['x-user-id']; // ✅ ADICIONAR ESTA LINHA
+        const user_id = req.body.user_id || req.headers['x-user-id'];
 
         console.log('📋 Criando lista para usuário:', user_id);
         console.log('   - Nome:', name);
@@ -1236,6 +1578,30 @@ app.post('/api/lists', async (req, res) => {
         if (!name) {
             return res.status(400).json({ success: false, error: 'Nome da lista é obrigatório' });
         }
+
+        // ===== VERIFICAR LIMITE DE LISTAS DO PLANO =====
+        const { getUserPlan, countUserResources } = require('./middleware/planLimits');
+        const { getLimit, isLimitReached, getLimitMessage } = require('./config/plans');
+
+        const userPlan = await getUserPlan(db, db.isPostgres, user_id);
+        const listLimit = getLimit(userPlan, 'lists');
+
+        if (listLimit !== -1) {
+            const currentLists = await countUserResources(db, db.isPostgres, user_id, 'lists');
+
+            if (isLimitReached(currentLists, listLimit)) {
+                return res.status(403).json({
+                    success: false,
+                    error: getLimitMessage('lists', userPlan),
+                    code: 'PLAN_LIMIT_REACHED',
+                    limit: listLimit,
+                    current: currentLists,
+                    plan: userPlan,
+                    upgrade: userPlan === 'normal' ? 'pro' : 'promax'
+                });
+            }
+        }
+        // ===== FIM VERIFICAÇÃO DE LIMITE =====
 
         // Buscar posição da última lista
         const lastPos = await db.get(
@@ -1425,7 +1791,7 @@ app.get('/api/lists/:id/tasks', async (req, res) => {
         }
 
         const tasks = await db.query(
-            "SELECT * FROM tasks WHERE list_id = ? AND user_id = ? ORDER BY created_at DESC",
+            "SELECT * FROM tasks WHERE list_id = ? AND user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC",
             [id, userId]
         );
 
@@ -1511,17 +1877,43 @@ app.post('/api/sections', async (req, res) => {
     console.log('📂 POST /api/sections - Criar seção');
     console.log('   name:', name);
     console.log('   user_id:', user_id);
-    console.log('   list_id:', list_id);  // ✅ IMPORTANTE
+    console.log('   list_id:', list_id);
     console.log('   position:', position);
 
     if (!name || !user_id) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'Nome e usuário são obrigatórios' 
+        return res.status(400).json({
+            success: false,
+            error: 'Nome e usuário são obrigatórios'
         });
     }
 
     try {
+        // ===== VERIFICAR LIMITE DE SEÇÕES POR LISTA DO PLANO =====
+        if (list_id) {
+            const { getUserPlan, countSectionsInList } = require('./middleware/planLimits');
+            const { getLimit, isLimitReached, getLimitMessage } = require('./config/plans');
+
+            const userPlan = await getUserPlan(db, db.isPostgres, user_id);
+            const sectionLimit = getLimit(userPlan, 'sectionsPerList');
+
+            if (sectionLimit !== -1) {
+                const currentSections = await countSectionsInList(db, db.isPostgres, list_id);
+
+                if (isLimitReached(currentSections, sectionLimit)) {
+                    return res.status(403).json({
+                        success: false,
+                        error: getLimitMessage('sectionsPerList', userPlan),
+                        code: 'PLAN_LIMIT_REACHED',
+                        limit: sectionLimit,
+                        current: currentSections,
+                        plan: userPlan,
+                        upgrade: userPlan === 'normal' ? 'pro' : 'promax'
+                    });
+                }
+            }
+        }
+        // ===== FIM VERIFICAÇÃO DE LIMITE =====
+
         if (db.isPostgres) {
             // ✅ PostgreSQL
             const result = await db.query(`
@@ -1842,38 +2234,74 @@ app.post(`/telegram-webhook/${process.env.TELEGRAM_BOT_TOKEN}`, (req, res) => {
 // POST - Login do usuário
 app.post("/api/login", async (req, res) => {
     console.log("🔐 Tentativa de login:", req.body);
-    
-    const { username, password } = req.body;
-    
-    if (!username || !password) {
+
+    const { username, password, email } = req.body;
+    const loginIdentifier = username || email;
+
+    if (!loginIdentifier || !password) {
         return res.status(400).json({
             success: false,
-            error: "Usuário e senha são obrigatórios"
+            error: "Usuário/email e senha são obrigatórios"
         });
     }
-    
+
     try {
         let user;
-        
+
         if (db.isPostgres) {
-            // ✅ PostgreSQL - usar $1, $2 DIRETAMENTE
+            // ✅ PostgreSQL - buscar usuário primeiro (sem verificar senha na query)
             const result = await db.query(
-                `SELECT id, name AS username, email FROM users 
-                 WHERE (name = $1 OR email = $1) AND password = $2`,
-                [username, password]
+                `SELECT id, name AS username, email, password as stored_password FROM users
+                 WHERE name = $1 OR email = $1`,
+                [loginIdentifier]
             );
             user = result[0];
         } else {
-            // ✅ SQLite - usar ?
+            // ✅ SQLite - buscar usuário primeiro
             user = await db.get(
-                `SELECT id, name AS username, email FROM users 
-                 WHERE (name = ? OR email = ?) AND password = ?`,
-                [username, username, password]
+                `SELECT id, name AS username, email, password as stored_password FROM users
+                 WHERE name = ? OR email = ?`,
+                [loginIdentifier, loginIdentifier]
             );
         }
-        
-        if (user) {
+
+        if (!user) {
+            console.log('❌ Usuário não encontrado');
+            return res.status(401).json({
+                success: false,
+                error: "Usuário ou senha incorretos"
+            });
+        }
+
+        // ✅ VERIFICAR SENHA (com suporte a hash e texto plano legado)
+        let passwordValid = false;
+
+        if (isHashedPassword(user.stored_password)) {
+            // Senha já está com hash - usar bcrypt
+            passwordValid = await comparePassword(password, user.stored_password);
+        } else {
+            // Senha em texto plano (legado) - verificar e ATUALIZAR para hash
+            passwordValid = (password === user.stored_password);
+
+            if (passwordValid) {
+                // Atualizar senha para hash automaticamente
+                const hashedPwd = await hashPassword(password);
+                if (db.isPostgres) {
+                    await db.query('UPDATE users SET password = $1 WHERE id = $2', [hashedPwd, user.id]);
+                } else {
+                    await db.run('UPDATE users SET password = ? WHERE id = ?', [hashedPwd, user.id]);
+                }
+                console.log(`🔐 Senha do usuário ${user.id} migrada para hash bcrypt`);
+            }
+        }
+
+        if (passwordValid) {
             console.log('✅ Login bem-sucedido:', user.username);
+
+            // Gerar tokens JWT
+            const { generateTokens } = require('./middleware/auth');
+            const tokens = generateTokens({ id: user.id, username: user.username, email: user.email });
+
             res.json({
                 success: true,
                 message: "Login realizado com sucesso!",
@@ -1881,16 +2309,20 @@ app.post("/api/login", async (req, res) => {
                     id: user.id,
                     username: user.username,
                     email: user.email
-                }
+                },
+                // Tokens JWT (opcional - frontend pode usar ou não)
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+                expiresIn: 900
             });
         } else {
-            console.log('❌ Credenciais inválidas');
+            console.log('❌ Senha incorreta');
             res.status(401).json({
                 success: false,
                 error: "Usuário ou senha incorretos"
             });
         }
-        
+
     } catch (err) {
         console.error('❌ Erro no login:', err);
         res.status(500).json({
@@ -1980,7 +2412,49 @@ app.post("/api/gerar-rotina", async (req, res) => {
     console.log("📝 Body:", req.body);
 
     try {
-        const { descricao, horaInicio = "08:00", horaFim = "18:00" } = req.body;
+        const { descricao, horaInicio = "08:00", horaFim = "18:00", user_id } = req.body;
+
+        // ===== VERIFICAR LIMITE DE IA DO PLANO =====
+        if (user_id) {
+            const { getUserPlan, countAIUsage, logAIUsage } = require('./middleware/planLimits');
+            const { getPlan, isLimitReached } = require('./config/plans');
+
+            const userPlan = await getUserPlan(db, db.isPostgres, user_id);
+            const planConfig = getPlan(userPlan);
+
+            // Verificar se IA está habilitada
+            if (!planConfig.ai.enabled) {
+                return res.status(403).json({
+                    success: false,
+                    error: `Funcionalidades de IA não disponíveis no plano ${planConfig.name}. Faça upgrade para Pro ou ProMax.`,
+                    code: 'AI_NOT_AVAILABLE',
+                    plan: userPlan,
+                    upgrade: 'pro'
+                });
+            }
+
+            // Verificar limite de rotinas por semana
+            const routineLimit = planConfig.ai.routinesPerWeek;
+            if (routineLimit !== -1) {
+                const currentUsage = await countAIUsage(db, db.isPostgres, user_id, 'routine', 'week');
+
+                if (isLimitReached(currentUsage, routineLimit)) {
+                    return res.status(403).json({
+                        success: false,
+                        error: `Você atingiu o limite de ${routineLimit} rotinas por semana do plano ${planConfig.name}. Faça upgrade para gerar mais.`,
+                        code: 'AI_LIMIT_REACHED',
+                        limit: routineLimit,
+                        current: currentUsage,
+                        plan: userPlan,
+                        upgrade: userPlan === 'pro' ? 'promax' : 'pro'
+                    });
+                }
+            }
+
+            // Registrar uso de IA (será feito após sucesso)
+            req.logAIUsage = () => logAIUsage(db, db.isPostgres, user_id, 'routine');
+        }
+        // ===== FIM VERIFICAÇÃO DE LIMITE DE IA =====
 
         if (!descricao) {
             console.log("❌ Descrição não fornecida");
@@ -2132,6 +2606,13 @@ Gere APENAS a rotina no formato pedido. Sem introduções, explicações ou come
         console.log("📛 Nome da seção:", nomeSecao);
         console.log("📄 Tamanho da resposta:", rotinaCompleta.length, "caracteres");
 
+        // ===== REGISTRAR USO DE IA =====
+        if (req.logAIUsage) {
+            await req.logAIUsage();
+            console.log("📊 Uso de IA registrado");
+        }
+        // ===== FIM REGISTRO =====
+
         res.json({
             success: true,
             rotina: rotinaCompleta,
@@ -2171,7 +2652,49 @@ Gere APENAS a rotina no formato pedido. Sem introduções, explicações ou come
 // ===== API - GERAR OU MELHORAR DESCRIÇÃO COM IA =====
 app.post('/api/ai/generate-description', async (req, res) => {
     try {
-        const { taskTitle, detailLevel = 'medio', existingDescription = '' } = req.body;
+        const { taskTitle, detailLevel = 'medio', existingDescription = '', user_id } = req.body;
+
+        // ===== VERIFICAR LIMITE DE IA DO PLANO =====
+        if (user_id) {
+            const { getUserPlan, countAIUsage, logAIUsage } = require('./middleware/planLimits');
+            const { getPlan, isLimitReached } = require('./config/plans');
+
+            const userPlan = await getUserPlan(db, db.isPostgres, user_id);
+            const planConfig = getPlan(userPlan);
+
+            // Verificar se IA está habilitada
+            if (!planConfig.ai.enabled) {
+                return res.status(403).json({
+                    success: false,
+                    error: `Funcionalidades de IA não disponíveis no plano ${planConfig.name}. Faça upgrade para Pro ou ProMax.`,
+                    code: 'AI_NOT_AVAILABLE',
+                    plan: userPlan,
+                    upgrade: 'pro'
+                });
+            }
+
+            // Verificar limite de descrições por dia
+            const descLimit = planConfig.ai.descriptionsPerDay;
+            if (descLimit !== -1) {
+                const currentUsage = await countAIUsage(db, db.isPostgres, user_id, 'description', 'day');
+
+                if (isLimitReached(currentUsage, descLimit)) {
+                    return res.status(403).json({
+                        success: false,
+                        error: `Você atingiu o limite de ${descLimit} descrições por dia do plano ${planConfig.name}. Faça upgrade para gerar mais.`,
+                        code: 'AI_LIMIT_REACHED',
+                        limit: descLimit,
+                        current: currentUsage,
+                        plan: userPlan,
+                        upgrade: userPlan === 'pro' ? 'promax' : 'pro'
+                    });
+                }
+            }
+
+            // Registrar uso de IA (será feito após sucesso)
+            req.logAIUsage = () => logAIUsage(db, db.isPostgres, user_id, 'description');
+        }
+        // ===== FIM VERIFICAÇÃO DE LIMITE DE IA =====
 
         if (!taskTitle || taskTitle.trim() === '') {
             return res.status(400).json({
@@ -2254,6 +2777,13 @@ Responda APENAS com a descrição, sem introduções ou explicações adicionais
         const description = response.text().trim();
 
         console.log(`✅ Descrição ${mode === 'melhorar' ? 'melhorada' : 'gerada'} com sucesso!`);
+
+        // ===== REGISTRAR USO DE IA =====
+        if (req.logAIUsage) {
+            await req.logAIUsage();
+            console.log("📊 Uso de IA registrado (descrição)");
+        }
+        // ===== FIM REGISTRO =====
 
         res.json({
             success: true,
@@ -2704,16 +3234,41 @@ app.get('/subtasks/:taskId', async (req, res) => {
 });
 
 // POST - Criar nova subtarefa
-// POST - Criar nova subtarefa
 app.post('/subtasks', async (req, res) => {
-    const { task_id, title, position } = req.body;
-    
+    const { task_id, title, position, user_id } = req.body;
+
     if (!task_id || !title) {
         return res.status(400).json({ error: 'task_id e title são obrigatórios' });
     }
-    
+
     try {
         console.log(`💾 Criando subtarefa: "${title}" para tarefa ${task_id}`);
+
+        // ===== VERIFICAR LIMITE DE SUBTAREFAS POR TAREFA DO PLANO =====
+        if (user_id) {
+            const { getUserPlan, countSubtasksInTask } = require('./middleware/planLimits');
+            const { getLimit, isLimitReached, getLimitMessage } = require('./config/plans');
+
+            const userPlan = await getUserPlan(db, db.isPostgres, user_id);
+            const subtaskLimit = getLimit(userPlan, 'subtasksPerTask');
+
+            if (subtaskLimit !== -1) {
+                const currentSubtasks = await countSubtasksInTask(db, db.isPostgres, task_id);
+
+                if (isLimitReached(currentSubtasks, subtaskLimit)) {
+                    return res.status(403).json({
+                        success: false,
+                        error: getLimitMessage('subtasksPerTask', userPlan),
+                        code: 'PLAN_LIMIT_REACHED',
+                        limit: subtaskLimit,
+                        current: currentSubtasks,
+                        plan: userPlan,
+                        upgrade: userPlan === 'normal' ? 'pro' : 'promax'
+                    });
+                }
+            }
+        }
+        // ===== FIM VERIFICAÇÃO DE LIMITE =====
         
         let result;
         

@@ -112,12 +112,33 @@ function getCurrentUser() {
 }
 
 // ===== FAZER LOGOUT =====
-function logout() {
+async function logout() {
     if (confirm('⚠️ Tem certeza que deseja sair?')) {
         console.log('🚪 Realizando logout...');
 
+        // Tentar invalidar refresh token no servidor
+        const refreshToken = localStorage.getItem('nura_refresh_token');
+        if (refreshToken) {
+            try {
+                const API_URL = window.location.hostname === 'localhost'
+                    ? 'http://localhost:3000'
+                    : window.location.origin;
+
+                await fetch(`${API_URL}/v1/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                });
+            } catch (err) {
+                console.log('⚠️ Erro ao invalidar token no servidor (não crítico)');
+            }
+        }
+
+        // Limpar todos os dados locais
         localStorage.removeItem('nura_user');
         localStorage.removeItem('nura_logged_in');
+        localStorage.removeItem('nura_access_token');
+        localStorage.removeItem('nura_refresh_token');
 
         window.location.replace('/login');
     }

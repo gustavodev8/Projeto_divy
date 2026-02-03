@@ -107,7 +107,25 @@ async function createSection(sectionName) {
 
         } else {
             console.error('❌ Erro do servidor:', result);
-            showNotification('❌ Erro ao criar seção');
+
+            // Verificar se é erro de limite de plano
+            if (result.code === 'PLAN_LIMIT_REACHED' && window.PlanService) {
+                // Fechar modal de criar seção primeiro (se existir)
+                if (typeof closeCreateSectionModal === 'function') {
+                    closeCreateSectionModal();
+                }
+
+                // Pequeno delay para garantir que o modal fechou
+                setTimeout(() => {
+                    window.PlanService.showUpgradeModal(
+                        result.error || 'Você atingiu o limite de seções do seu plano.',
+                        result.plan || 'normal',
+                        result.upgrade || 'pro'
+                    );
+                }, 100);
+            } else {
+                showNotification('❌ ' + (result.error || 'Erro ao criar seção'));
+            }
         }
 
     } catch (error) {
@@ -465,7 +483,21 @@ async function submitCreateSection() {
             
             showNotification('✅ Seção criada com sucesso!');
         } else {
-            showNotification('❌ Erro ao criar seção: ' + (result.error || 'Erro desconhecido'));
+            // Verificar se é erro de limite de plano
+            if (result.code === 'PLAN_LIMIT_REACHED' && window.PlanService) {
+                closeCreateSectionModal();
+
+                // Pequeno delay para garantir que o modal fechou
+                setTimeout(() => {
+                    window.PlanService.showUpgradeModal(
+                        result.error || 'Você atingiu o limite de seções do seu plano.',
+                        result.plan || 'normal',
+                        result.upgrade || 'pro'
+                    );
+                }, 100);
+            } else {
+                showNotification('❌ ' + (result.error || 'Erro ao criar seção'));
+            }
         }
     } catch (error) {
         console.error('❌ Erro:', error);

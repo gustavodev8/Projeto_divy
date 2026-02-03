@@ -37,17 +37,24 @@ async function login(event) {
         
         if (response.ok && data.success) {
             console.log('✅ Login bem-sucedido!');
-            
+
             localStorage.setItem('nura_user', JSON.stringify(data.user));
             localStorage.setItem('nura_logged_in', 'true');
-            
+
+            // Salvar tokens JWT se disponíveis (nova API com segurança)
+            if (data.accessToken) {
+                localStorage.setItem('nura_access_token', data.accessToken);
+                localStorage.setItem('nura_refresh_token', data.refreshToken);
+                console.log('🔐 Tokens JWT salvos');
+            }
+
             showMessage('Login realizado com sucesso! Redirecionando...', 'success');
-            
+
             // ✅ CORRIGIDO: usar /inicial ao invés de Tela_Inicial.html
             setTimeout(() => {
                 window.location.href = '/inicial';
             }, 1000);
-            
+
         } else {
             console.error('❌ Erro no login:', data.error);
             showMessage(data.error || 'Usuário ou senha incorretos', 'error');

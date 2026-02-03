@@ -19,10 +19,13 @@
   <link rel="stylesheet" href="../css/dark-mode-system.css">
   <link rel="stylesheet" href="../css/ai-routine-panel.css">
   <link rel="stylesheet" href="../css/subtasks.css">
+  <link rel="stylesheet" href="../css/animations.css">
 
-  
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome para ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Preconnect para performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,9 +68,8 @@
         </div>
         <div class="user-info">
           <span class="user-name">Minha Conta</span>
-          <span class="user-plan">Plano Free</span>
+          <span class="user-plan" id="user-plan-badge">Carregando...</span>
         </div>
-        <button class="btn-upgrade">Pro</button>
       </div>
 
       <!-- Quick Actions -->
@@ -188,7 +190,7 @@
           </span>
           <span class="nav-text">Concluído</span>
         </a>
-        <a href="#" class="nav-item">
+        <a href="Lixeira.html" class="nav-item" onclick="closeSidebarMobile();">
           <span class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="3 6 5 6 21 6"></polyline>
@@ -1012,9 +1014,10 @@
   <!-- ===== SCRIPTS ===== -->
   <script src="../scripts/auth.js"></script>
   <script src="../scripts/settings.js"></script>
-  <script src="../scripts/lists.js"></script>        
+  <script src="../scripts/lists.js"></script>
   <script src="../scripts/sections.js"></script>
   <script src="../scripts/kanban-view.js"></script>
+  <script src="../scripts/plan-service.js"></script>
   <script src="../scripts/sincro_telas.js"></script>
   <script src="../scripts/smart-filters.js"></script> 
   <script src="../scripts/estatisticas_backend.js"></script>

@@ -113,7 +113,11 @@ async function generateAIRoutine() {
         `;
         
         console.log('📤 Enviando requisição para API Gemini...');
-        
+
+        // Obter user_id para verificação de plano
+        const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
+        const userId = userData.id;
+
         // Chamar API
         const response = await fetch(`${AI_PANEL_API_URL}/api/gerar-rotina`, {
             method: 'POST',
@@ -123,7 +127,8 @@ async function generateAIRoutine() {
             body: JSON.stringify({
                 descricao: description,
                 horaInicio: startTime,
-                horaFim: endTime
+                horaFim: endTime,
+                user_id: userId
             })
         });
         
@@ -177,7 +182,24 @@ async function generateAIRoutine() {
             showNotification('✅ Rotina gerada com sucesso!');
         } else {
             console.error('❌ Erro ao gerar rotina:', result.error);
-            
+
+            // ===== VERIFICAR SE É ERRO DE LIMITE DE PLANO =====
+            if (result.code === 'AI_NOT_AVAILABLE' || result.code === 'AI_LIMIT_REACHED') {
+                if (window.PlanService && typeof window.PlanService.handlePlanLimitError === 'function') {
+                    window.PlanService.handlePlanLimitError(result);
+                    resultDiv.innerHTML = `
+                        <div class="ai-error">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <p>${result.error}</p>
+                        </div>
+                    `;
+                    return;
+                }
+            }
+
             resultDiv.innerHTML = `
                 <div class="ai-error">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -189,7 +211,7 @@ async function generateAIRoutine() {
                     <button class="btn-retry" onclick="generateAIRoutine()">Tentar novamente</button>
                 </div>
             `;
-            
+
             showNotification('❌ Erro ao gerar rotina');
         }
         

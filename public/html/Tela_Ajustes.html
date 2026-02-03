@@ -9,6 +9,7 @@
     <script src="../scripts/auth.js"></script>
 
     <link rel="stylesheet" href="../css/Ajustes.css">
+    <link rel="stylesheet" href="../css/animations.css">
 </head>
 <body>
     <div class="settings-container">
@@ -127,6 +128,21 @@
                 </div>
             </section>
 
+            <!-- Plano / Assinatura -->
+            <section class="settings-section" id="plan-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
+                    Meu Plano
+                </h2>
+
+                <div class="plan-info" id="plan-info-container">
+                    <div class="plan-loading">Carregando informações do plano...</div>
+                </div>
+            </section>
+
             <!-- Conta -->
             <section class="settings-section">
                 <h2 class="section-title">
@@ -136,7 +152,7 @@
                     </svg>
                     Conta
                 </h2>
-                
+
                 <div class="account-info">
                     <div class="account-avatar">
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -190,8 +206,12 @@
         </main>
     </div>
 
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Scripts -->
     <script src="../scripts/auth.js"></script>
+    <script src="../scripts/plan-service.js"></script>
     <script src="../scripts/ajustes.js"></script>
 </body>
 </html>
