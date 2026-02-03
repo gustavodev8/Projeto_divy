@@ -15,6 +15,12 @@ window.currentListTasks = []; // Cache de tarefas filtradas por lista
 async function generateAIDescription(taskTitle, existingDescription = '') {
     console.log('🤖 Verificando se deve processar descrição automática...');
 
+    // Bloquear IA para plano normal
+    if (window.PlanService && window.PlanService._cachedPlanId === 'normal') {
+        console.log('⏭️ IA bloqueada para plano normal');
+        return null;
+    }
+
     // Verificar se sugestões automáticas estão ativadas
     let autoSuggestions = false;
     let detailLevel = 'medio';
@@ -129,6 +135,7 @@ async function loadUserPlanBadge() {
 
         if (!userId) {
             planBadge.textContent = 'Plano Free';
+            toggleAIFeatures(false);
             return;
         }
 
@@ -142,13 +149,47 @@ async function loadUserPlanBadge() {
                 promax: 'Plano ProMax'
             };
             planBadge.textContent = planNames[data.plan.id] || 'Plano Free';
+
+            // Salvar planId no cache global para verificação síncrona
+            if (window.PlanService) {
+                window.PlanService._cachedPlanId = data.plan.id;
+            }
+
+            // Esconder IA para plano normal
+            const isNormalPlan = data.plan.id === 'normal';
+            toggleAIFeatures(!isNormalPlan);
         } else {
             planBadge.textContent = 'Plano Free';
+            toggleAIFeatures(false);
         }
     } catch (error) {
         console.error('❌ Erro ao carregar plano:', error);
         planBadge.textContent = 'Plano Free';
+        toggleAIFeatures(false);
     }
+}
+
+// ===== MOSTRAR/ESCONDER FUNCIONALIDADES DE IA BASEADO NO PLANO =====
+function toggleAIFeatures(show) {
+    // Botão flutuante de IA
+    const aiFloatBtn = document.querySelector('.ai-float-button');
+    if (aiFloatBtn) {
+        aiFloatBtn.style.display = show ? '' : 'none';
+    }
+
+    // Botão de gerar subtarefas com IA
+    const btnGenerateSubtasks = document.getElementById('btnGenerateSubtasks');
+    if (btnGenerateSubtasks) {
+        btnGenerateSubtasks.style.display = show ? '' : 'none';
+    }
+
+    // Indicador "IA Online" no header
+    const statAi = document.querySelector('.stat-ai');
+    if (statAi) {
+        statAi.style.display = show ? '' : 'none';
+    }
+
+    console.log(`🤖 Funcionalidades de IA: ${show ? 'ATIVADAS' : 'DESATIVADAS'}`);
 }
 
 // ===== INICIALIZAÇÃO =====

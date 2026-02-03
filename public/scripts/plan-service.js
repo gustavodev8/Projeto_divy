@@ -36,6 +36,10 @@ async function getMyPlan(forceRefresh = false) {
         if (data.success) {
             cachedPlanInfo = data;
             cacheTimestamp = Date.now();
+            // Cache do planId para verificação síncrona
+            if (data.plan && data.plan.id) {
+                window.PlanService._cachedPlanId = data.plan.id;
+            }
             return data;
         }
 
@@ -91,8 +95,12 @@ async function canUseFeature(feature) {
 
 /**
  * Mostra modal de upgrade
+ * @param {string} reason - Motivo do bloqueio
+ * @param {string} currentPlan - Plano atual do usuário
+ * @param {string} suggestedPlan - Plano sugerido para upgrade
+ * @param {string} type - Tipo do modal: 'limit' (padrão) ou 'ai' (funcionalidades de IA)
  */
-function showUpgradeModal(reason, currentPlan = 'normal', suggestedPlan = 'pro') {
+function showUpgradeModal(reason, currentPlan = 'normal', suggestedPlan = 'pro', type = 'limit') {
     // Remover modal existente se houver
     const existingModal = document.getElementById('upgrade-modal');
     if (existingModal) existingModal.remove();
@@ -123,6 +131,37 @@ function showUpgradeModal(reason, currentPlan = 'normal', suggestedPlan = 'pro')
         ]
     };
 
+    // Conteúdo específico para IA
+    const aiContent = {
+        icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.27a7 7 0 0 1-12.46 0H6a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"></path>
+                    <circle cx="9.5" cy="15.5" r="1"></circle>
+                    <circle cx="14.5" cy="15.5" r="1"></circle>
+               </svg>`,
+        title: 'Recurso Exclusivo',
+        subtitle: `A Inteligência Artificial está disponível apenas nos planos Pro e ProMax`,
+        benefits: [
+            'Assistente IA completo',
+            'Geração de rotinas com IA',
+            'Descrições automáticas',
+            'Subtarefas inteligentes'
+        ]
+    };
+
+    // Conteúdo padrão (limite atingido)
+    const defaultContent = {
+        icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+               </svg>`,
+        title: 'Limite Atingido',
+        subtitle: `Desbloqueie recursos ilimitados com o plano ${planNames[suggestedPlan]}`,
+        benefits: planBenefits[suggestedPlan] || planBenefits.pro
+    };
+
+    // Selecionar conteúdo baseado no tipo
+    const content = type === 'ai' ? aiContent : defaultContent;
+
     const modal = document.createElement('div');
     modal.id = 'upgrade-modal';
     modal.className = 'upgrade-modal-overlay';
@@ -131,17 +170,14 @@ function showUpgradeModal(reason, currentPlan = 'normal', suggestedPlan = 'pro')
             <button class="upgrade-modal-close" onclick="closeUpgradeModal()">×</button>
 
             <div class="upgrade-modal-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
+                ${content.icon}
             </div>
 
-            <h2 class="upgrade-modal-title">Limite Atingido</h2>
-            <p class="upgrade-modal-subtitle">Desbloqueie recursos ilimitados com o plano ${planNames[suggestedPlan]}</p>
+            <h2 class="upgrade-modal-title">${content.title}</h2>
+            <p class="upgrade-modal-subtitle">${content.subtitle}</p>
 
             <ul class="upgrade-benefits-list">
-                ${planBenefits[suggestedPlan].map(b => `
+                ${content.benefits.map(b => `
                     <li>
                         <span class="benefit-check">✓</span>
                         <span>${b}</span>

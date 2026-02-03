@@ -16,15 +16,32 @@
 // ===== ABRIR PAINEL DE IA =====
 function openAIRoutinePanel() {
     console.log('🤖 Abrindo painel de IA');
-    
+
+    // Verificar se o plano permite IA
+    if (window.PlanService && typeof window.PlanService.getMyPlan === 'function') {
+        window.PlanService.getMyPlan().then(planData => {
+            if (planData && planData.plan && planData.plan.id === 'normal') {
+                window.PlanService.showUpgradeModal(
+                    'O Assistente IA está disponível nos planos Pro e ProMax.',
+                    'normal',
+                    'pro',
+                    'ai'
+                );
+            }
+        });
+        // Checar cache sincronamente para bloquear abertura
+        const cachedPlan = window.PlanService._cachedPlanId;
+        if (cachedPlan === 'normal') return;
+    }
+
     const panel = document.getElementById('aiRoutinePanel');
     const overlay = document.getElementById('aiRoutinePanelOverlay');
-    
+
     if (!panel || !overlay) {
         console.error('❌ Elementos do painel não encontrados');
         return;
     }
-    
+
     // Mostrar painel
     panel.classList.add('active');
     overlay.classList.add('active');

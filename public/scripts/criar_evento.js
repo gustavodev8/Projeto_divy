@@ -727,6 +727,17 @@ async function saveTask() {
 
 // ===== MODAL DE IA =====
 function showAIModal() {
+  // Bloquear IA para plano normal
+  if (window.PlanService && window.PlanService._cachedPlanId === 'normal') {
+      window.PlanService.showUpgradeModal(
+          'O Assistente IA está disponível nos planos Pro e ProMax.',
+          'normal',
+          'pro',
+          'ai'
+      );
+      return;
+  }
+
   const modal = createModal({
     title: '🤖 Assistente IA - Criar Rotina',
     content: `

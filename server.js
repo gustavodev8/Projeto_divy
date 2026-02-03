@@ -3653,6 +3653,14 @@ app.get('/Tela_Concluidas.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/html/Tela_Concluidas.html'));
 });
 
+// Lixeira
+app.get('/lixeira', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Lixeira.html'));
+});
+app.get('/Lixeira.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Lixeira.html'));
+});
+
 // Criar Conta
 app.get('/criar-conta', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/html/Tela_CriaConta.html'));

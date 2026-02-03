@@ -506,7 +506,16 @@ function deleteTaskPermanentlyFromModal() {
     if (currentTaskId) {
         const task = trashTasks.find(t => t.id === currentTaskId);
         if (task) {
-            confirmDeleteTask(currentTaskId, task.title);
+            const taskId = currentTaskId;
+            const taskTitle = task.title;
+
+            // Fechar modal de detalhes primeiro
+            closeTaskModal();
+
+            // Delay para garantir que fechou antes de abrir o de confirmação
+            setTimeout(() => {
+                confirmDeleteTask(taskId, taskTitle);
+            }, 150);
         }
     }
 }

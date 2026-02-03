@@ -79,6 +79,12 @@ async function loadPlanInfo() {
 
         const { plan, usage, features } = planData;
 
+        // Esconder seção de IA para plano normal
+        const aiSection = document.getElementById('ai-settings-section');
+        if (aiSection) {
+            aiSection.style.display = plan.id === 'normal' ? 'none' : '';
+        }
+
         // Cores e ícones por plano
         const planStyles = {
             normal: { color: '#6c757d', icon: 'fa-user', gradient: 'linear-gradient(135deg, #6c757d, #495057)' },

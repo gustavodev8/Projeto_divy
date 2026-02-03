@@ -473,6 +473,17 @@ function updateSubtasksProgress() {
 
 // ===== GERAR SUBTAREFAS COM IA =====
 async function generateSubtasksWithAI() {
+    // Bloquear IA para plano normal
+    if (window.PlanService && window.PlanService._cachedPlanId === 'normal') {
+        window.PlanService.showUpgradeModal(
+            'O Assistente IA está disponível nos planos Pro e ProMax.',
+            'normal',
+            'pro',
+            'ai'
+        );
+        return;
+    }
+
     // ✅ VERIFICAR SE ESTÁ EM MODO SOMENTE LEITURA
     const isReadOnly = !!window.currentSmartFilter;
     
