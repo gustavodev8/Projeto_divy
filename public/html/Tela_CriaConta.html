@@ -48,6 +48,52 @@
         </section>
     </main>
 
+    <!-- Modal de Verificação de Email -->
+    <div id="verification-modal" class="verification-modal-overlay">
+        <div class="verification-modal-content">
+            <button class="verification-modal-close" onclick="closeVerificationModal()">&times;</button>
+
+            <div class="verification-modal-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+            </div>
+
+            <h2 class="verification-modal-title">Verifique seu e-mail</h2>
+            <p class="verification-modal-subtitle">
+                Enviamos um código de 6 dígitos para<br>
+                <strong id="verification-email"></strong>
+            </p>
+
+            <div class="code-inputs-container">
+                <input type="text" maxlength="1" class="code-input" data-index="0" inputmode="numeric" pattern="[0-9]">
+                <input type="text" maxlength="1" class="code-input" data-index="1" inputmode="numeric" pattern="[0-9]">
+                <input type="text" maxlength="1" class="code-input" data-index="2" inputmode="numeric" pattern="[0-9]">
+                <input type="text" maxlength="1" class="code-input" data-index="3" inputmode="numeric" pattern="[0-9]">
+                <input type="text" maxlength="1" class="code-input" data-index="4" inputmode="numeric" pattern="[0-9]">
+                <input type="text" maxlength="1" class="code-input" data-index="5" inputmode="numeric" pattern="[0-9]">
+            </div>
+
+            <div id="verification-error" class="verification-error"></div>
+
+            <button id="btn-verify" class="btn-verify" onclick="verifyCode()">
+                Verificar
+            </button>
+
+            <div class="resend-section">
+                <span>Não recebeu?</span>
+                <button id="btn-resend" class="btn-resend" onclick="resendCode()" disabled>
+                    Reenviar (<span id="resend-timer">60</span>s)
+                </button>
+            </div>
+
+            <button class="btn-back" onclick="closeVerificationModal()">
+                ← Voltar
+            </button>
+        </div>
+    </div>
+
     <!-- Script de registro -->
     <script src="../scripts/register.js"></script>
 

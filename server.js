@@ -760,6 +760,14 @@ app.get('/Tela_Login.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/html/Tela_Login.html'));
 });
 
+// Esqueci minha senha
+app.get('/esqueci-senha', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_EsqueciSenha.html'));
+});
+app.get('/forgot-password', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_EsqueciSenha.html'));
+});
+
 // Tela Inicial
 app.get('/inicial', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/html/Tela_Inicial.html'));
@@ -3083,6 +3091,34 @@ console.log('⏰ Cron job configurado: Relatórios semanais às segundas 08:00 (
 console.log('📧 Serviço de email: SendGrid');
 console.log(`📨 Email remetente: ${process.env.SENDGRID_FROM_EMAIL || 'NÃO CONFIGURADO'}`);
 
+// ===== CRON JOB - NOTIFICAÇÕES WHATSAPP DIÁRIAS =====
+
+// Agenda envio de resumos via WhatsApp às 08:00 (horário de Brasília)
+cron.schedule('0 8 * * *', async () => {
+    console.log('\n📱 ========================================');
+    console.log('📱 Executando envio de resumos via WhatsApp');
+    console.log('📱 Horário: 08:00 (Brasília)');
+    console.log('📱 ========================================\n');
+
+    try {
+        // Importa a função do bot (lazy loading para garantir que o bot já foi iniciado)
+        const whatsappBot = require('./whatsapp-bot');
+
+        if (whatsappBot.enviarResumoDiarioWhatsApp) {
+            const result = await whatsappBot.enviarResumoDiarioWhatsApp();
+            console.log('📱 Resultado:', result);
+        } else {
+            console.log('⚠️ Função enviarResumoDiarioWhatsApp não encontrada');
+        }
+    } catch (error) {
+        console.error('❌ Erro no cron job de WhatsApp:', error);
+    }
+}, {
+    timezone: "America/Sao_Paulo"
+});
+
+console.log('📱 Cron job configurado: Resumos WhatsApp diários às 08:00 (Horário de Brasília)');
+
 // ===== API - RELATÓRIO SEMANAL COM IA =====
 
 // GET - Debug: Verificar configuração de email
@@ -3626,6 +3662,14 @@ app.get('/login', (req, res) => {
 });
 app.get('/Tela_Login.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/html/Tela_Login.html'));
+});
+
+// Esqueci minha senha
+app.get('/esqueci-senha', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_EsqueciSenha.html'));
+});
+app.get('/forgot-password', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_EsqueciSenha.html'));
 });
 
 // Tela Inicial

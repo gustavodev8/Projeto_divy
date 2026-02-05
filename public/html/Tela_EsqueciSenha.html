@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esqueci minha senha - Nura.ia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styleEsqueciSenha.css">
+</head>
+
+<body>
+    <main>
+        <section id="logins">
+            <div id="imagem"></div>
+
+            <div id="text">
+                <!-- Etapa 1: Email -->
+                <div id="step-email" class="step active">
+                    <h1>Esqueceu sua senha?</h1>
+                    <p class="subtitle">Digite seu e-mail para receber o codigo de recuperacao</p>
+
+                    <form id="forgot-form">
+                        <div id="message-container" style="display: none;"></div>
+
+                        <p id="email">
+                            <label for="iemail">E-mail</label>
+                            <input type="email" name="email" id="iemail" placeholder="Digite seu e-mail cadastrado" required>
+                        </p>
+
+                        <p id="enviar">
+                            <input type="submit" value="Enviar codigo" id="ienviar">
+                        </p>
+                    </form>
+
+                    <div class="back-link">
+                        <a href="/login">← Voltar para o login</a>
+                    </div>
+                </div>
+
+                <!-- Etapa 2: Codigo de verificacao -->
+                <div id="step-code" class="step">
+                    <h1>Verifique seu e-mail</h1>
+                    <p class="subtitle">
+                        Enviamos um codigo de 6 digitos para<br>
+                        <strong id="email-display"></strong>
+                    </p>
+
+                    <div class="code-inputs-container">
+                        <input type="text" maxlength="1" class="code-input" data-index="0" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="code-input" data-index="1" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="code-input" data-index="2" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="code-input" data-index="3" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="code-input" data-index="4" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="code-input" data-index="5" inputmode="numeric" pattern="[0-9]">
+                    </div>
+
+                    <div id="code-error" class="error-message"></div>
+
+                    <button id="btn-verify" class="btn-primary" onclick="verifyCode()">
+                        Verificar codigo
+                    </button>
+
+                    <div class="resend-section">
+                        <span>Nao recebeu?</span>
+                        <button id="btn-resend" class="btn-link" onclick="resendCode()" disabled>
+                            Reenviar (<span id="resend-timer">60</span>s)
+                        </button>
+                    </div>
+
+                    <button class="btn-back" onclick="goToStep('email')">
+                        ← Usar outro e-mail
+                    </button>
+                </div>
+
+                <!-- Etapa 3: Nova senha -->
+                <div id="step-password" class="step">
+                    <h1>Criar nova senha</h1>
+                    <p class="subtitle">Digite sua nova senha abaixo</p>
+
+                    <form id="reset-form">
+                        <p id="senha">
+                            <label for="inova-senha">Nova senha</label>
+                            <input type="password" name="nova-senha" id="inova-senha" placeholder="Minimo 6 caracteres" required minlength="6">
+                        </p>
+
+                        <p id="confirmar">
+                            <label for="iconfirmar-senha">Confirmar senha</label>
+                            <input type="password" name="confirmar-senha" id="iconfirmar-senha" placeholder="Digite novamente" required minlength="6">
+                        </p>
+
+                        <div id="password-error" class="error-message"></div>
+
+                        <p id="enviar">
+                            <input type="submit" value="Redefinir senha" id="isubmit-reset">
+                        </p>
+                    </form>
+                </div>
+
+                <!-- Etapa 4: Sucesso -->
+                <div id="step-success" class="step">
+                    <div class="success-container">
+                        <div class="success-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                        <h1>Senha redefinida!</h1>
+                        <p class="subtitle">Sua senha foi alterada com sucesso.</p>
+                        <a href="/login" class="btn-primary">
+                            Fazer login
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <footer>
+                <p>Lembrou a senha?</p>
+                <a href="/login"><strong>Faca login</strong></a>
+            </footer>
+        </section>
+    </main>
+
+    <script src="../scripts/forgotPassword.js"></script>
+</body>
+</html>

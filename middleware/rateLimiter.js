@@ -85,10 +85,28 @@ const refreshLimiter = rateLimit({
     legacyHeaders: false
 });
 
+/**
+ * Rate limiter para envio de código de verificação
+ * 3 códigos por email a cada 10 minutos por IP
+ */
+const sendCodeLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 minutos
+    max: 3, // 3 tentativas
+    message: {
+        success: false,
+        error: 'Muitos códigos solicitados. Aguarde 10 minutos.',
+        code: 'SEND_CODE_RATE_LIMIT'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+    // Usa o keyGenerator padrão (por IP) para evitar problemas com IPv6
+});
+
 module.exports = {
     generalLimiter,
     loginLimiter,
     registerLimiter,
     aiLimiter,
-    refreshLimiter
+    refreshLimiter,
+    sendCodeLimiter
 };

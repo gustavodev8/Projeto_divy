@@ -499,3 +499,318 @@ input#ienviar.loading::after {
     transform: rotate(360deg);
   }
 }
+
+/* ========================================
+   MODAL DE VERIFICAÇÃO DE EMAIL
+   ======================================== */
+
+.verification-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  padding: 20px;
+}
+
+.verification-modal-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.verification-modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 32px;
+  max-width: 400px;
+  width: 100%;
+  position: relative;
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.3s ease;
+  text-align: center;
+}
+
+.verification-modal-overlay.visible .verification-modal-content {
+  transform: scale(1) translateY(0);
+}
+
+.verification-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.verification-modal-close:hover {
+  color: #333;
+}
+
+.verification-modal-icon {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #49a09d 0%, #3b8c6e 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.verification-modal-icon svg {
+  color: white;
+}
+
+.verification-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 12px;
+}
+
+.verification-modal-subtitle {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin: 0 0 32px;
+  line-height: 1.5;
+}
+
+.verification-modal-subtitle strong {
+  color: #2c3e50;
+}
+
+/* Inputs de código */
+.code-inputs-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.code-input {
+  width: 48px;
+  height: 56px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: #f8f9fa;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  color: #2c3e50;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.code-input:focus {
+  border-color: #49a09d;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(73, 160, 157, 0.1);
+}
+
+.code-inputs-container.shake {
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Erro de verificação */
+.verification-error {
+  display: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.verification-error.success {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* Botão de verificar */
+.btn-verify {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #49a09d 0%, #3b8c6e 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(73, 160, 157, 0.3);
+  margin-bottom: 20px;
+}
+
+.btn-verify:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(73, 160, 157, 0.4);
+}
+
+.btn-verify:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Seção de reenvio */
+.resend-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+.btn-resend {
+  background: none;
+  border: none;
+  color: #49a09d;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.btn-resend:hover:not(:disabled) {
+  color: #3b8c6e;
+  text-decoration: underline;
+}
+
+.btn-resend:disabled {
+  color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Botão voltar */
+.btn-back {
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 16px;
+  transition: color 0.2s;
+}
+
+.btn-back:hover {
+  color: #2c3e50;
+}
+
+/* Sucesso */
+.verification-success {
+  padding: 20px;
+}
+
+.verification-success .success-icon {
+  width: 80px;
+  height: 80px;
+  background: #dcfce7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.verification-success h2 {
+  font-size: 24px;
+  color: #16a34a;
+  margin: 0 0 8px;
+}
+
+.verification-success p {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+/* Responsivo do modal */
+@media (max-width: 480px) {
+  .verification-modal-content {
+    padding: 32px 24px;
+    border-radius: 16px;
+  }
+
+  .verification-modal-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 20px;
+  }
+
+  .verification-modal-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .verification-modal-title {
+    font-size: 20px;
+  }
+
+  .verification-modal-subtitle {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .code-inputs-container {
+    gap: 6px;
+  }
+
+  .code-input {
+    width: 42px;
+    height: 50px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+  .btn-verify {
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .resend-section,
+  .btn-resend,
+  .btn-back {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .verification-modal-content {
+    padding: 24px 16px;
+  }
+
+  .code-inputs-container {
+    gap: 4px;
+  }
+
+  .code-input {
+    width: 38px;
+    height: 46px;
+    font-size: 18px;
+    border-radius: 8px;
+  }
+}

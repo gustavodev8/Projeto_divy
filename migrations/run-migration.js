@@ -8,6 +8,7 @@ require('dotenv').config();
 const path = require('path');
 const { up: addPlansSystem } = require('./add_plans_system');
 const { up: addTrashSystem } = require('./add_trash_system');
+const { up: addEmailVerification } = require('./add_email_verification');
 
 // Detectar ambiente
 const isPostgres = !!process.env.DATABASE_URL;
@@ -57,6 +58,10 @@ async function runMigrations() {
         console.log('');
         console.log('--- Migração: Sistema de Lixeira ---');
         await addTrashSystem(db, isPostgres);
+
+        console.log('');
+        console.log('--- Migração: Verificação de Email ---');
+        await addEmailVerification(db, isPostgres);
 
         console.log('');
         console.log('====================================');

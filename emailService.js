@@ -1,5 +1,6 @@
 // ===== SERVIÇO DE ENVIO DE EMAILS =====
 const sgMail = require('@sendgrid/mail');
+const nodemailer = require('nodemailer');
 const db = require('./database');
 
 // Configurar SendGrid com a API Key
@@ -9,11 +10,29 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const EMAIL_FROM = process.env.EMAIL_FROM || process.env.SENDGRID_FROM_EMAIL;
 const EMAIL_NAME = process.env.EMAIL_NAME || process.env.SENDGRID_FROM_NAME || 'NURA - Sistema de Tarefas';
 
+// Configuração Gmail (Nodemailer)
+const GMAIL_USER = process.env.GMAIL_USER;
+const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
+
+// Criar transporter do Gmail
+let gmailTransporter = null;
+if (GMAIL_USER && GMAIL_APP_PASSWORD) {
+    gmailTransporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: GMAIL_USER,
+            pass: GMAIL_APP_PASSWORD
+        }
+    });
+}
+
 // Debug: mostrar configurações ao iniciar
 console.log('📧 ===== CONFIGURAÇÃO DE EMAIL =====');
 console.log(`   SENDGRID_API_KEY: ${process.env.SENDGRID_API_KEY ? '✅ Configurada' : '❌ NÃO configurada'}`);
 console.log(`   EMAIL_FROM: ${EMAIL_FROM || '❌ NÃO CONFIGURADO'}`);
 console.log(`   EMAIL_NAME: ${EMAIL_NAME}`);
+console.log(`   GMAIL_USER: ${GMAIL_USER ? '✅ ' + GMAIL_USER : '❌ NÃO configurado'}`);
+console.log(`   GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD ? '✅ Configurada' : '❌ NÃO configurada'}`);
 console.log('=====================================');
 
 /**
@@ -540,8 +559,482 @@ async function enviarEmail(destinatario, assunto, mensagem) {
     }
 }
 
+/**
+ * Envia código de verificação para criação de conta
+ * @param {string} email - Email do destinatário
+ * @param {string} codigo - Código de 6 dígitos
+ * @param {string} nome - Nome do usuário
+ * @returns {Object} Resultado do envio
+ */
+async function enviarCodigoVerificacao(email, codigo, nome) {
+    try {
+        console.log(`📧 Enviando código de verificação para ${email}...`);
+
+        // Formatar código com espaços para melhor visualização
+        const codigoFormatado = codigo.split('').join(' ');
+
+        const htmlContent = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código de Verificação - Nura</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 28px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 8px 0 0 0;
+            opacity: 0.8;
+            font-size: 14px;
+        }
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .greeting {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .instruction {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .code-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 25px 20px;
+            margin: 25px 0;
+        }
+        .code {
+            font-family: 'Courier New', monospace;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            color: #1a1a2e;
+        }
+        .expiry {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 25px;
+            padding: 12px 20px;
+            background: #fff3cd;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #856404;
+        }
+        .warning {
+            margin-top: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">🔐</div>
+            <h1>Código de Verificação</h1>
+            <p>Nura - Sistema de Tarefas</p>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                Olá${nome ? ', <strong>' + nome + '</strong>' : ''}!
+            </div>
+
+            <div class="instruction">
+                Use o código abaixo para verificar seu e-mail e criar sua conta no Nura:
+            </div>
+
+            <div class="code-box">
+                <div class="code">${codigoFormatado}</div>
+            </div>
+
+            <div class="expiry">
+                ⏰ Este código expira em <strong>10 minutos</strong>
+            </div>
+
+            <div class="warning">
+                Se você não solicitou este código, ignore este e-mail. Sua conta não será criada sem a verificação.
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Nura - Seu assistente de produtividade</p>
+            <p>Este é um e-mail automático, por favor não responda.</p>
+        </div>
+    </div>
+</body>
+</html>
+        `.trim();
+
+        const textContent = `
+Olá${nome ? ', ' + nome : ''}!
+
+Seu código de verificação Nura é:
+
+    ${codigoFormatado}
+
+Este código expira em 10 minutos.
+
+Se você não solicitou este código, ignore este e-mail.
+
+---
+Nura - Seu assistente de produtividade
+        `.trim();
+
+        // Tentar enviar via Gmail primeiro (se configurado), senão SendGrid
+        if (gmailTransporter) {
+            // Usar Gmail (Nodemailer)
+            console.log('📧 Usando Gmail para enviar...');
+
+            const mailOptions = {
+                from: `"${EMAIL_NAME}" <${GMAIL_USER}>`,
+                to: email,
+                subject: `🔐 Código de verificação Nura: ${codigo}`,
+                text: textContent,
+                html: htmlContent
+            };
+
+            await gmailTransporter.sendMail(mailOptions);
+            console.log(`✅ Código de verificação enviado via Gmail para ${email}`);
+
+        } else {
+            // Usar SendGrid
+            console.log('📧 Usando SendGrid para enviar...');
+
+            const msg = {
+                to: email,
+                from: {
+                    email: EMAIL_FROM,
+                    name: EMAIL_NAME
+                },
+                subject: `🔐 Código de verificação Nura: ${codigo}`,
+                text: textContent,
+                html: htmlContent
+            };
+
+            await sgMail.send(msg);
+            console.log(`✅ Código de verificação enviado via SendGrid para ${email}`);
+        }
+
+        return {
+            success: true,
+            sent: true,
+            email: email
+        };
+
+    } catch (error) {
+        console.error(`❌ Erro ao enviar código de verificação para ${email}:`, error.message);
+
+        if (error.response) {
+            console.error('Detalhes do erro SendGrid:', error.response.body);
+        }
+
+        return {
+            success: false,
+            sent: false,
+            error: error.message,
+            email: email
+        };
+    }
+}
+
+/**
+ * Envia código de recuperação de senha
+ * @param {string} email - Email do destinatário
+ * @param {string} codigo - Código de 6 dígitos
+ * @param {string} nome - Nome do usuário
+ * @returns {Object} Resultado do envio
+ */
+async function enviarCodigoRecuperacao(email, codigo, nome) {
+    try {
+        console.log(`📧 Enviando código de recuperação para ${email}...`);
+
+        // Formatar código com espaços para melhor visualização
+        const codigoFormatado = codigo.split('').join(' ');
+
+        const htmlContent = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperação de Senha - Nura</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 28px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 8px 0 0 0;
+            opacity: 0.8;
+            font-size: 14px;
+        }
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .greeting {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .instruction {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .code-box {
+            background: linear-gradient(135deg, #fef5f5 0%, #fde8e8 100%);
+            border: 2px dashed #f5c6cb;
+            border-radius: 12px;
+            padding: 25px 20px;
+            margin: 25px 0;
+        }
+        .code {
+            font-family: 'Courier New', monospace;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            color: #c0392b;
+        }
+        .expiry {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 25px;
+            padding: 12px 20px;
+            background: #fff3cd;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #856404;
+        }
+        .warning {
+            margin-top: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">🔑</div>
+            <h1>Recuperação de Senha</h1>
+            <p>Nura - Sistema de Tarefas</p>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                Olá${nome ? ', <strong>' + nome + '</strong>' : ''}!
+            </div>
+
+            <div class="instruction">
+                Recebemos uma solicitação para redefinir sua senha. Use o código abaixo:
+            </div>
+
+            <div class="code-box">
+                <div class="code">${codigoFormatado}</div>
+            </div>
+
+            <div class="expiry">
+                ⏰ Este código expira em <strong>10 minutos</strong>
+            </div>
+
+            <div class="warning">
+                ⚠️ Se você não solicitou a redefinição de senha, ignore este e-mail. Sua senha atual permanecerá inalterada.
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Nura - Seu assistente de produtividade</p>
+            <p>Este é um e-mail automático, por favor não responda.</p>
+        </div>
+    </div>
+</body>
+</html>
+        `.trim();
+
+        const textContent = `
+Olá${nome ? ', ' + nome : ''}!
+
+Recebemos uma solicitação para redefinir sua senha.
+
+Seu código de recuperação Nura é:
+
+    ${codigoFormatado}
+
+Este código expira em 10 minutos.
+
+Se você não solicitou a redefinição de senha, ignore este e-mail.
+
+---
+Nura - Seu assistente de produtividade
+        `.trim();
+
+        // Tentar enviar via Gmail primeiro (se configurado), senão SendGrid
+        if (gmailTransporter) {
+            console.log('📧 Usando Gmail para enviar...');
+
+            const mailOptions = {
+                from: `"${EMAIL_NAME}" <${GMAIL_USER}>`,
+                to: email,
+                subject: `🔑 Código de recuperação Nura: ${codigo}`,
+                text: textContent,
+                html: htmlContent
+            };
+
+            await gmailTransporter.sendMail(mailOptions);
+            console.log(`✅ Código de recuperação enviado via Gmail para ${email}`);
+
+        } else {
+            console.log('📧 Usando SendGrid para enviar...');
+
+            const msg = {
+                to: email,
+                from: {
+                    email: EMAIL_FROM,
+                    name: EMAIL_NAME
+                },
+                subject: `🔑 Código de recuperação Nura: ${codigo}`,
+                text: textContent,
+                html: htmlContent
+            };
+
+            await sgMail.send(msg);
+            console.log(`✅ Código de recuperação enviado via SendGrid para ${email}`);
+        }
+
+        return {
+            success: true,
+            sent: true,
+            email: email
+        };
+
+    } catch (error) {
+        console.error(`❌ Erro ao enviar código de recuperação para ${email}:`, error.message);
+
+        if (error.response) {
+            console.error('Detalhes do erro SendGrid:', error.response.body);
+        }
+
+        return {
+            success: false,
+            sent: false,
+            error: error.message,
+            email: email
+        };
+    }
+}
+
 module.exports = {
     enviarResumoDiario,
     enviarResumoParaTodos,
-    enviarEmail
+    enviarEmail,
+    enviarCodigoVerificacao,
+    enviarCodigoRecuperacao
 };
