@@ -18,10 +18,17 @@ const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
 let gmailTransporter = null;
 if (GMAIL_USER && GMAIL_APP_PASSWORD) {
     gmailTransporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        family: 4, // Forçar IPv4 (resolve problema em hosts como Render)
         auth: {
             user: GMAIL_USER,
             pass: GMAIL_APP_PASSWORD
+        },
+        // Configurações adicionais para maior compatibilidade
+        tls: {
+            rejectUnauthorized: false
         }
     });
 }
