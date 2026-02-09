@@ -9,6 +9,9 @@ const API_URL = window.location.hostname === 'localhost'
 
 let currentUser = null;
 
+// Estado de verificação WhatsApp
+let whatsappVerificationPhone = null;
+
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('⚙️ Inicializando sistema de ajustes...');
@@ -33,8 +36,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Carregar informações do plano
     await loadPlanInfo();
 
+    // Carregar status do WhatsApp (se for ProMax)
+    await loadWhatsappStatus();
+
     // Inicializar event listeners
     initializeEventListeners();
+
+    // Inicializar inputs de código de verificação
+    initializeCodeInputs();
 
     console.log('✅ Sistema de ajustes carregado');
 });
@@ -676,59 +685,115 @@ function initializeEventListeners() {
     console.log('✅ Event listeners configurados');
 }
 
-// ===== LOGOUT =====
-function logout() {
-    if (confirm('Tem certeza que deseja sair?')) {
-        console.log('👋 Fazendo logout...');
-        
-        // Limpar dados do usuário
-        localStorage.removeItem('nura_user');
-        localStorage.removeItem('nura_dark_mode');
-        localStorage.removeItem('nura_settings');
-        
-        // Redirecionar para login
-        window.location.href = 'Tela_Login.html';
+// ===== MODAL DE LOGOUT =====
+function showLogoutModal() {
+    const overlay = document.getElementById('logoutModalOverlay');
+    if (overlay) {
+        overlay.classList.add('active');
     }
 }
 
-// ===== NOTIFICAÇÃO =====
-function showNotification(message) {
-    // Remover notificação anterior se existir
-    const existingNotification = document.querySelector('.settings-notification');
-    if (existingNotification) {
-        existingNotification.remove();
+function closeLogoutModal() {
+    const overlay = document.getElementById('logoutModalOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
     }
-    
-    // Criar nova notificação
+}
+
+function confirmLogout() {
+    console.log('👋 Fazendo logout...');
+
+    // Limpar dados do usuário
+    localStorage.removeItem('nura_user');
+    localStorage.removeItem('nura_dark_mode');
+    localStorage.removeItem('nura_settings');
+    localStorage.removeItem('nura_token');
+    localStorage.removeItem('nura_refresh_token');
+
+    // Redirecionar para login
+    window.location.href = 'Tela_Login.html';
+}
+
+// Fechar modal com ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeLogoutModal();
+    }
+});
+
+// ===== NOTIFICAÇÃO =====
+function showNotification(message, type = 'info') {
+    // Remover emojis
+    const cleanMessage = message.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2300}-\u{23FF}]|[\u{2B50}]|[\u{2705}]|[\u{274C}]|[\u{26A0}]|[\u{2139}]/gu, '').trim();
+
+    // Detectar tipo
+    if (message.includes('✅') || message.includes('sucesso') || message.toLowerCase().includes('salv')) type = 'success';
+    else if (message.includes('❌') || message.includes('erro')) type = 'error';
+    else if (message.includes('⚠️')) type = 'warning';
+
+    const icons = {
+        success: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+        error: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+        info: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
+    };
+
+    const colors = {
+        success: { bg: '#0f172a', border: '#22c55e', icon: '#22c55e' },
+        error: { bg: '#0f172a', border: '#ef4444', icon: '#ef4444' },
+        warning: { bg: '#0f172a', border: '#f59e0b', icon: '#f59e0b' },
+        info: { bg: '#0f172a', border: '#3b82f6', icon: '#3b82f6' }
+    };
+
+    const color = colors[type] || colors.info;
+
+    const existing = document.querySelector('.divy-notification');
+    if (existing) existing.remove();
+
     const notification = document.createElement('div');
-    notification.className = 'settings-notification';
-    notification.textContent = message;
-    
-    // Aplicar estilos
+    notification.className = 'divy-notification';
+    notification.innerHTML = `
+        <span style="display:flex;color:${color.icon};flex-shrink:0">${icons[type] || icons.info}</span>
+        <span style="flex:1;line-height:1.3">${cleanMessage}</span>
+    `;
+
     notification.style.cssText = `
         position: fixed;
-        top: 24px;
-        right: 24px;
-        background: hsl(0, 0%, 8%);
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        top: 20px;
+        right: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: ${color.bg};
+        color: #e2e8f0;
+        padding: 12px 16px;
+        border-radius: 6px;
+        border-left: 3px solid ${color.border};
+        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         z-index: 10000;
-        font-size: 14px;
+        font-family: 'Inter', -apple-system, sans-serif;
+        font-size: 13px;
         font-weight: 500;
-        animation: slideInRight 300ms ease;
-        font-family: 'Inter', sans-serif;
+        max-width: 320px;
+        animation: divyNotifIn 0.2s ease;
     `;
-    
-    // Adicionar ao body
+
+    if (!document.getElementById('divy-notif-css')) {
+        const style = document.createElement('style');
+        style.id = 'divy-notif-css';
+        style.textContent = `
+            @keyframes divyNotifIn { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:translateX(0); } }
+            @keyframes divyNotifOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(16px); } }
+        `;
+        document.head.appendChild(style);
+    }
+
     document.body.appendChild(notification);
-    
-    // Remover após 3 segundos
+
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 300ms ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+        notification.style.animation = 'divyNotifOut 0.2s ease forwards';
+        setTimeout(() => notification.remove(), 200);
+    }, 2500);
 }
 
 // ===== HELPER: GET CURRENT USER =====
@@ -744,9 +809,364 @@ function getCurrentUser() {
     }
 }
 
+// ===== WHATSAPP: CARREGAR STATUS =====
+async function loadWhatsappStatus() {
+    console.log('📱 Verificando status do WhatsApp...');
+
+    const whatsappSection = document.getElementById('whatsapp-section');
+    if (!whatsappSection) return;
+
+    // Verificar se é ProMax
+    try {
+        let planData = null;
+
+        if (window.PlanService) {
+            planData = await window.PlanService.getMyPlan(false);
+        } else {
+            const response = await fetch(`${API_URL}/api/plans/my-plan?user_id=${currentUser.id}`);
+            planData = await response.json();
+        }
+
+        if (!planData || !planData.success || planData.plan.id !== 'promax') {
+            console.log('📱 WhatsApp: Plano não é ProMax, escondendo seção');
+            whatsappSection.style.display = 'none';
+            return;
+        }
+
+        // Mostrar seção WhatsApp para ProMax
+        whatsappSection.style.display = '';
+
+        // Buscar status de vinculação
+        const token = localStorage.getItem('nura_token');
+        const response = await fetch(`${API_URL}/v1/whatsapp/status`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.data.linked) {
+            // WhatsApp vinculado
+            showWhatsappLinkedState(data.data.phoneNumber);
+        } else {
+            // Não vinculado
+            showWhatsappNotLinkedState();
+        }
+
+        console.log('✅ Status WhatsApp carregado');
+
+    } catch (error) {
+        console.error('❌ Erro ao carregar status WhatsApp:', error);
+        whatsappSection.style.display = 'none';
+    }
+}
+
+// ===== WHATSAPP: MOSTRAR ESTADOS =====
+function showWhatsappNotLinkedState() {
+    document.getElementById('whatsapp-not-linked').style.display = '';
+    document.getElementById('whatsapp-verification').style.display = 'none';
+    document.getElementById('whatsapp-linked').style.display = 'none';
+}
+
+function showWhatsappVerificationState(phoneNumber) {
+    document.getElementById('whatsapp-not-linked').style.display = 'none';
+    document.getElementById('whatsapp-verification').style.display = '';
+    document.getElementById('whatsapp-linked').style.display = 'none';
+
+    // Atualizar número exibido
+    document.getElementById('verificationPhone').textContent = phoneNumber;
+
+    // Limpar inputs de código
+    document.querySelectorAll('.code-input').forEach(input => {
+        input.value = '';
+        input.classList.remove('filled');
+    });
+
+    // Focar no primeiro input
+    document.querySelector('.code-input[data-index="0"]')?.focus();
+}
+
+function showWhatsappLinkedState(phoneNumber) {
+    document.getElementById('whatsapp-not-linked').style.display = 'none';
+    document.getElementById('whatsapp-verification').style.display = 'none';
+    document.getElementById('whatsapp-linked').style.display = '';
+
+    // Atualizar número exibido
+    document.getElementById('linkedWhatsappNumber').textContent = phoneNumber;
+}
+
+// ===== WHATSAPP: SOLICITAR VERIFICAÇÃO =====
+async function requestWhatsappVerification() {
+    const phoneInput = document.getElementById('whatsappPhone');
+    const phone = phoneInput?.value.replace(/\D/g, '');
+
+    if (!phone || phone.length < 10) {
+        showNotification('Número inválido. Use DDD + número', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btnLinkWhatsapp');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span> Enviando...';
+
+    try {
+        const token = localStorage.getItem('nura_token');
+        const response = await fetch(`${API_URL}/v1/whatsapp/request-verification`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phoneNumber: phone })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            whatsappVerificationPhone = phone;
+            showWhatsappVerificationState(data.data.phoneNumber);
+            showNotification('Código enviado para seu WhatsApp', 'success');
+        } else {
+            showNotification(data.message || 'Erro ao enviar código', 'error');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao solicitar verificação:', error);
+        showNotification('Erro ao enviar código. Tente novamente.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            Enviar código de verificação
+        `;
+    }
+}
+
+// ===== WHATSAPP: VERIFICAR CÓDIGO =====
+async function verifyWhatsappCode() {
+    // Coletar código dos inputs
+    const codeInputs = document.querySelectorAll('.code-input');
+    let code = '';
+    codeInputs.forEach(input => code += input.value);
+
+    if (code.length !== 6) {
+        showNotification('Digite o código completo de 6 dígitos', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btnVerifyCode');
+    btn.disabled = true;
+    btn.textContent = 'Verificando...';
+
+    try {
+        const token = localStorage.getItem('nura_token');
+        const response = await fetch(`${API_URL}/v1/whatsapp/verify-code`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                phoneNumber: whatsappVerificationPhone,
+                code: code
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showWhatsappLinkedState(data.data.phoneNumber);
+            showNotification('WhatsApp vinculado com sucesso!', 'success');
+            whatsappVerificationPhone = null;
+        } else {
+            showNotification(data.message || 'Código incorreto', 'error');
+            // Limpar inputs
+            codeInputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('filled');
+            });
+            codeInputs[0]?.focus();
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao verificar código:', error);
+        showNotification('Erro ao verificar código. Tente novamente.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verificar código';
+    }
+}
+
+// ===== WHATSAPP: REENVIAR CÓDIGO =====
+async function resendVerificationCode() {
+    if (!whatsappVerificationPhone) {
+        showNotification('Erro ao reenviar. Tente novamente.', 'error');
+        cancelVerification();
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('nura_token');
+        const response = await fetch(`${API_URL}/v1/whatsapp/resend-code`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phoneNumber: whatsappVerificationPhone })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Novo código enviado!', 'success');
+            // Limpar inputs
+            document.querySelectorAll('.code-input').forEach(input => {
+                input.value = '';
+                input.classList.remove('filled');
+            });
+            document.querySelector('.code-input[data-index="0"]')?.focus();
+        } else {
+            showNotification(data.message || 'Erro ao reenviar código', 'error');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao reenviar código:', error);
+        showNotification('Erro ao reenviar código. Tente novamente.', 'error');
+    }
+}
+
+// ===== WHATSAPP: CANCELAR VERIFICAÇÃO =====
+function cancelVerification() {
+    whatsappVerificationPhone = null;
+    showWhatsappNotLinkedState();
+
+    // Limpar input de telefone
+    const phoneInput = document.getElementById('whatsappPhone');
+    if (phoneInput) phoneInput.value = '';
+}
+
+// ===== WHATSAPP: DESVINCULAR =====
+async function unlinkWhatsapp() {
+    if (!confirm('Tem certeza que deseja desvincular o WhatsApp?')) {
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('nura_token');
+        const response = await fetch(`${API_URL}/v1/whatsapp/unlink`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showWhatsappNotLinkedState();
+            showNotification('WhatsApp desvinculado', 'success');
+        } else {
+            showNotification(data.message || 'Erro ao desvincular', 'error');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao desvincular WhatsApp:', error);
+        showNotification('Erro ao desvincular. Tente novamente.', 'error');
+    }
+}
+
+// ===== WHATSAPP: INICIALIZAR INPUTS DE CÓDIGO =====
+function initializeCodeInputs() {
+    const inputs = document.querySelectorAll('.code-input');
+
+    inputs.forEach((input, index) => {
+        // Ao digitar
+        input.addEventListener('input', (e) => {
+            const value = e.target.value;
+
+            // Apenas números
+            e.target.value = value.replace(/\D/g, '').slice(0, 1);
+
+            // Atualizar estado visual
+            if (e.target.value) {
+                e.target.classList.add('filled');
+                // Mover para próximo input
+                if (index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            } else {
+                e.target.classList.remove('filled');
+            }
+
+            // Verificar se todos os campos estão preenchidos
+            const allFilled = Array.from(inputs).every(i => i.value.length === 1);
+            if (allFilled) {
+                // Auto-verificar após pequeno delay
+                setTimeout(() => verifyWhatsappCode(), 300);
+            }
+        });
+
+        // Ao pressionar tecla
+        input.addEventListener('keydown', (e) => {
+            // Backspace: voltar para input anterior
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                inputs[index - 1].focus();
+            }
+            // Seta esquerda
+            if (e.key === 'ArrowLeft' && index > 0) {
+                inputs[index - 1].focus();
+            }
+            // Seta direita
+            if (e.key === 'ArrowRight' && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+        });
+
+        // Ao colar
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pastedData = (e.clipboardData || window.clipboardData).getData('text');
+            const digits = pastedData.replace(/\D/g, '').slice(0, 6);
+
+            digits.split('').forEach((digit, i) => {
+                if (inputs[i]) {
+                    inputs[i].value = digit;
+                    inputs[i].classList.add('filled');
+                }
+            });
+
+            // Focar no último preenchido ou no próximo vazio
+            const lastFilledIndex = digits.length - 1;
+            if (lastFilledIndex < inputs.length - 1) {
+                inputs[lastFilledIndex + 1]?.focus();
+            } else {
+                inputs[lastFilledIndex]?.focus();
+            }
+
+            // Auto-verificar se colou 6 dígitos
+            if (digits.length === 6) {
+                setTimeout(() => verifyWhatsappCode(), 300);
+            }
+        });
+    });
+}
+
 // ===== EXPORTAR FUNÇÕES GLOBAIS =====
-window.logout = logout;
+window.showLogoutModal = showLogoutModal;
+window.closeLogoutModal = closeLogoutModal;
+window.confirmLogout = confirmLogout;
 window.saveAllSettings = saveAllSettings;
+window.requestWhatsappVerification = requestWhatsappVerification;
+window.verifyWhatsappCode = verifyWhatsappCode;
+window.resendVerificationCode = resendVerificationCode;
+window.cancelVerification = cancelVerification;
+window.unlinkWhatsapp = unlinkWhatsapp;
 
 // ===== ANIMAÇÕES CSS =====
 const style = document.createElement('style');

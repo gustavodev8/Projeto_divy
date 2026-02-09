@@ -59,7 +59,7 @@ body.dark-mode .navbar-nav {
 
 /* Hero Section Escuro */
 body.dark-mode .hero {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #146551 100%) !important;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #2563eb 100%) !important;
 }
 
 body.dark-mode .hero h1 {
@@ -236,7 +236,7 @@ body.dark-mode .ai-field-textarea::placeholder {
 body.dark-mode .ai-textarea:focus,
 body.dark-mode .ai-field-textarea:focus {
   background: rgba(15, 23, 42, 0.7) !important;
-  border-color: #146551 !important;
+  border-color: #2563eb !important;
 }
 
 /* ===== CAMPOS DE HORÁRIO - DARK MODE (SEM ÍCONES) ===== */
@@ -257,7 +257,7 @@ body.dark-mode .ai-time-input:hover {
 
 body.dark-mode .ai-time-input:focus {
   background: rgba(15, 23, 42, 0.7) !important;
-  border-color: #146551 !important;
+  border-color: #2563eb !important;
 }
 
 /* Ícone removido */
@@ -323,7 +323,7 @@ body.dark-mode .pricing-card:hover {
 }
 
 body.dark-mode .pricing-card.featured {
-  border-color: #146551 !important;
+  border-color: #2563eb !important;
 }
 
 body.dark-mode .pricing-header {
@@ -354,7 +354,7 @@ body.dark-mode .pricing-btn {
 }
 
 body.dark-mode .pricing-btn:hover {
-  border-color: #146551 !important;
+  border-color: #2563eb !important;
   color: #14b8a6 !important;
 }
 

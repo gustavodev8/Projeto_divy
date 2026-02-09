@@ -1,10 +1,14 @@
 /* ========================================
-   NURA - SEÇÕES (TICKTICK STYLE)
+   DIVY - SEÇÕES (DESIGN MODERNO)
    ======================================== */
 
 /* ===== SEÇÃO CONTAINER ===== */
 .task-section {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
+    background: var(--surface-main, #ffffff);
+    border-radius: 12px;
+    border: 1px solid var(--border-light, #e8eaed);
+    overflow: hidden;
 }
 
 .task-section.collapsed .section-tasks {
@@ -15,12 +19,16 @@
 .section-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0.625rem 0.5rem;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
     cursor: pointer;
-    border-radius: 6px;
     transition: background-color 0.15s ease;
     user-select: none;
+    border-bottom: 1px solid transparent;
+}
+
+.task-section:not(.collapsed) .section-header {
+    border-bottom-color: var(--border-light, #e8eaed);
 }
 
 .section-header:hover {
@@ -30,7 +38,7 @@
 .section-header-left {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     flex: 1;
 }
 
@@ -41,6 +49,8 @@
     color: var(--text-muted, #9ca3af);
     transition: transform 0.2s ease;
     flex-shrink: 0;
+    width: 16px;
+    height: 16px;
 }
 
 .task-section.collapsed .section-chevron,
@@ -65,31 +75,86 @@
 /* Título da seção */
 .section-title,
 .section-name {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--text-secondary, #6b7280);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-strong, #1a1d21);
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
+    flex: 1;
 }
 
-/* Contador */
-.section-count {
-    display: inline-flex;
+/* Subtítulo da seção */
+.section-subtitle {
+    font-size: 0.75rem;
+    color: var(--nura-primary, #2563eb);
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+/* ===== AÇÕES DA SEÇÃO (aparecem no hover, antes do contador) ===== */
+
+/* Botão de três pontinhos - Editar */
+.btn-section-more {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    color: var(--text-muted, #9ca3af);
+    cursor: pointer;
+    display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 20px;
-    height: 18px;
-    padding: 0 0.375rem;
-    background: var(--surface-secondary, #f0f1f3);
-    color: var(--text-muted, #9ca3af);
-    border-radius: 9px;
-    font-size: 0.6875rem;
-    font-weight: 600;
+    opacity: 0;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
-/* ===== AÇÕES DA SEÇÃO ===== */
+.btn-section-more:hover {
+    background: var(--surface-active, #e5e7eb);
+    color: var(--text-primary, #1a1d21);
+}
+
+/* Botão de excluir seção */
+.btn-section-delete {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    color: var(--text-muted, #9ca3af);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.btn-section-delete svg {
+    width: 14px;
+    height: 14px;
+}
+
+.btn-section-delete:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Mostrar botões no hover */
+.section-header:hover .btn-section-more,
+.section-header:hover .btn-section-delete {
+    opacity: 1;
+}
+
+/* Container de ações (para uso alternativo) */
 .section-actions {
     display: flex;
+    align-items: center;
     gap: 0.25rem;
     opacity: 0;
     transition: opacity 0.15s ease;
@@ -99,65 +164,51 @@
     opacity: 1;
 }
 
-.section-action-btn,
-.btn-section-more {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
+.section-action-btn {
+    width: 28px;
+    height: 28px;
     padding: 0;
     border: none;
     background: transparent;
-    border-radius: 4px;
+    border-radius: 6px;
     color: var(--text-muted, #9ca3af);
     cursor: pointer;
     transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.section-action-btn:hover,
-.btn-section-more:hover {
+.section-action-btn:hover {
     background: var(--surface-active, #e5e7eb);
     color: var(--text-primary, #1a1d21);
 }
 
-.section-action-btn.btn-delete:hover,
-.btn-section-delete:hover {
+.section-action-btn.btn-delete:hover {
     background: #fee2e2;
     color: #dc2626;
 }
 
-/* Botão de excluir seção */
-.btn-section-delete {
-    display: flex;
+/* Contador - SEMPRE à direita (último elemento no HTML) */
+.section-count {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
-    padding: 0;
-    border: none;
+    min-width: 28px;
+    height: 24px;
+    padding: 0 0.5rem;
     background: transparent;
-    border-radius: 4px;
-    color: var(--text-muted, #9ca3af);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    opacity: 0;
-}
-
-.section-header:hover .btn-section-delete {
-    opacity: 1;
-}
-
-.btn-section-delete svg {
-    width: 14px;
-    height: 14px;
+    color: var(--nura-primary, #2563eb);
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    flex-shrink: 0;
 }
 
 /* ===== CONTAINER DAS TAREFAS ===== */
 .section-tasks {
-    padding-left: 0.5rem;
+    padding: 0.5rem 0.75rem 0.75rem;
     min-height: 40px;
-    border-radius: 8px;
     transition: all 0.2s ease;
 }
 
@@ -169,7 +220,7 @@
     font-size: 0.8125rem;
     border: 2px dashed var(--border-light, #e5e7eb);
     border-radius: 8px;
-    margin: 0.5rem 0;
+    margin: 0.5rem;
 }
 
 /* ===== DRAG & DROP ===== */
@@ -180,7 +231,7 @@
 
 .section-tasks.drag-over {
     background: var(--nura-primary-soft, rgba(20, 101, 81, 0.06));
-    border: 2px dashed var(--nura-primary, #146551);
+    border: 2px dashed var(--nura-primary, #2563eb);
 }
 
 /* ===== BOTÃO ADICIONAR SEÇÃO ===== */
@@ -190,11 +241,11 @@
     justify-content: center;
     gap: 0.5rem;
     width: 100%;
-    padding: 0.75rem;
-    margin-top: 1rem;
-    background: transparent;
-    border: 2px dashed var(--border-light, #e5e7eb);
-    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    background: var(--surface-main, #ffffff);
+    border: 2px dashed var(--border-subtle, #e5e7eb);
+    border-radius: 12px;
     color: var(--text-muted, #9ca3af);
     font-size: 0.875rem;
     font-weight: 500;
@@ -203,9 +254,9 @@
 }
 
 .add-section-btn:hover {
-    border-color: var(--nura-primary, #146551);
-    color: var(--nura-primary, #146551);
-    background: var(--nura-primary-soft, rgba(20, 101, 81, 0.04));
+    border-color: var(--nura-primary, #2563eb);
+    color: var(--nura-primary, #2563eb);
+    background: var(--nura-primary-soft, rgba(37, 99, 235, 0.04));
 }
 
 /* ========================================
@@ -303,7 +354,7 @@
     padding: 12px 16px;
     background: var(--bg-secondary, #f8f9fa);
     border-radius: 8px;
-    border-left: 3px solid var(--primary, #146551);
+    border-left: 3px solid var(--primary, #2563eb);
 }
 
 .form-field {
@@ -336,7 +387,7 @@
 
 .form-input:focus {
     outline: none;
-    border-color: var(--primary, #146551);
+    border-color: var(--primary, #2563eb);
     box-shadow: 0 0 0 3px rgba(20, 101, 81, 0.1);
 }
 
@@ -384,7 +435,7 @@
 }
 
 .btn-modal-primary {
-    background: linear-gradient(135deg, var(--primary, #146551) 0%, var(--primary-dark, #0f4f3e) 100%);
+    background: linear-gradient(135deg, var(--primary, #2563eb) 0%, var(--primary-dark, #1d4ed8) 100%);
     color: white;
     box-shadow: 0 4px 12px rgba(20, 101, 81, 0.3);
 }
@@ -435,7 +486,7 @@
 .dark-mode .modal-description {
     background: var(--bg-tertiary, #1e1e1e);
     color: var(--text-secondary, #a0a0a0);
-    border-color: var(--primary, #146551);
+    border-color: var(--primary, #2563eb);
 }
 
 .dark-mode .form-label {
@@ -449,7 +500,7 @@
 }
 
 .dark-mode .form-input:focus {
-    border-color: var(--primary, #146551);
+    border-color: var(--primary, #2563eb);
     box-shadow: 0 0 0 3px rgba(20, 101, 81, 0.2);
 }
 

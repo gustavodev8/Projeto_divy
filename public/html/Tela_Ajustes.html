@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajustes - Nura</title>
+    <title>Ajustes - Divy</title>
 
     <!-- PROTEÇÃO DE AUTENTICAÇÃO (deve ser o primeiro script) -->
     <script src="../scripts/auth.js"></script>
@@ -143,6 +143,103 @@
                 </div>
             </section>
 
+            <!-- WhatsApp - Apenas para ProMax -->
+            <section class="settings-section" id="whatsapp-section" style="display: none;">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                    </svg>
+                    WhatsApp
+                    <span class="promax-badge">ProMax</span>
+                </h2>
+
+                <!-- Estado: Não vinculado -->
+                <div id="whatsapp-not-linked" class="whatsapp-state">
+                    <p class="whatsapp-description">
+                        Vincule seu WhatsApp para receber lembretes e gerenciar tarefas diretamente pelo chat.
+                    </p>
+
+                    <div class="whatsapp-form">
+                        <div class="phone-input-group">
+                            <label for="whatsappPhone">Número do WhatsApp</label>
+                            <div class="phone-input-wrapper">
+                                <span class="phone-prefix">+55</span>
+                                <input
+                                    type="tel"
+                                    id="whatsappPhone"
+                                    placeholder="75 92488820"
+                                    maxlength="12"
+                                    autocomplete="tel"
+                                >
+                            </div>
+                            <span class="phone-hint">DDD + Número (sem o 9 da frente)</span>
+                        </div>
+
+                        <button class="btn-whatsapp-link" id="btnLinkWhatsapp" onclick="requestWhatsappVerification()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            Enviar código de verificação
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Estado: Aguardando verificação -->
+                <div id="whatsapp-verification" class="whatsapp-state" style="display: none;">
+                    <p class="whatsapp-description">
+                        Enviamos uma mensagem para o seu WhatsApp. Digite o código de verificação recebido:
+                    </p>
+
+                    <div class="verification-code-group">
+                        <div class="code-inputs">
+                            <input type="text" class="code-input" maxlength="1" data-index="0" inputmode="numeric">
+                            <input type="text" class="code-input" maxlength="1" data-index="1" inputmode="numeric">
+                            <input type="text" class="code-input" maxlength="1" data-index="2" inputmode="numeric">
+                            <input type="text" class="code-input" maxlength="1" data-index="3" inputmode="numeric">
+                            <input type="text" class="code-input" maxlength="1" data-index="4" inputmode="numeric">
+                            <input type="text" class="code-input" maxlength="1" data-index="5" inputmode="numeric">
+                        </div>
+                        <span class="verification-hint">Código enviado para <strong id="verificationPhone"></strong></span>
+                    </div>
+
+                    <div class="verification-actions">
+                        <button class="btn-verify-code" id="btnVerifyCode" onclick="verifyWhatsappCode()">
+                            Verificar código
+                        </button>
+                        <button class="btn-resend-code" onclick="resendVerificationCode()">
+                            Reenviar código
+                        </button>
+                        <button class="btn-cancel-verification" onclick="cancelVerification()">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Estado: Vinculado -->
+                <div id="whatsapp-linked" class="whatsapp-state" style="display: none;">
+                    <div class="whatsapp-linked-info">
+                        <div class="linked-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                        <div class="linked-details">
+                            <span class="linked-label">WhatsApp vinculado</span>
+                            <span class="linked-number" id="linkedWhatsappNumber">+55 75 92488820</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-unlink-whatsapp" onclick="unlinkWhatsapp()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        Desvincular WhatsApp
+                    </button>
+                </div>
+            </section>
+
             <!-- Conta -->
             <section class="settings-section">
                 <h2 class="section-title">
@@ -166,7 +263,7 @@
                     </div>
                 </div>
 
-                <button class="btn-signout" onclick="logout()">
+                <button class="btn-signout" onclick="showLogoutModal()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                         <polyline points="16 17 21 12 16 7"></polyline>
@@ -198,12 +295,31 @@
                     </div>
                     <div class="about-item">
                         <span class="about-label">Desenvolvido por</span>
-                        <span class="about-value">Nura Team</span>
+                        <span class="about-value">Divy Team</span>
                     </div>
                 </div>
             </section>
 
         </main>
+    </div>
+
+    <!-- MODAL DE LOGOUT -->
+    <div class="logout-modal-overlay" id="logoutModalOverlay" onclick="closeLogoutModal()">
+        <div class="logout-modal" onclick="event.stopPropagation()">
+            <div class="logout-modal-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </div>
+            <h3 class="logout-modal-title">Sair da conta</h3>
+            <p class="logout-modal-text">Tem certeza que deseja encerrar sua sessão?</p>
+            <div class="logout-modal-actions">
+                <button class="logout-btn-cancel" onclick="closeLogoutModal()">Cancelar</button>
+                <button class="logout-btn-confirm" onclick="confirmLogout()">Sair</button>
+            </div>
+        </div>
     </div>
 
     <!-- Font Awesome para ícones -->

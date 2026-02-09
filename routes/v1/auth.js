@@ -126,19 +126,42 @@ module.exports = function(db, isPostgres) {
             // Gerar tokens
             const tokens = generateTokens(newUser);
 
-            // Criar lista padrão "Tarefas"
+            // Criar lista padrão "Minha Lista"
+            let newList;
             if (isPostgres) {
-                await db.query(
+                const listResult = await db.query(
                     `INSERT INTO lists (user_id, name, emoji, color, is_default, position)
-                     VALUES ($1, 'Tarefas', '📋', '#146551', true, 0)`,
+                     VALUES ($1, 'Minha Lista', '📋', '#2563eb', true, 0)
+                     RETURNING id`,
                     [newUser.id]
                 );
+                newList = listResult[0];
             } else {
-                db.prepare(
+                const stmt = db.prepare(
                     `INSERT INTO lists (user_id, name, emoji, color, is_default, position)
-                     VALUES (?, 'Tarefas', '📋', '#146551', 1, 0)`
-                ).run(newUser.id);
+                     VALUES (?, 'Minha Lista', '📋', '#2563eb', 1, 0)`
+                );
+                const info = stmt.run(newUser.id);
+                newList = { id: info.lastInsertRowid };
             }
+
+            // Criar seção padrão "Tarefas" dentro da lista
+            if (newList && newList.id) {
+                if (isPostgres) {
+                    await db.query(
+                        `INSERT INTO sections (list_id, user_id, name, position)
+                         VALUES ($1, $2, 'Tarefas', 0)`,
+                        [newList.id, newUser.id]
+                    );
+                } else {
+                    db.prepare(
+                        `INSERT INTO sections (list_id, user_id, name, position)
+                         VALUES (?, ?, 'Tarefas', 0)`
+                    ).run(newList.id, newUser.id);
+                }
+            }
+
+            console.log(`✅ Lista e seção padrão criadas para usuário ${newUser.id}`);
 
             return created(res, {
                 user: {
@@ -475,18 +498,39 @@ module.exports = function(db, isPostgres) {
             // Gerar tokens
             const tokens = generateTokens(newUser);
 
-            // Criar lista padrão "Tarefas"
+            // Criar lista padrão "Minha Lista"
+            let newList;
             if (isPostgres) {
-                await db.query(
+                const listResult = await db.query(
                     `INSERT INTO lists (user_id, name, emoji, color, is_default, position)
-                     VALUES ($1, 'Tarefas', '📋', '#146551', true, 0)`,
+                     VALUES ($1, 'Minha Lista', '📋', '#2563eb', true, 0)
+                     RETURNING id`,
                     [newUser.id]
                 );
+                newList = listResult[0];
             } else {
-                db.prepare(
+                const stmt = db.prepare(
                     `INSERT INTO lists (user_id, name, emoji, color, is_default, position)
-                     VALUES (?, 'Tarefas', '📋', '#146551', 1, 0)`
-                ).run(newUser.id);
+                     VALUES (?, 'Minha Lista', '📋', '#2563eb', 1, 0)`
+                );
+                const info = stmt.run(newUser.id);
+                newList = { id: info.lastInsertRowid };
+            }
+
+            // Criar seção padrão "Tarefas" dentro da lista
+            if (newList && newList.id) {
+                if (isPostgres) {
+                    await db.query(
+                        `INSERT INTO sections (list_id, user_id, name, position)
+                         VALUES ($1, $2, 'Tarefas', 0)`,
+                        [newList.id, newUser.id]
+                    );
+                } else {
+                    db.prepare(
+                        `INSERT INTO sections (list_id, user_id, name, position)
+                         VALUES (?, ?, 'Tarefas', 0)`
+                    ).run(newList.id, newUser.id);
+                }
             }
 
             console.log(`✅ Conta criada com verificação de email: ${email}`);
@@ -723,6 +767,273 @@ module.exports = function(db, isPostgres) {
         } catch (err) {
             console.error('❌ Erro ao verificar código de recuperação:', err);
             return error(res, 'Erro ao verificar código');
+        }
+    });
+
+    // ===== AUTENTICAÇÃO COM GOOGLE (via credential JWT) =====
+    router.post('/google', async (req, res) => {
+        try {
+            const { credential } = req.body;
+
+            if (!credential) {
+                return badRequest(res, 'Token do Google é obrigatório', 'MISSING_CREDENTIAL');
+            }
+
+            // Verificar o token JWT do Google
+            const { OAuth2Client } = require('google-auth-library');
+            const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+            let payload;
+            try {
+                const ticket = await client.verifyIdToken({
+                    idToken: credential,
+                    audience: process.env.GOOGLE_CLIENT_ID
+                });
+                payload = ticket.getPayload();
+            } catch (verifyError) {
+                console.error('❌ Erro ao verificar token Google:', verifyError);
+                return unauthorized(res, 'Token do Google inválido', 'INVALID_GOOGLE_TOKEN');
+            }
+
+            const { email, name, picture, sub: googleId } = payload;
+
+            if (!email) {
+                return badRequest(res, 'Email não disponível na conta Google', 'NO_EMAIL');
+            }
+
+            // Verificar se usuário já existe
+            let user;
+            if (isPostgres) {
+                const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+                user = result[0];
+            } else {
+                user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+            }
+
+            if (user) {
+                // Usuário existe - fazer login
+                // Atualizar google_id se não tiver
+                if (!user.google_id) {
+                    if (isPostgres) {
+                        await db.query('UPDATE users SET google_id = $1, avatar_url = $2 WHERE id = $3', [googleId, picture, user.id]);
+                    } else {
+                        db.prepare('UPDATE users SET google_id = ?, avatar_url = ? WHERE id = ?').run(googleId, picture, user.id);
+                    }
+                }
+
+                // Gerar tokens
+                const tokens = generateTokens(user);
+
+                console.log(`✅ Login com Google: ${email}`);
+
+                return success(res, {
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        username: user.name,
+                        avatar_url: picture || user.avatar_url
+                    },
+                    accessToken: tokens.accessToken,
+                    refreshToken: tokens.refreshToken,
+                    expiresIn: 900,
+                    isNewUser: false
+                }, 'Login realizado com sucesso');
+
+            } else {
+                // Usuário não existe - criar conta
+                let newUser;
+                if (isPostgres) {
+                    const result = await db.query(
+                        'INSERT INTO users (name, email, google_id, avatar_url) VALUES ($1, $2, $3, $4) RETURNING id, name, email',
+                        [name, email, googleId, picture]
+                    );
+                    newUser = result[0];
+                } else {
+                    const stmt = db.prepare('INSERT INTO users (name, email, google_id, avatar_url) VALUES (?, ?, ?, ?)');
+                    const info = stmt.run(name, email, googleId, picture);
+                    newUser = { id: info.lastInsertRowid, name, email };
+                }
+
+                // Criar lista padrão "Minha Lista"
+                let newList;
+                if (isPostgres) {
+                    const listResult = await db.query(
+                        `INSERT INTO lists (user_id, name, emoji, color, is_default, position)
+                         VALUES ($1, 'Minha Lista', '📋', '#2563eb', true, 0)
+                         RETURNING id`,
+                        [newUser.id]
+                    );
+                    newList = listResult[0];
+                } else {
+                    const stmt = db.prepare(
+                        `INSERT INTO lists (user_id, name, emoji, color, is_default, position)
+                         VALUES (?, 'Minha Lista', '📋', '#2563eb', 1, 0)`
+                    );
+                    const info = stmt.run(newUser.id);
+                    newList = { id: info.lastInsertRowid };
+                }
+
+                // Criar seção padrão "Tarefas" dentro da lista
+                if (newList && newList.id) {
+                    if (isPostgres) {
+                        await db.query(
+                            `INSERT INTO sections (list_id, user_id, name, position)
+                             VALUES ($1, $2, 'Tarefas', 0)`,
+                            [newList.id, newUser.id]
+                        );
+                    } else {
+                        db.prepare(
+                            `INSERT INTO sections (list_id, user_id, name, position)
+                             VALUES (?, ?, 'Tarefas', 0)`
+                        ).run(newList.id, newUser.id);
+                    }
+                }
+
+                // Gerar tokens
+                const tokens = generateTokens(newUser);
+
+                console.log(`✅ Conta criada com Google: ${email}`);
+
+                return created(res, {
+                    user: {
+                        id: newUser.id,
+                        name: newUser.name,
+                        email: newUser.email,
+                        username: newUser.name,
+                        avatar_url: picture
+                    },
+                    accessToken: tokens.accessToken,
+                    refreshToken: tokens.refreshToken,
+                    expiresIn: 900,
+                    isNewUser: true
+                }, 'Conta criada com sucesso');
+            }
+
+        } catch (err) {
+            console.error('❌ Erro na autenticação Google:', err);
+            return error(res, 'Erro ao autenticar com Google');
+        }
+    });
+
+    // ===== AUTENTICAÇÃO COM GOOGLE (via userinfo - método alternativo) =====
+    router.post('/google-userinfo', async (req, res) => {
+        try {
+            const { email, name, picture, sub: googleId } = req.body;
+
+            if (!email) {
+                return badRequest(res, 'Email é obrigatório', 'MISSING_EMAIL');
+            }
+
+            // Verificar se usuário já existe
+            let user;
+            if (isPostgres) {
+                const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+                user = result[0];
+            } else {
+                user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+            }
+
+            if (user) {
+                // Usuário existe - fazer login
+                if (!user.google_id && googleId) {
+                    if (isPostgres) {
+                        await db.query('UPDATE users SET google_id = $1, avatar_url = $2 WHERE id = $3', [googleId, picture, user.id]);
+                    } else {
+                        db.prepare('UPDATE users SET google_id = ?, avatar_url = ? WHERE id = ?').run(googleId, picture, user.id);
+                    }
+                }
+
+                const tokens = generateTokens(user);
+
+                console.log(`✅ Login com Google (userinfo): ${email}`);
+
+                return success(res, {
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        username: user.name,
+                        avatar_url: picture || user.avatar_url
+                    },
+                    accessToken: tokens.accessToken,
+                    refreshToken: tokens.refreshToken,
+                    expiresIn: 900,
+                    isNewUser: false
+                }, 'Login realizado com sucesso');
+
+            } else {
+                // Criar nova conta
+                let newUser;
+                if (isPostgres) {
+                    const result = await db.query(
+                        'INSERT INTO users (name, email, google_id, avatar_url) VALUES ($1, $2, $3, $4) RETURNING id, name, email',
+                        [name, email, googleId, picture]
+                    );
+                    newUser = result[0];
+                } else {
+                    const stmt = db.prepare('INSERT INTO users (name, email, google_id, avatar_url) VALUES (?, ?, ?, ?)');
+                    const info = stmt.run(name, email, googleId, picture);
+                    newUser = { id: info.lastInsertRowid, name, email };
+                }
+
+                // Criar lista padrão "Minha Lista"
+                let newList;
+                if (isPostgres) {
+                    const listResult = await db.query(
+                        `INSERT INTO lists (user_id, name, emoji, color, is_default, position)
+                         VALUES ($1, 'Minha Lista', '📋', '#2563eb', true, 0)
+                         RETURNING id`,
+                        [newUser.id]
+                    );
+                    newList = listResult[0];
+                } else {
+                    const stmt = db.prepare(
+                        `INSERT INTO lists (user_id, name, emoji, color, is_default, position)
+                         VALUES (?, 'Minha Lista', '📋', '#2563eb', 1, 0)`
+                    );
+                    const info = stmt.run(newUser.id);
+                    newList = { id: info.lastInsertRowid };
+                }
+
+                // Criar seção padrão "Tarefas" dentro da lista
+                if (newList && newList.id) {
+                    if (isPostgres) {
+                        await db.query(
+                            `INSERT INTO sections (list_id, user_id, name, position)
+                             VALUES ($1, $2, 'Tarefas', 0)`,
+                            [newList.id, newUser.id]
+                        );
+                    } else {
+                        db.prepare(
+                            `INSERT INTO sections (list_id, user_id, name, position)
+                             VALUES (?, ?, 'Tarefas', 0)`
+                        ).run(newList.id, newUser.id);
+                    }
+                }
+
+                const tokens = generateTokens(newUser);
+
+                console.log(`✅ Conta criada com Google (userinfo): ${email}`);
+
+                return created(res, {
+                    user: {
+                        id: newUser.id,
+                        name: newUser.name,
+                        email: newUser.email,
+                        username: newUser.name,
+                        avatar_url: picture
+                    },
+                    accessToken: tokens.accessToken,
+                    refreshToken: tokens.refreshToken,
+                    expiresIn: 900,
+                    isNewUser: true
+                }, 'Conta criada com sucesso');
+            }
+
+        } catch (err) {
+            console.error('❌ Erro na autenticação Google (userinfo):', err);
+            return error(res, 'Erro ao autenticar com Google');
         }
     });
 

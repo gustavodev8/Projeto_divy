@@ -4,9 +4,9 @@
 <head>
 
   <meta charset="UTF-8">
-  <title>Nura - Gestão Inteligente de Tarefas</title>
+  <title>Divy - Gestão Inteligente de Tarefas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#146551">
+  <meta name="theme-color" content="#2563eb">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -20,6 +20,9 @@
   <link rel="stylesheet" href="../css/ai-routine-panel.css">
   <link rel="stylesheet" href="../css/subtasks.css">
   <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/nura-responsive.css">
+  <link rel="stylesheet" href="../css/nura-mobile-extras.css">
+  <link rel="stylesheet" href="../css/nura-all-modals-fix.css">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -45,9 +48,12 @@
       <!-- Logo/Brand -->
       <div class="sidebar-brand">
         <div class="brand-logo">
-          <span class="logo-letter">N</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
         </div>
-        <span class="brand-name">Nura</span>
+        <span class="brand-name">Divy</span>
         
         <!-- Botão fechar sidebar (mobile) -->
         <button class="btn-close-sidebar hide-desktop" id="btnCloseSidebar" aria-label="Fechar menu">
@@ -231,7 +237,7 @@
               <span class="title-emoji">👋</span>
               <span class="title-text">Bem-vindo</span>
             </h1>
-            <span class="task-count" id="taskCountHeader">0 tarefas</span>
+            <span class="task-count" id="taskCountHeader">Você tem 0 tarefas pendentes</span>
           </div>
         </div>
         
@@ -285,13 +291,16 @@
 
       <!-- Input de Nova Tarefa -->
       <div class="add-task-inline">
-        <button class="add-task-trigger" id="btnAdicionar" onclick="openTaskModal()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>Adicionar tarefa</span>
-        </button>
+        <div class="add-task-wrapper">
+          <button class="add-task-trigger" id="btnAdicionar" onclick="openTaskModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Adicionar tarefa</span>
+          </button>
+          <button class="btn-add-task-submit" onclick="openTaskModal()">Adicionar</button>
+        </div>
       </div>
 
       <!-- Lista de Tarefas -->
@@ -693,35 +702,35 @@
   </div>
 
   <!-- MODAL DE EDITAR SEÇÃO -->
-  <div class="modal-overlay" id="editSectionModalOverlay" onclick="closeEditSectionModal()"></div>
-
-  <div class="modal-edit-section" id="editSectionModal" role="dialog" aria-modal="true">
-    <div class="modal-header">
-      <h3 class="modal-title">Editar Seção</h3>
-      <button class="btn-close-modal" onclick="closeEditSectionModal()" aria-label="Fechar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-    </div>
-    
-    <div class="modal-body">
-      <div class="form-field">
-        <label class="form-label" for="editSectionNameInput">Nome da seção</label>
-        <input 
-          type="text" 
-          id="editSectionNameInput" 
-          class="form-input" 
-          placeholder="Digite o nome"
-          maxlength="50"
-        />
+  <div class="modal-overlay" id="editSectionModalOverlay" onclick="closeEditSectionModal()">
+    <div class="modal-edit-section" id="editSectionModal" role="dialog" aria-modal="true" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Editar Seção</h3>
+        <button class="btn-close-modal" onclick="closeEditSectionModal()" aria-label="Fechar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
-    </div>
-    
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeEditSectionModal()">Cancelar</button>
-      <button class="btn-primary" onclick="saveEditedSectionName()">Salvar</button>
+
+      <div class="modal-body">
+        <div class="form-field">
+          <label class="form-label" for="editSectionNameInput">Nome da seção</label>
+          <input
+            type="text"
+            id="editSectionNameInput"
+            class="form-input"
+            placeholder="Digite o nome"
+            maxlength="50"
+          />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeEditSectionModal()">Cancelar</button>
+        <button class="btn-primary" onclick="saveEditedSectionName()">Salvar</button>
+      </div>
     </div>
   </div>
 
@@ -1010,9 +1019,6 @@
   </div>
 
   <!-- ===== SCRIPTS ===== -->
-
-  <!-- ===== SCRIPTS ===== -->
-  <script src="../scripts/auth.js"></script>
   <script src="../scripts/settings.js"></script>
   <script src="../scripts/lists.js"></script>
   <script src="../scripts/sections.js"></script>
@@ -1165,7 +1171,7 @@
     function updateTaskCountHeader(count) {
       const taskCountHeader = document.getElementById('taskCountHeader');
       if (taskCountHeader) {
-        taskCountHeader.textContent = `${count} tarefa${count !== 1 ? 's' : ''}`;
+        taskCountHeader.textContent = `Você tem ${count} tarefa${count !== 1 ? 's' : ''} pendente${count !== 1 ? 's' : ''}`;
       }
     }
     

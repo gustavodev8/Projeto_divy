@@ -57,13 +57,82 @@
     max-width: 420px !important;
     max-height: 90vh !important;
     max-height: 90dvh !important;
-    background: var(--surface-main, #1a1a1a) !important;
+    background: var(--surface-main, #ffffff) !important;
     border-radius: 16px !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
     overflow: hidden !important;
-    display: flex !important;
+    display: none !important;
     flex-direction: column !important;
     animation: modalFadeIn 0.25s ease !important;
+}
+
+/* ===== MODAL EDIT SECTION - GARANTIR CENTRALIZAÇÃO ===== */
+#editSectionModalOverlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    z-index: 9999 !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+}
+
+#editSectionModalOverlay.active {
+    display: flex !important;
+}
+
+#editSectionModal,
+#editSectionModalOverlay .modal-edit-section {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    max-height: 90vh !important;
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+    overflow: hidden !important;
+    display: none !important;
+    flex-direction: column !important;
+    animation: modalFadeIn 0.25s ease !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+#editSectionModal.active,
+#editSectionModalOverlay .modal-edit-section.active {
+    display: flex !important;
+}
+
+/* Dark mode para modal de editar seção */
+.dark-mode #editSectionModal,
+.dark-mode #editSectionModalOverlay .modal-edit-section {
+    background: #1a1a1a !important;
+}
+
+/* Modal ativo */
+.modal-edit-section.active,
+.section-modal.active,
+.list-modal.active,
+.edit-list-modal.active,
+.modal-edit-list.active,
+.modal-rename-section.active {
+    display: flex !important;
 }
 
 @keyframes modalFadeIn {
@@ -185,7 +254,7 @@
 .form-input:focus,
 .modal-input:focus {
     outline: none !important;
-    border-color: var(--nura-primary, #146551) !important;
+    border-color: var(--nura-primary, #2563eb) !important;
     background: var(--surface-main, #1a1a1a) !important;
     box-shadow: 0 0 0 3px rgba(20, 101, 81, 0.25) !important;
 }
@@ -261,7 +330,7 @@
     padding: 14px 20px !important;
     border: none !important;
     border-radius: 10px !important;
-    background: var(--nura-primary, #146551) !important;
+    background: var(--nura-primary, #2563eb) !important;
     color: white !important;
     font-size: 14px !important;
     font-weight: 600 !important;
@@ -294,16 +363,18 @@
     /* SOMENTE QUANDO ATIVO - Bottom Sheet */
     .section-modal-overlay.active,
     .list-modal-overlay.active,
-    .modal-overlay.active {
+    .modal-overlay.active,
+    #editSectionModalOverlay.active {
         padding: 0 !important;
         align-items: flex-end !important; /* Modal vem de baixo */
     }
-    
+
     .section-modal,
     .list-modal,
     .edit-list-modal,
     .modal-edit-list,
-    .modal-edit-section {
+    .modal-edit-section,
+    #editSectionModal {
         max-width: none !important;
         width: 100% !important;
         max-height: 85vh !important;
@@ -430,7 +501,7 @@
 .dark-mode .list-form-input:focus,
 .dark-mode .form-input:focus {
     background: #1a1a1a !important;
-    border-color: var(--nura-primary, #146551) !important;
+    border-color: var(--nura-primary, #2563eb) !important;
 }
 
 .dark-mode .section-modal-close,

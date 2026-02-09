@@ -156,7 +156,7 @@ function updatePageTitle(filterType) {
     
     if (countElement) {
         const count = window.currentListTasks?.length || 0;
-        countElement.textContent = `${count} tarefa${count !== 1 ? 's' : ''}`;
+        countElement.textContent = `Você tem ${count} tarefa${count !== 1 ? 's' : ''} pendente${count !== 1 ? 's' : ''}`;
     }
     
     console.log('✅ Título atualizado:', config.text);

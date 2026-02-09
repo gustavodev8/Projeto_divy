@@ -638,7 +638,6 @@ function renderListView(container) {
                             </svg>
                         </button>
                         <h3 class="section-title">${escapeHtml(section.name)}</h3>
-                        <span class="section-count">${visibleSectionTasks.length}${hideCompleted && allSectionTasks.length !== visibleSectionTasks.length ? ` <span style="opacity:0.5">(+${allSectionTasks.length - visibleSectionTasks.length} ocultas)</span>` : ''}</span>
                         <button class="btn-section-more" onclick="event.stopPropagation(); openEditSectionModal(${section.id})" title="Editar seção">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="1"></circle>
@@ -653,6 +652,7 @@ function renderListView(container) {
                                 <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                             </svg>
                         </button>
+                        <span class="section-count">${visibleSectionTasks.length}${hideCompleted && allSectionTasks.length !== visibleSectionTasks.length ? ` <span style="opacity:0.5">(+${allSectionTasks.length - visibleSectionTasks.length} ocultas)</span>` : ''}</span>
                     </div>
                     <div class="section-tasks" data-section-drop="${section.id}">
                         ${visibleSectionTasks.length === 0 ? (hideCompleted && allSectionTasks.length > 0 ? '<div class="section-empty" style="opacity:0.6">Todas as tarefas estão concluídas</div>' : '<div class="section-empty">Arraste tarefas para cá</div>') : ''}
@@ -1651,29 +1651,87 @@ function showEmptyState() {
 }
 
 // ===== NOTIFICAÇÃO =====
-function showNotification(message) {
+function showNotification(message, type = 'info') {
+    // Remover emojis da mensagem
+    const cleanMessage = message.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2300}-\u{23FF}]|[\u{2B50}]|[\u{2705}]|[\u{274C}]|[\u{26A0}]|[\u{2139}]/gu, '').trim();
+
+    // Detectar tipo baseado na mensagem original
+    if (message.includes('✅') || message.includes('sucesso') || message.toLowerCase().includes('salv')) {
+        type = 'success';
+    } else if (message.includes('❌') || message.includes('erro') || message.includes('Erro')) {
+        type = 'error';
+    } else if (message.includes('⚠️') || message.includes('atenção')) {
+        type = 'warning';
+    }
+
+    // Ícones SVG para cada tipo
+    const icons = {
+        success: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+        error: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+        info: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
+    };
+
+    // Cores para cada tipo
+    const colors = {
+        success: { bg: '#0f172a', border: '#22c55e', icon: '#22c55e' },
+        error: { bg: '#0f172a', border: '#ef4444', icon: '#ef4444' },
+        warning: { bg: '#0f172a', border: '#f59e0b', icon: '#f59e0b' },
+        info: { bg: '#0f172a', border: '#3b82f6', icon: '#3b82f6' }
+    };
+
+    const color = colors[type] || colors.info;
+
+    // Remover notificação anterior
+    const existing = document.querySelector('.divy-notification');
+    if (existing) existing.remove();
+
     const notification = document.createElement('div');
+    notification.className = 'divy-notification';
+    notification.innerHTML = `
+        <span style="display:flex;color:${color.icon};flex-shrink:0">${icons[type] || icons.info}</span>
+        <span style="flex:1;line-height:1.3">${cleanMessage}</span>
+    `;
+
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: var(--nura-primary, #146551);
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: ${color.bg};
+        color: #e2e8f0;
+        padding: 12px 16px;
+        border-radius: 6px;
+        border-left: 3px solid ${color.border};
+        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         z-index: 10000;
+        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+        font-size: 13px;
         font-weight: 500;
-        animation: slideIn 0.3s ease;
+        letter-spacing: -0.01em;
+        max-width: 320px;
+        animation: divyNotifIn 0.2s ease;
     `;
-    notification.textContent = message;
-    
+
+    // Keyframes
+    if (!document.getElementById('divy-notif-css')) {
+        const style = document.createElement('style');
+        style.id = 'divy-notif-css';
+        style.textContent = `
+            @keyframes divyNotifIn { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:translateX(0); } }
+            @keyframes divyNotifOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(16px); } }
+        `;
+        document.head.appendChild(style);
+    }
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+        notification.style.animation = 'divyNotifOut 0.2s ease forwards';
+        setTimeout(() => notification.remove(), 200);
+    }, 2500);
 }
 
 // ===== UTILITÁRIOS =====
@@ -2468,101 +2526,9 @@ function updatePageTitle() {
     
     // Atualizar contador
     if (taskCountElement) {
-        taskCountElement.textContent = `${count} ${count === 1 ? 'tarefa' : 'tarefas'}`;
+        taskCountElement.textContent = `Você tem ${count} tarefa${count !== 1 ? 's' : ''} pendente${count !== 1 ? 's' : ''}`;
     }
-    
-    console.log(`📝 Título atualizado: ${emoji} ${title} (${count} tarefas)`);
-}
 
-/* ========================================
-   ATUALIZAR TÍTULO DA PÁGINA DINAMICAMENTE
-   ======================================== */
-
-function updatePageTitle() {
-    const pageTitleElement = document.querySelector('.page-title');
-    const taskCountElement = document.querySelector('.task-count');
-    const titleEmoji = document.querySelector('.title-emoji');
-    
-    if (!pageTitleElement) return;
-    
-    let title = 'Bem-vindo';
-    let emoji = '👋';
-    let count = window.homeTasks ? window.homeTasks.length : 0;
-    
-    // ===== 1. VERIFICAR SE ESTÁ EM FILTRO INTELIGENTE =====
-    if (window.currentSmartFilter) {
-        switch (window.currentSmartFilter) {
-            case 'inbox':
-                title = 'Caixa de Entrada';
-                emoji = '📥';
-                count = window.homeTasks.filter(t => !t.due_date && t.status !== 'completed').length;
-                break;
-            case 'today':
-                title = 'Hoje';
-                emoji = '📅';
-                const today = new Date().toISOString().split('T')[0];
-                count = window.homeTasks.filter(t => t.due_date === today && t.status !== 'completed').length;
-                break;
-            case 'next7days':
-                title = 'Próximos 7 dias';
-                emoji = '📆';
-                const nextWeek = new Date();
-                nextWeek.setDate(nextWeek.getDate() + 7);
-                count = window.homeTasks.filter(t => {
-                    if (!t.due_date || t.status === 'completed') return false;
-                    const dueDate = new Date(t.due_date);
-                    return dueDate >= new Date() && dueDate <= nextWeek;
-                }).length;
-                break;
-            case 'all':
-                title = 'Todas as Tarefas';
-                emoji = '📋';
-                count = window.homeTasks.length;
-                break;
-        }
-    }
-    // ===== 2. VERIFICAR SE ESTÁ EM LISTA =====
-    else if (window.currentListId && window.allLists) {
-        const currentList = window.allLists.find(l => l.id === parseInt(window.currentListId));
-        if (currentList) {
-            title = currentList.name;
-            emoji = currentList.emoji || '📋';
-            count = window.filteredTasks ? window.filteredTasks.length : 0;
-        }
-    }
-    
-    // ===== 3. ATUALIZAR DOM =====
-    if (titleEmoji) {
-        titleEmoji.textContent = emoji;
-    }
-    
-    // Atualizar texto do título (preservando o emoji)
-    const titleTextNode = Array.from(pageTitleElement.childNodes).find(
-        node => node.nodeType === Node.TEXT_NODE
-    );
-    
-    if (titleTextNode) {
-        titleTextNode.textContent = title;
-    } else {
-        // Se não encontrar texto, substituir tudo menos o emoji
-        const emojiElement = pageTitleElement.querySelector('.title-emoji');
-        pageTitleElement.innerHTML = '';
-        if (emojiElement) {
-            pageTitleElement.appendChild(emojiElement);
-        } else {
-            const newEmoji = document.createElement('span');
-            newEmoji.className = 'title-emoji';
-            newEmoji.textContent = emoji;
-            pageTitleElement.appendChild(newEmoji);
-        }
-        pageTitleElement.appendChild(document.createTextNode(title));
-    }
-    
-    // Atualizar contador
-    if (taskCountElement) {
-        taskCountElement.textContent = `${count} ${count === 1 ? 'tarefa' : 'tarefas'}`;
-    }
-    
     console.log(`📝 Título atualizado: ${emoji} ${title} (${count} tarefas)`);
 }
 

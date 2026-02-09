@@ -320,7 +320,7 @@
 .form-input:focus,
 #editListName:focus {
     outline: none !important;
-    border-color: var(--nura-primary, #146551) !important;
+    border-color: var(--nura-primary, #2563eb) !important;
     box-shadow: 0 0 0 3px rgba(20, 101, 81, 0.25) !important;
 }
 
@@ -389,7 +389,7 @@ input[type="color"],
     padding: 14px 20px !important;
     border: none !important;
     border-radius: 10px !important;
-    background: var(--nura-primary, #146551) !important;
+    background: var(--nura-primary, #2563eb) !important;
     color: white !important;
     font-size: 14px !important;
     font-weight: 600 !important;

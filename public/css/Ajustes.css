@@ -206,7 +206,7 @@ body {
 }
 
 .slider {
-    --toggle-color: #146551;
+    --toggle-color: #2563eb;
     position: relative;
     display: flex;
     align-items: center;
@@ -924,5 +924,541 @@ body {
     .select-minimal,
     .btn-signout {
         will-change: transform;
+    }
+}
+
+/* ========================================
+   MODAL DE LOGOUT - DESIGN SÉRIO
+   ======================================== */
+
+.logout-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.logout-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.logout-modal {
+    background: var(--settings-card);
+    border: 1px solid var(--settings-border);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 360px;
+    padding: 32px 28px 24px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    animation: logoutModalIn 0.25s ease;
+}
+
+@keyframes logoutModalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.logout-modal-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 20px;
+    background: hsl(0, 84%, 96%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logout-modal-icon svg {
+    color: var(--settings-destructive);
+    stroke-width: 1.75;
+}
+
+.dark-mode .logout-modal-icon {
+    background: hsl(0, 84%, 12%);
+}
+
+.logout-modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--settings-foreground);
+    margin: 0 0 8px;
+}
+
+.logout-modal-text {
+    font-size: 0.875rem;
+    color: var(--settings-muted-foreground);
+    margin: 0 0 28px;
+    line-height: 1.5;
+}
+
+.logout-modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.logout-btn-cancel,
+.logout-btn-confirm {
+    flex: 1;
+    padding: 12px 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.logout-btn-cancel {
+    background: transparent;
+    border: 1px solid var(--settings-border);
+    color: var(--settings-foreground);
+}
+
+.logout-btn-cancel:hover {
+    background: var(--settings-muted);
+}
+
+.logout-btn-confirm {
+    background: var(--settings-destructive);
+    border: 1px solid var(--settings-destructive);
+    color: white;
+}
+
+.logout-btn-confirm:hover {
+    background: hsl(0, 84%, 55%);
+    border-color: hsl(0, 84%, 55%);
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .logout-modal {
+        padding: 28px 24px 20px;
+        max-width: none;
+        margin: 0 16px;
+    }
+
+    .logout-modal-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+    }
+
+    .logout-modal-icon svg {
+        width: 26px;
+        height: 26px;
+    }
+
+    .logout-modal-title {
+        font-size: 1rem;
+    }
+
+    .logout-modal-text {
+        font-size: 0.8125rem;
+        margin-bottom: 24px;
+    }
+
+    .logout-modal-actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .logout-btn-cancel,
+    .logout-btn-confirm {
+        padding: 14px;
+        width: 100%;
+    }
+}
+
+/* ========================================
+   SEÇÃO WHATSAPP - DESIGN MODERNO
+   ======================================== */
+
+/* Badge ProMax no título */
+.promax-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 700;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 8px;
+}
+
+/* Estado base */
+.whatsapp-state {
+    background: var(--settings-card);
+    border: 1px solid var(--settings-border);
+    border-radius: var(--settings-radius);
+    padding: 1.5rem;
+}
+
+.whatsapp-description {
+    font-size: 0.875rem;
+    color: var(--settings-muted-foreground);
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+}
+
+/* Form de telefone */
+.whatsapp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.phone-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.phone-input-group label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--settings-foreground);
+}
+
+.phone-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--settings-muted);
+    border: 1px solid var(--settings-border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.15s ease;
+}
+
+.phone-input-wrapper:focus-within {
+    border-color: #25d366;
+    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.15);
+}
+
+.phone-prefix {
+    padding: 0 12px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--settings-muted-foreground);
+    background: var(--settings-border);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--settings-border);
+}
+
+.phone-input-wrapper input {
+    flex: 1;
+    padding: 12px 14px;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--settings-foreground);
+    outline: none;
+}
+
+.phone-input-wrapper input::placeholder {
+    color: var(--settings-muted-foreground);
+    opacity: 0.6;
+}
+
+.phone-hint {
+    font-size: 0.75rem;
+    color: var(--settings-muted-foreground);
+}
+
+/* Botão de vincular WhatsApp */
+.btn-whatsapp-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 14px 20px;
+    background: #25d366;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+}
+
+.btn-whatsapp-link:hover {
+    background: #1fb855;
+    transform: translateY(-1px);
+}
+
+.btn-whatsapp-link:active {
+    transform: translateY(0);
+}
+
+.btn-whatsapp-link:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-whatsapp-link svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+}
+
+/* Estado de verificação */
+.verification-code-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.code-inputs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.code-input {
+    width: 44px;
+    height: 52px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-family: 'Inter', monospace;
+    border: 2px solid var(--settings-border);
+    border-radius: 10px;
+    background: var(--settings-card);
+    color: var(--settings-foreground);
+    transition: all 0.15s ease;
+    outline: none;
+}
+
+.code-input:focus {
+    border-color: #25d366;
+    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.15);
+}
+
+.code-input.filled {
+    border-color: #25d366;
+    background: rgba(37, 211, 102, 0.08);
+}
+
+.verification-hint {
+    font-size: 0.8125rem;
+    color: var(--settings-muted-foreground);
+    text-align: center;
+}
+
+.verification-hint strong {
+    color: var(--settings-foreground);
+}
+
+.verification-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.btn-verify-code {
+    width: 100%;
+    padding: 14px 20px;
+    background: #25d366;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+}
+
+.btn-verify-code:hover {
+    background: #1fb855;
+}
+
+.btn-verify-code:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-resend-code,
+.btn-cancel-verification {
+    width: 100%;
+    padding: 12px 20px;
+    background: transparent;
+    border: 1px solid var(--settings-border);
+    border-radius: 10px;
+    color: var(--settings-muted-foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+}
+
+.btn-resend-code:hover,
+.btn-cancel-verification:hover {
+    background: var(--settings-muted);
+    color: var(--settings-foreground);
+}
+
+/* Estado vinculado */
+.whatsapp-linked-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.linked-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(37, 211, 102, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.linked-icon svg {
+    color: #25d366;
+}
+
+.linked-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.linked-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #25d366;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.linked-number {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--settings-foreground);
+}
+
+.btn-unlink-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 12px 20px;
+    background: transparent;
+    border: 1px solid var(--settings-border);
+    border-radius: 10px;
+    color: var(--settings-destructive);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+}
+
+.btn-unlink-whatsapp:hover {
+    background: hsl(0, 84%, 96%);
+    border-color: var(--settings-destructive);
+}
+
+.dark-mode .btn-unlink-whatsapp:hover {
+    background: hsl(0, 84%, 12%);
+}
+
+.btn-unlink-whatsapp svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+
+/* Responsivo WhatsApp */
+@media (max-width: 480px) {
+    .whatsapp-state {
+        padding: 1.25rem;
+        border-radius: 12px;
+    }
+
+    .whatsapp-description {
+        font-size: 0.8125rem;
+    }
+
+    .code-inputs {
+        gap: 6px;
+    }
+
+    .code-input {
+        width: 40px;
+        height: 48px;
+        font-size: 1.25rem;
+        border-radius: 8px;
+    }
+
+    .btn-whatsapp-link,
+    .btn-verify-code {
+        font-size: 0.875rem;
+        padding: 14px 16px;
+    }
+
+    .linked-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .linked-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .linked-number {
+        font-size: 0.9375rem;
+    }
+}
+
+/* Loading Spinner para botões */
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
     }
 }

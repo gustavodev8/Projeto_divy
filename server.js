@@ -44,8 +44,18 @@ const plansRoutesV1 = require('./routes/v1/plans')(db.isPostgres ? db : db, db.i
 app.use('/v1/plans', plansRoutesV1);
 app.use('/api/plans', plansRoutesV1); // Também disponível na API legada
 
+// ===== ROTAS DE CONFIGURAÇÃO V1 =====
+const configRoutesV1 = require('./routes/v1/config');
+app.use('/v1/config', configRoutesV1);
+
+// ===== ROTAS DE WHATSAPP V1 =====
+const whatsappRoutesV1 = require('./routes/v1/whatsapp')(db.isPostgres ? db : db, db.isPostgres);
+app.use('/v1/whatsapp', whatsappRoutesV1);
+
 console.log('🔐 API v1 com JWT ativada em /v1/auth');
 console.log('💎 API de planos ativada em /v1/plans e /api/plans');
+console.log('⚙️ API de config ativada em /v1/config');
+console.log('📱 API de WhatsApp ativada em /v1/whatsapp');
 
 // ===== INICIALIZAR WHATSAPP BOT =====
 console.log('🤖 Carregando bot WhatsApp...');

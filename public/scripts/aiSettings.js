@@ -271,44 +271,102 @@ async function initAISettingsPage() {
 }
 
 // Função auxiliar para mostrar notificações
-function showNotification(message) {
-    // Cria elemento de notificação se não existir
-    let notification = document.querySelector('.ai-notification');
+function showNotification(message, type = 'info') {
+    // Remover emojis da mensagem
+    const cleanMessage = message.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2300}-\u{23FF}]|[\u{2B50}]|[\u{2705}]|[\u{274C}]|[\u{26A0}]|[\u{2139}]/gu, '').trim();
 
-    if (!notification) {
-        notification = document.createElement('div');
-        notification.className = 'ai-notification';
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #146551;
-            color: white;
-            padding: 16px 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 10000;
-            font-size: 0.9rem;
-            font-weight: 500;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.3s ease;
-        `;
-        document.body.appendChild(notification);
+    // Detectar tipo baseado na mensagem original
+    if (message.includes('✅') || message.toLowerCase().includes('ativad')) type = 'success';
+    else if (message.includes('❌') || message.toLowerCase().includes('erro')) type = 'error';
+    else if (message.includes('🔕') || message.toLowerCase().includes('desativad')) type = 'warning';
+
+    // Ícones SVG por tipo
+    const icons = {
+        success: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+        error: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+        info: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
+    };
+
+    // Cores por tipo
+    const colors = {
+        success: { bg: '#0f172a', border: '#22c55e', icon: '#22c55e' },
+        error: { bg: '#0f172a', border: '#ef4444', icon: '#ef4444' },
+        warning: { bg: '#0f172a', border: '#f59e0b', icon: '#f59e0b' },
+        info: { bg: '#0f172a', border: '#3b82f6', icon: '#3b82f6' }
+    };
+
+    const color = colors[type] || colors.info;
+    const icon = icons[type] || icons.info;
+
+    // Remover notificação anterior
+    const existingNotification = document.querySelector('.divy-notification');
+    if (existingNotification) {
+        existingNotification.remove();
     }
 
-    notification.textContent = message;
+    // Criar notificação
+    const notification = document.createElement('div');
+    notification.className = 'divy-notification';
+    notification.innerHTML = `
+        <div class="notification-icon" style="color: ${color.icon}">${icon}</div>
+        <span class="notification-message">${cleanMessage}</span>
+    `;
 
-    // Anima entrada
-    setTimeout(() => {
-        notification.style.opacity = '1';
-        notification.style.transform = 'translateY(0)';
-    }, 10);
+    // Estilos
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${color.bg};
+        color: #e2e8f0;
+        padding: 12px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-left: 3px solid ${color.border};
+        animation: slideInNotification 0.3s ease;
+        max-width: 320px;
+    `;
 
-    // Remove após 3 segundos
+    // Adicionar estilos de animação se não existirem
+    if (!document.getElementById('divy-notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'divy-notification-styles';
+        style.textContent = `
+            @keyframes slideInNotification {
+                from { opacity: 0; transform: translateX(20px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            @keyframes slideOutNotification {
+                from { opacity: 1; transform: translateX(0); }
+                to { opacity: 0; transform: translateX(20px); }
+            }
+            .divy-notification .notification-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .divy-notification .notification-message {
+                line-height: 1.4;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(notification);
+
+    // Remover após 3 segundos
     setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateY(-20px)';
+        notification.style.animation = 'slideOutNotification 0.3s ease forwards';
+        setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
 

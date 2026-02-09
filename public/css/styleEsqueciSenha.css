@@ -1,7 +1,7 @@
 @charset "utf-8";
 
 /* ============================================
-   NURA.IA - ESQUECI MINHA SENHA
+   DIVY - ESQUECI MINHA SENHA
    Design baseado na tela de login
    ============================================ */
 
@@ -13,23 +13,23 @@
 }
 
 :root {
-  --nura-primary: #3d7a7a;
-  --nura-primary-light: #4a9494;
-  --nura-primary-dark: #2d5c5c;
-  --nura-accent: #5cb88f;
-  --nura-bg-gradient-start: #1a4f4f;
-  --nura-bg-gradient-end: #6bc492;
+  --nura-primary: #2563eb;
+  --nura-primary-light: #3b82f6;
+  --nura-primary-dark: #1d4ed8;
+  --nura-accent: #60a5fa;
+  --nura-bg-gradient-start: #0f172a;
+  --nura-bg-gradient-end: #1e40af;
   --text-primary: #1a2b3c;
   --text-secondary: #5a6a7a;
   --text-muted: #8a96a3;
   --surface: #ffffff;
   --surface-hover: #f8fafb;
   --border: #e2e8f0;
-  --border-focus: #3d7a7a;
+  --border-focus: #2563eb;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.2);
-  --shadow-primary: 0 4px 20px rgba(61, 122, 122, 0.25);
+  --shadow-primary: 0 4px 20px rgba(37, 99, 235, 0.25);
   --radius: 12px;
   --radius-lg: 20px;
 }
@@ -55,8 +55,8 @@ body::before {
   top: -75%;
   left: -75%;
   background:
-    radial-gradient(circle at 30% 30%, rgba(92, 184, 143, 0.25) 0%, transparent 40%),
-    radial-gradient(circle at 70% 70%, rgba(61, 122, 122, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 30% 30%, rgba(96, 165, 250, 0.25) 0%, transparent 40%),
+    radial-gradient(circle at 70% 70%, rgba(37, 99, 235, 0.2) 0%, transparent 40%),
     radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
   animation: floatBg 20s ease-in-out infinite;
   pointer-events: none;
