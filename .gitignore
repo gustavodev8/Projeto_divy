@@ -33,3 +33,4 @@ build/
 *.exe
 ngrok.exe
 ngrok.zip
+nul
