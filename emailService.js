@@ -13,6 +13,10 @@ const EMAIL_NAME = process.env.EMAIL_NAME || process.env.SENDGRID_FROM_NAME || '
 // Configuração Gmail (Nodemailer)
 const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
+const dns = require('dns');
+
+// Forçar DNS a usar apenas IPv4
+dns.setDefaultResultOrder('ipv4first');
 
 // Criar transporter do Gmail
 let gmailTransporter = null;
@@ -20,21 +24,23 @@ if (GMAIL_USER && GMAIL_APP_PASSWORD) {
     gmailTransporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
-        secure: false, // STARTTLS
-        family: 4, // Forçar IPv4 (resolve problema em hosts como Render)
+        secure: false,
         requireTLS: true,
         auth: {
             user: GMAIL_USER,
             pass: GMAIL_APP_PASSWORD
         },
         tls: {
-            rejectUnauthorized: false,
-            minVersion: 'TLSv1.2'
+            rejectUnauthorized: false
         },
-        // Pool de conexões para melhor performance
-        pool: true,
-        maxConnections: 5,
-        maxMessages: 100
+        // Configurações de conexão
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
+        // Forçar IPv4 via opções de socket
+        dnsOptions: {
+            family: 4
+        }
     });
 
     // Verificar conexão ao iniciar
