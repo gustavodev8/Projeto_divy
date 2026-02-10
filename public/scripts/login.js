@@ -166,45 +166,38 @@ function initGoogleSignIn() {
     console.log('🔑 Inicializando Google Sign-In...');
 
     try {
-        // Usar diretamente o OAuth2 Token Client (mais confiável)
         const googleBtn = document.getElementById('google-signin-btn');
 
         if (googleBtn) {
-            const tokenClient = google.accounts.oauth2.initTokenClient({
+            // Usar o método de One Tap / ID Token (mais confiável que popup OAuth2)
+            google.accounts.id.initialize({
                 client_id: clientId,
-                scope: 'email profile',
-                callback: async (response) => {
-                    if (response.access_token) {
-                        console.log('✅ Token recebido, buscando info do usuário...');
-                        try {
-                            const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                                headers: { Authorization: `Bearer ${response.access_token}` }
-                            }).then(r => r.json());
-
-                            await handleGoogleUserInfo(userInfo);
-                        } catch (err) {
-                            console.error('❌ Erro ao buscar info:', err);
-                            showMessage('Erro ao obter dados do Google', 'error');
-                        }
-                    }
-                    googleBtn.classList.remove('loading');
-                },
-                error_callback: (error) => {
-                    console.error('❌ Erro Google OAuth:', error);
-                    console.error('Detalhes:', JSON.stringify(error, null, 2));
-                    if (error.type === 'popup_closed') {
-                        showMessage('Popup fechado. Verifique se bloqueadores estão desativados.', 'error');
-                    } else {
-                        showMessage('Erro na autenticação Google: ' + (error.message || error.type), 'error');
-                    }
-                    googleBtn.classList.remove('loading');
-                }
+                callback: handleGoogleCredentialResponse,
+                auto_select: false,
+                cancel_on_tap_outside: true
             });
 
+            // Ao clicar no botão, mostrar o prompt do Google
             googleBtn.addEventListener('click', () => {
-                console.log('📱 Abrindo popup do Google...');
+                console.log('📱 Abrindo Google Sign-In...');
                 googleBtn.classList.add('loading');
-                tokenClient.requestAccessToken();
+
+                // Tentar One Tap primeiro
+                google.accounts.id.prompt((notification) => {
+                    console.log('📋 Google prompt notification:', notification);
+
+                    if (notification.isNotDisplayed()) {
+                        console.log('⚠️ One Tap não exibido, usando método alternativo...');
+                        // Fallback: usar OAuth2 com redirect
+                        useOAuth2Redirect(clientId);
+                    } else if (notification.isSkippedMoment()) {
+                        console.log('⚠️ Usuário pulou o One Tap');
+                        googleBtn.classList.remove('loading');
+                    } else if (notification.isDismissedMoment()) {
+                        console.log('⚠️ One Tap foi fechado');
+                        googleBtn.classList.remove('loading');
+                    }
+                });
             });
         }
 
@@ -213,6 +206,59 @@ function initGoogleSignIn() {
     } catch (error) {
         console.error('❌ Erro ao inicializar Google Sign-In:', error);
     }
+}
+
+// Callback para resposta do Google ID Token
+async function handleGoogleCredentialResponse(response) {
+    console.log('✅ Credential response recebido');
+    const googleBtn = document.getElementById('google-signin-btn');
+
+    try {
+        // Enviar o credential (JWT) para o backend
+        const res = await fetch(`${API_URL}/v1/auth/google`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                credential: response.credential
+            })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            handleGoogleSuccess(data);
+        } else {
+            showMessage(data.error || 'Erro ao fazer login com Google', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Erro no login Google:', error);
+        showMessage('Erro de conexão. Tente novamente.', 'error');
+    } finally {
+        if (googleBtn) googleBtn.classList.remove('loading');
+    }
+}
+
+// Fallback: OAuth2 com redirect (mais confiável que popup)
+function useOAuth2Redirect(clientId) {
+    const redirectUri = window.location.origin + '/auth/google/callback';
+    const scope = 'email profile';
+    const state = Math.random().toString(36).substring(7);
+
+    // Salvar state para verificação
+    sessionStorage.setItem('google_oauth_state', state);
+
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${encodeURIComponent(clientId)}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&response_type=token` +
+        `&scope=${encodeURIComponent(scope)}` +
+        `&state=${state}` +
+        `&prompt=select_account`;
+
+    console.log('🔄 Redirecionando para Google OAuth...');
+    window.location.href = authUrl;
 }
 
 // Login com informações do Google

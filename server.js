@@ -818,6 +818,112 @@ app.get('/Tela_TesteEmail.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/html/Tela_TesteEmail.html'));
 });
 
+// Google OAuth Callback (para redirect flow)
+app.get('/auth/google/callback', (req, res) => {
+    // Esta página processa o token do Google OAuth redirect
+    res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Autenticando...</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+        }
+        .loader {
+            text-align: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: #4285F4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader">
+        <div class="spinner"></div>
+        <p>Autenticando com Google...</p>
+    </div>
+    <script>
+        // Pegar o access_token do hash da URL
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get('access_token');
+        const state = params.get('state');
+
+        if (accessToken) {
+            // Buscar info do usuário
+            fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: 'Bearer ' + accessToken }
+            })
+            .then(r => r.json())
+            .then(userInfo => {
+                // Enviar para o backend
+                return fetch('/v1/auth/google-userinfo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: userInfo.email,
+                        name: userInfo.name,
+                        picture: userInfo.picture,
+                        sub: userInfo.sub
+                    })
+                });
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    // Salvar dados no localStorage
+                    const userData = data.data?.user || data.user;
+                    const accessToken = data.data?.accessToken || data.accessToken;
+                    const refreshToken = data.data?.refreshToken || data.refreshToken;
+
+                    if (userData) {
+                        localStorage.setItem('nura_user', JSON.stringify(userData));
+                    }
+                    localStorage.setItem('nura_logged_in', 'true');
+                    if (accessToken) {
+                        localStorage.setItem('nura_access_token', accessToken);
+                        localStorage.setItem('nura_refresh_token', refreshToken);
+                    }
+
+                    // Redirecionar para a página inicial
+                    window.location.href = '/inicial';
+                } else {
+                    alert('Erro: ' + (data.error || 'Falha na autenticação'));
+                    window.location.href = '/login';
+                }
+            })
+            .catch(err => {
+                console.error('Erro:', err);
+                alert('Erro na autenticação');
+                window.location.href = '/login';
+            });
+        } else {
+            alert('Token não recebido');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>
+    `);
+});
+
 // ===== API - GERENCIAMENTO DE TAREFAS =====
 
 // GET - Listar todas as tarefas do usuário
