@@ -8,7 +8,10 @@
       "Bash(findstr:*)",
       "Bash(node -e:*)",
       "Bash(powershell -Command \"\\(Get-Content ''Tela_EsqueciSenha.html''\\) -replace ''Nura'', ''Divy'' | Set-Content ''Tela_EsqueciSenha.html''\")",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
