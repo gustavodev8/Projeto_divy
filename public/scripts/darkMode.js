@@ -97,7 +97,7 @@
         applyDarkMode(newState);
         
         // Animar botão
-        const navbarToggle = document.querySelector('.navbar #darkModeToggle');
+        const navbarToggle = document.getElementById('darkModeToggle');
         if (navbarToggle) {
             navbarToggle.style.transform = 'rotate(360deg)';
             setTimeout(() => {
@@ -142,8 +142,8 @@
         const isDark = await loadDarkModeFromDatabase();
         applyDarkMode(isDark);
         
-        // Event listener APENAS no botão da NAVBAR
-        const navbarToggle = document.querySelector('.navbar #darkModeToggle');
+        // Event listener no botão de dark mode
+        const navbarToggle = document.getElementById('darkModeToggle');
         if (navbarToggle) {
             // Remover listeners antigos
             const newToggle = navbarToggle.cloneNode(true);
