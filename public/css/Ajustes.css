@@ -26,16 +26,16 @@
     --settings-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 
-/* Dark mode */
+/* Dark mode - Cores iguais à Tela Inicial (azul escuro) */
 .dark-mode {
-    --settings-background: hsl(0, 0%, 8%);
-    --settings-foreground: hsl(0, 0%, 98%);
-    --settings-card: hsl(0, 0%, 10%);
-    --settings-border: hsl(0, 0%, 18%);
-    --settings-muted: hsl(0, 0%, 14%);
-    --settings-muted-foreground: hsl(0, 0%, 55%);
-    --settings-primary: hsl(0, 0%, 98%);
-    --settings-primary-foreground: hsl(0, 0%, 8%);
+    --settings-background: #020617;        /* bg-app da tela inicial */
+    --settings-foreground: #f1f5f9;        /* text-strong */
+    --settings-card: #0f172a;              /* surface-main */
+    --settings-border: #334155;            /* border-subtle */
+    --settings-muted: #1e293b;             /* surface-secondary */
+    --settings-muted-foreground: #94a3b8;  /* text-muted */
+    --settings-primary: #2563eb;           /* nura-primary */
+    --settings-primary-foreground: #ffffff;
 }
 
 /* ===== RESET ===== */
@@ -250,13 +250,13 @@ body {
     transform: scale(0.95);
 }
 
-/* Dark mode ajuste */
+/* Dark mode ajuste - Cores azuis iguais à tela inicial */
 .dark-mode .slider {
-    background-color: hsl(0, 0%, 22%);
+    background-color: #334155;  /* border-subtle */
 }
 
 .dark-mode .switch input:checked + .slider {
-    background-color: #0B6E4F;
+    background-color: #2563eb;  /* nura-primary */
 }
 
 /* ===== SELECT MINIMALISTA ===== */
@@ -353,7 +353,7 @@ body {
 }
 
 .dark-mode .btn-signout:hover {
-    background: hsl(0, 84%, 16%);
+    background: rgba(239, 68, 68, 0.15);  /* vermelho suave com transparência */
 }
 
 .btn-signout svg {
@@ -991,7 +991,7 @@ body {
 }
 
 .dark-mode .logout-modal-icon {
-    background: hsl(0, 84%, 12%);
+    background: rgba(239, 68, 68, 0.15);  /* vermelho suave com transparência */
 }
 
 .logout-modal-title {
@@ -1394,7 +1394,7 @@ body {
 }
 
 .dark-mode .btn-unlink-whatsapp:hover {
-    background: hsl(0, 84%, 12%);
+    background: rgba(239, 68, 68, 0.15);  /* vermelho suave com transparência */
 }
 
 .btn-unlink-whatsapp svg {
