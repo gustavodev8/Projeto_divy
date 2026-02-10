@@ -1,66 +1,48 @@
-// ===== SERVIÇO DE ENVIO DE EMAILS =====
-const sgMail = require('@sendgrid/mail');
-const nodemailer = require('nodemailer');
+// ===== SERVIÇO DE ENVIO DE EMAILS (RESEND) =====
 const db = require('./database');
 
-// Configurar SendGrid com a API Key
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// Configuração Resend (API HTTP - funciona no Render, grátis para sempre)
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const EMAIL_FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+const EMAIL_NAME = process.env.EMAIL_NAME || 'DIVY - Sistema de Tarefas';
 
-// Aceitar EMAIL_FROM ou SENDGRID_FROM_EMAIL
-const EMAIL_FROM = process.env.EMAIL_FROM || process.env.SENDGRID_FROM_EMAIL;
-const EMAIL_NAME = process.env.EMAIL_NAME || process.env.SENDGRID_FROM_NAME || 'NURA - Sistema de Tarefas';
+// Função para enviar email via Resend
+async function sendEmail(to, subject, html, text) {
+    if (!RESEND_API_KEY) {
+        throw new Error('RESEND_API_KEY não configurada');
+    }
 
-// Configuração Gmail (Nodemailer)
-const GMAIL_USER = process.env.GMAIL_USER;
-const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
-const dns = require('dns');
-
-// Forçar DNS a usar apenas IPv4
-dns.setDefaultResultOrder('ipv4first');
-
-// Criar transporter do Gmail
-let gmailTransporter = null;
-if (GMAIL_USER && GMAIL_APP_PASSWORD) {
-    gmailTransporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
-        auth: {
-            user: GMAIL_USER,
-            pass: GMAIL_APP_PASSWORD
+    const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json'
         },
-        tls: {
-            rejectUnauthorized: false
-        },
-        // Configurações de conexão
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 10000,
-        // Forçar IPv4 via opções de socket
-        dnsOptions: {
-            family: 4
-        }
+        body: JSON.stringify({
+            from: `${EMAIL_NAME} <${EMAIL_FROM}>`,
+            to: [to],
+            subject: subject,
+            html: html,
+            text: text
+        })
     });
 
-    // Verificar conexão ao iniciar
-    gmailTransporter.verify(function(error, success) {
-        if (error) {
-            console.log('❌ Erro na conexão Gmail SMTP:', error.message);
-        } else {
-            console.log('✅ Gmail SMTP pronto para enviar emails');
-        }
-    });
+    const data = await response.json();
+
+    if (!response.ok) {
+        console.error('❌ Erro Resend:', data);
+        throw new Error(data.message || 'Erro ao enviar email via Resend');
+    }
+
+    return { success: true, id: data.id };
 }
 
 // Debug: mostrar configurações ao iniciar
-console.log('📧 ===== CONFIGURAÇÃO DE EMAIL =====');
-console.log(`   SENDGRID_API_KEY: ${process.env.SENDGRID_API_KEY ? '✅ Configurada' : '❌ NÃO configurada'}`);
-console.log(`   EMAIL_FROM: ${EMAIL_FROM || '❌ NÃO CONFIGURADO'}`);
+console.log('📧 ===== CONFIGURAÇÃO DE EMAIL (RESEND) =====');
+console.log(`   RESEND_API_KEY: ${RESEND_API_KEY ? '✅ Configurada' : '❌ NÃO configurada'}`);
+console.log(`   EMAIL_FROM: ${EMAIL_FROM}`);
 console.log(`   EMAIL_NAME: ${EMAIL_NAME}`);
-console.log(`   GMAIL_USER: ${GMAIL_USER ? '✅ ' + GMAIL_USER : '❌ NÃO configurado'}`);
-console.log(`   GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD ? '✅ Configurada' : '❌ NÃO configurada'}`);
-console.log('=====================================');
+console.log('=============================================');
 
 /**
  * Envia resumo diário para um usuário específico
@@ -765,40 +747,17 @@ Se você não solicitou este código, ignore este e-mail.
 Nura - Seu assistente de produtividade
         `.trim();
 
-        // Tentar enviar via Gmail primeiro (se configurado), senão SendGrid
-        if (gmailTransporter) {
-            // Usar Gmail (Nodemailer)
-            console.log('📧 Usando Gmail para enviar...');
+        // Enviar via SendGrid (API HTTP - funciona no Render)
+        console.log('📧 Usando Resend para enviar...');
 
-            const mailOptions = {
-                from: `"${EMAIL_NAME}" <${GMAIL_USER}>`,
-                to: email,
-                subject: `🔐 Código de verificação Nura: ${codigo}`,
-                text: textContent,
-                html: htmlContent
-            };
+        await sendEmail(
+            email,
+            `Código de verificação DIVY: ${codigo}`,
+            htmlContent,
+            textContent
+        );
 
-            await gmailTransporter.sendMail(mailOptions);
-            console.log(`✅ Código de verificação enviado via Gmail para ${email}`);
-
-        } else {
-            // Usar SendGrid
-            console.log('📧 Usando SendGrid para enviar...');
-
-            const msg = {
-                to: email,
-                from: {
-                    email: EMAIL_FROM,
-                    name: EMAIL_NAME
-                },
-                subject: `🔐 Código de verificação Nura: ${codigo}`,
-                text: textContent,
-                html: htmlContent
-            };
-
-            await sgMail.send(msg);
-            console.log(`✅ Código de verificação enviado via SendGrid para ${email}`);
-        }
+        console.log(`✅ Código de verificação enviado via Resend para ${email}`);
 
         return {
             success: true,
@@ -1003,38 +962,17 @@ Se você não solicitou a redefinição de senha, ignore este e-mail.
 Nura - Seu assistente de produtividade
         `.trim();
 
-        // Tentar enviar via Gmail primeiro (se configurado), senão SendGrid
-        if (gmailTransporter) {
-            console.log('📧 Usando Gmail para enviar...');
+        // Enviar via SendGrid (API HTTP - funciona no Render)
+        console.log('📧 Usando Resend para enviar...');
 
-            const mailOptions = {
-                from: `"${EMAIL_NAME}" <${GMAIL_USER}>`,
-                to: email,
-                subject: `🔑 Código de recuperação Nura: ${codigo}`,
-                text: textContent,
-                html: htmlContent
-            };
+        await sendEmail(
+            email,
+            `Código de recuperação DIVY: ${codigo}`,
+            htmlContent,
+            textContent
+        );
 
-            await gmailTransporter.sendMail(mailOptions);
-            console.log(`✅ Código de recuperação enviado via Gmail para ${email}`);
-
-        } else {
-            console.log('📧 Usando SendGrid para enviar...');
-
-            const msg = {
-                to: email,
-                from: {
-                    email: EMAIL_FROM,
-                    name: EMAIL_NAME
-                },
-                subject: `🔑 Código de recuperação Nura: ${codigo}`,
-                text: textContent,
-                html: htmlContent
-            };
-
-            await sgMail.send(msg);
-            console.log(`✅ Código de recuperação enviado via SendGrid para ${email}`);
-        }
+        console.log(`✅ Código de recuperação enviado via Resend para ${email}`);
 
         return {
             success: true,
