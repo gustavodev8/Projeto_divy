@@ -459,8 +459,10 @@ footer a:hover strong::after {
 /* Mobile (até 480px) */
 @media (max-width: 480px) {
   body {
-    padding: 16px;
+    padding: 12px;
     min-height: 100dvh;
+    align-items: flex-start;
+    padding-top: 5vh;
   }
 
   main {
@@ -470,60 +472,92 @@ footer a:hover strong::after {
   }
 
   section#logins {
-    border-radius: 16px;
+    border-radius: 20px;
     width: 100%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
   }
 
   div#imagem {
-    height: 100px;
+    height: 90px;
+    border-radius: 20px 20px 0 0;
   }
 
   div#imagem::after {
-    font-size: 28px;
-    letter-spacing: 4px;
+    font-size: 26px;
+    letter-spacing: 5px;
+  }
+
+  .logo-icon {
+    left: 20px;
+    font-size: 20px;
   }
 
   div#text {
-    padding: 24px 20px 18px;
+    padding: 28px 24px 20px;
   }
 
   div#text h1 {
     font-size: 22px;
+    margin-bottom: 4px;
   }
 
   div#text > p.subtitle {
-    font-size: 13px;
+    font-size: 14px;
     margin-bottom: 24px;
+    color: var(--text-secondary);
   }
 
   form {
-    gap: 16px;
+    gap: 18px;
+  }
+
+  .label-text {
+    font-size: 14px;
   }
 
   footer {
-    padding: 16px 20px 20px;
+    padding: 20px 24px 24px;
   }
 
-  footer p,
+  footer p {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
   footer a {
-    font-size: 13px;
+    font-size: 15px;
   }
 
   input[type="text"],
   input[type="password"] {
-    padding: 12px 12px 12px 40px;
+    padding: 14px 14px 14px 44px;
     font-size: 16px; /* Previne zoom no iOS */
+    border-radius: var(--radius);
   }
 
   input#ienviar {
-    padding: 14px 20px;
-    min-height: 48px;
+    padding: 16px 20px;
+    min-height: 52px;
+    font-size: 16px;
+    border-radius: var(--radius);
   }
 
   .toggle-password {
     padding: 8px;
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* OAuth buttons mobile */
+  .divider {
+    margin: 24px 0;
+  }
+
+  .oauth-btn {
+    padding: 14px 16px;
+    font-size: 15px;
+    min-height: 52px;
+    border-radius: var(--radius);
   }
 }
 

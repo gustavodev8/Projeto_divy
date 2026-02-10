@@ -493,9 +493,9 @@ footer a:hover strong::after {
 /* Mobile */
 @media (max-width: 480px) {
   body {
-    padding: 16px 12px;
+    padding: 12px;
     align-items: flex-start;
-    padding-top: 32px;
+    padding-top: 5vh;
   }
 
   main {
@@ -504,86 +504,97 @@ footer a:hover strong::after {
   }
 
   section#logins {
-    border-radius: 16px;
+    border-radius: 20px;
     width: 100%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
   }
 
   div#imagem {
-    height: 80px;
+    height: 90px;
+    border-radius: 20px 20px 0 0;
   }
 
   div#imagem::after {
     font-size: 26px;
-    letter-spacing: 4px;
+    letter-spacing: 5px;
   }
 
   div#text {
-    padding: 20px 20px 16px;
+    padding: 28px 24px 20px;
   }
 
   div#text h1 {
     font-size: 22px;
+    margin-bottom: 4px;
   }
 
   div#text > p.subtitle {
-    font-size: 13px;
-    margin-bottom: 20px;
+    font-size: 14px;
+    margin-bottom: 24px;
+    color: var(--text-secondary);
   }
 
   form {
-    gap: 14px;
+    gap: 18px;
   }
 
   form > p label {
-    font-size: 12px;
-    margin-bottom: 6px;
+    font-size: 14px;
+    margin-bottom: 8px;
   }
 
   input[type="text"],
   input[type="email"],
   input[type="password"] {
-    padding: 12px 14px;
+    padding: 14px 16px;
     font-size: 16px; /* Previne zoom no iOS */
-    border-radius: 10px;
+    border-radius: var(--radius);
   }
 
   input#ienviar {
-    padding: 14px 20px;
-    font-size: 15px;
-    min-height: 48px;
+    padding: 16px 20px;
+    font-size: 16px;
+    min-height: 52px;
+    border-radius: var(--radius);
   }
 
   .terms-text {
-    font-size: 10px;
-    margin-top: 12px;
+    font-size: 11px;
+    margin-top: 16px;
   }
 
   .divider {
-    margin: 16px 0;
+    margin: 24px 0;
   }
 
   .divider span {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .oauth-btn {
-    padding: 12px 14px;
-    font-size: 14px;
-    gap: 10px;
+    padding: 14px 16px;
+    font-size: 15px;
+    gap: 12px;
+    min-height: 52px;
+    border-radius: var(--radius);
   }
 
   .oauth-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
 
   footer {
-    padding: 14px 20px 20px;
+    padding: 20px 24px 24px;
   }
 
-  footer p,
+  footer p {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
   footer a {
-    font-size: 13px;
+    font-size: 15px;
   }
 }
 
