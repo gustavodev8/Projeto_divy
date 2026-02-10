@@ -19,16 +19,30 @@ let gmailTransporter = null;
 if (GMAIL_USER && GMAIL_APP_PASSWORD) {
     gmailTransporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
+        port: 587,
+        secure: false, // STARTTLS
         family: 4, // Forçar IPv4 (resolve problema em hosts como Render)
+        requireTLS: true,
         auth: {
             user: GMAIL_USER,
             pass: GMAIL_APP_PASSWORD
         },
-        // Configurações adicionais para maior compatibilidade
         tls: {
-            rejectUnauthorized: false
+            rejectUnauthorized: false,
+            minVersion: 'TLSv1.2'
+        },
+        // Pool de conexões para melhor performance
+        pool: true,
+        maxConnections: 5,
+        maxMessages: 100
+    });
+
+    // Verificar conexão ao iniciar
+    gmailTransporter.verify(function(error, success) {
+        if (error) {
+            console.log('❌ Erro na conexão Gmail SMTP:', error.message);
+        } else {
+            console.log('✅ Gmail SMTP pronto para enviar emails');
         }
     });
 }
