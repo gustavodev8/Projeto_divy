@@ -133,7 +133,7 @@ body {
 .sidebar {
   width: var(--sidebar-width);
   height: 100vh;
-  background: #0f1729;
+  background: #0a0e1a;
   border-right: none;
   display: flex;
   flex-direction: column;
@@ -189,10 +189,9 @@ body {
 
 /* ===== LOGO IMAGEM ===== */
 .brand-logo-img {
-  height: 32px;
+  height: 42px;
   width: auto;
   object-fit: contain;
-  border-radius: 4px;
 }
 
 /* ===== USER PROFILE ===== */
