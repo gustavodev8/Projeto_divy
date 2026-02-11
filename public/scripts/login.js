@@ -57,6 +57,15 @@ async function login(event) {
 
         } else {
             console.error('❌ Erro no login:', data.error);
+
+            // Verificar se é conta Google que precisa definir senha
+            if (data.code === 'NEEDS_PASSWORD') {
+                showSetPasswordModal(data.email);
+                submitButton.disabled = false;
+                submitButton.value = originalValue;
+                return;
+            }
+
             showMessage(data.error || 'Usuário ou senha incorretos', 'error');
             submitButton.disabled = false;
             submitButton.value = originalValue;
@@ -329,3 +338,211 @@ function handleGoogleSuccess(data) {
 }
 
 console.log('✅ login.js carregado!');
+
+// ===== MODAL PARA DEFINIR SENHA EM CONTA GOOGLE =====
+function showSetPasswordModal(email) {
+    // Remover modal existente se houver
+    const existingModal = document.getElementById('set-password-modal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'set-password-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeSetPasswordModal()"></div>
+        <div class="modal-content">
+            <h2>Definir Senha</h2>
+            <p>Sua conta foi criada com Google. Para fazer login também com email e senha, defina uma senha abaixo:</p>
+            <form id="set-password-form">
+                <input type="hidden" id="set-password-email" value="${email}">
+                <div class="form-group">
+                    <label>Nova Senha</label>
+                    <input type="password" id="set-password-new" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirmar Senha</label>
+                    <input type="password" id="set-password-confirm" placeholder="Repita a senha" required>
+                </div>
+                <div id="set-password-error" style="color: #f44336; margin-bottom: 10px; display: none;"></div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-secondary" onclick="closeSetPasswordModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Definir Senha</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    // Estilos do modal
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+
+    const style = document.createElement('style');
+    style.textContent = `
+        #set-password-modal .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+        #set-password-modal .modal-content {
+            position: relative;
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            color: #fff;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        #set-password-modal h2 {
+            margin: 0 0 10px 0;
+            color: #fff;
+        }
+        #set-password-modal p {
+            margin: 0 0 20px 0;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        #set-password-modal .form-group {
+            margin-bottom: 15px;
+        }
+        #set-password-modal label {
+            display: block;
+            margin-bottom: 5px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        #set-password-modal input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #fff;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        #set-password-modal input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        #set-password-modal .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        #set-password-modal .btn-primary {
+            flex: 1;
+            padding: 12px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        #set-password-modal .btn-primary:hover {
+            background: #2563eb;
+        }
+        #set-password-modal .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #set-password-modal .btn-secondary:hover {
+            background: #1e293b;
+        }
+    `;
+    document.head.appendChild(style);
+    document.body.appendChild(modal);
+
+    // Event listener do formulário
+    document.getElementById('set-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await submitSetPassword();
+    });
+}
+
+function closeSetPasswordModal() {
+    const modal = document.getElementById('set-password-modal');
+    if (modal) modal.remove();
+}
+
+async function submitSetPassword() {
+    const email = document.getElementById('set-password-email').value;
+    const newPassword = document.getElementById('set-password-new').value;
+    const confirmPassword = document.getElementById('set-password-confirm').value;
+    const errorDiv = document.getElementById('set-password-error');
+
+    // Validações
+    if (newPassword.length < 6) {
+        errorDiv.textContent = 'Senha deve ter pelo menos 6 caracteres';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        errorDiv.textContent = 'As senhas não coincidem';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    errorDiv.style.display = 'none';
+
+    try {
+        const response = await fetch(`${API_URL}/v1/auth/set-password-google`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: newPassword
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            closeSetPasswordModal();
+
+            // Salvar dados do login
+            if (data.data?.user) {
+                localStorage.setItem('nura_user', JSON.stringify(data.data.user));
+            }
+            localStorage.setItem('nura_logged_in', 'true');
+            if (data.data?.accessToken) {
+                localStorage.setItem('nura_access_token', data.data.accessToken);
+                localStorage.setItem('nura_refresh_token', data.data.refreshToken);
+            }
+
+            showMessage('Senha definida com sucesso! Redirecionando...', 'success');
+            setTimeout(() => {
+                window.location.href = '/inicial';
+            }, 1000);
+        } else {
+            errorDiv.textContent = data.error || 'Erro ao definir senha';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        errorDiv.textContent = 'Erro de conexão. Tente novamente.';
+        errorDiv.style.display = 'block';
+    }
+}

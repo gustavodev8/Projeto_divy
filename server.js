@@ -2399,11 +2399,13 @@ app.post("/api/login", async (req, res) => {
 
         // ✅ VERIFICAR SE É CONTA DO GOOGLE (sem senha definida)
         if (!user.stored_password && user.google_id) {
-            console.log('⚠️ Tentativa de login com senha em conta do Google:', loginIdentifier);
+            console.log('⚠️ Conta Google sem senha, solicitando definição:', loginIdentifier);
             return res.status(400).json({
                 success: false,
-                error: "Esta conta foi criada com Google. Por favor, faça login usando o botão 'Entrar com Google'.",
-                code: "GOOGLE_ACCOUNT"
+                error: "Sua conta foi criada com Google e ainda não possui senha. Deseja definir uma senha para acessar também com email/senha?",
+                code: "NEEDS_PASSWORD",
+                userId: user.id,
+                email: user.email
             });
         }
 

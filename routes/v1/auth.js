@@ -1103,5 +1103,69 @@ module.exports = function(db, isPostgres) {
         }
     });
 
+    // ===== DEFINIR SENHA PARA CONTA GOOGLE =====
+    router.post('/set-password-google', async (req, res) => {
+        try {
+            const { email, password } = req.body;
+
+            if (!email || !password) {
+                return badRequest(res, 'Email e senha são obrigatórios', 'MISSING_FIELDS');
+            }
+
+            if (password.length < 6) {
+                return badRequest(res, 'Senha deve ter pelo menos 6 caracteres', 'INVALID_PASSWORD');
+            }
+
+            // Verificar se usuário existe e é conta Google
+            let user;
+            if (isPostgres) {
+                const result = await db.query('SELECT id, email, password, google_id FROM users WHERE email = $1', [email]);
+                user = result[0];
+            } else {
+                user = db.prepare('SELECT id, email, password, google_id FROM users WHERE email = ?').get(email);
+            }
+
+            if (!user) {
+                return badRequest(res, 'Usuário não encontrado', 'USER_NOT_FOUND');
+            }
+
+            if (!user.google_id) {
+                return badRequest(res, 'Esta funcionalidade é apenas para contas criadas com Google', 'NOT_GOOGLE_ACCOUNT');
+            }
+
+            if (user.password) {
+                return badRequest(res, 'Esta conta já possui senha definida', 'PASSWORD_ALREADY_SET');
+            }
+
+            // Hash da nova senha
+            const hashedPassword = await hashPassword(password);
+
+            // Atualizar senha do usuário
+            if (isPostgres) {
+                await db.query('UPDATE users SET password = $1 WHERE id = $2', [hashedPassword, user.id]);
+            } else {
+                db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, user.id);
+            }
+
+            console.log(`✅ Senha definida para conta Google: ${email}`);
+
+            // Gerar tokens para login automático
+            const tokens = generateTokens(user);
+
+            return success(res, {
+                user: {
+                    id: user.id,
+                    email: user.email
+                },
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken
+            }, 'Senha definida com sucesso! Agora você pode fazer login com email e senha.');
+
+        } catch (err) {
+            console.error('❌ Erro ao definir senha:', err);
+            return error(res, 'Erro ao definir senha');
+        }
+    });
+
     return router;
 };
