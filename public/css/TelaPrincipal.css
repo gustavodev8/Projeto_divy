@@ -187,6 +187,14 @@ body {
   letter-spacing: -0.01em;
 }
 
+/* ===== LOGO IMAGEM ===== */
+.brand-logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
 /* ===== USER PROFILE ===== */
 .sidebar-user {
   display: flex;
