@@ -146,6 +146,7 @@ body {
 .sidebar-brand {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 10px;
   padding: 16px 16px 12px;
   border-bottom: none;
