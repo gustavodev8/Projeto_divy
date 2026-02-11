@@ -12,29 +12,41 @@ const API_URL = window.location.hostname === 'localhost'
 // ===== VARIÁVEIS GLOBAIS =====
 let tasks = [];
 
+// ===== ESCONDER SPLASH SCREEN =====
+// Executar imediatamente para garantir que funcione
+(function hideSplashScreen() {
+  const hide = () => {
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+      setTimeout(() => {
+        splash.classList.add('fade-out');
+        setTimeout(() => splash.remove(), 500);
+      }, 800);
+    }
+  };
+
+  // Tentar esconder quando DOM estiver pronto ou imediatamente se já estiver
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hide);
+  } else {
+    hide();
+  }
+
+  // Fallback: esconder após 3 segundos de qualquer forma
+  setTimeout(() => {
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+      splash.classList.add('fade-out');
+      setTimeout(() => splash.remove(), 500);
+    }
+  }, 3000);
+})();
+
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
   loadTasksFromDatabase();
   initializeElements();
-
-  // Esconder splash screen após carregar
-  hideSplashScreen();
 });
-
-// ===== ESCONDER SPLASH SCREEN =====
-function hideSplashScreen() {
-  const splash = document.getElementById('splash-screen');
-  if (splash) {
-    // Aguardar um tempo mínimo para mostrar a logo (800ms)
-    setTimeout(() => {
-      splash.classList.add('fade-out');
-      // Remover do DOM após a animação
-      setTimeout(() => {
-        splash.remove();
-      }, 500);
-    }, 800);
-  }
-}
 
 // ===== INICIALIZAR ELEMENTOS =====
 function initializeElements() {
