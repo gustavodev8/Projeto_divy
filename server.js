@@ -2375,7 +2375,7 @@ app.post("/api/login", async (req, res) => {
         if (db.isPostgres) {
             // ✅ PostgreSQL - buscar usuário primeiro (sem verificar senha na query)
             const result = await db.query(
-                `SELECT id, name AS username, email, password as stored_password FROM users
+                `SELECT id, name AS username, email, password as stored_password, google_id FROM users
                  WHERE name = $1 OR email = $1`,
                 [loginIdentifier]
             );
@@ -2383,7 +2383,7 @@ app.post("/api/login", async (req, res) => {
         } else {
             // ✅ SQLite - buscar usuário primeiro
             user = await db.get(
-                `SELECT id, name AS username, email, password as stored_password FROM users
+                `SELECT id, name AS username, email, password as stored_password, google_id FROM users
                  WHERE name = ? OR email = ?`,
                 [loginIdentifier, loginIdentifier]
             );
@@ -2394,6 +2394,16 @@ app.post("/api/login", async (req, res) => {
             return res.status(401).json({
                 success: false,
                 error: "Usuário ou senha incorretos"
+            });
+        }
+
+        // ✅ VERIFICAR SE É CONTA DO GOOGLE (sem senha definida)
+        if (!user.stored_password && user.google_id) {
+            console.log('⚠️ Tentativa de login com senha em conta do Google:', loginIdentifier);
+            return res.status(400).json({
+                success: false,
+                error: "Esta conta foi criada com Google. Por favor, faça login usando o botão 'Entrar com Google'.",
+                code: "GOOGLE_ACCOUNT"
             });
         }
 
