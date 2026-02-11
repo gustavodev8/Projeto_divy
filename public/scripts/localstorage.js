@@ -16,7 +16,25 @@ let tasks = [];
 document.addEventListener('DOMContentLoaded', function() {
   loadTasksFromDatabase();
   initializeElements();
+
+  // Esconder splash screen após carregar
+  hideSplashScreen();
 });
+
+// ===== ESCONDER SPLASH SCREEN =====
+function hideSplashScreen() {
+  const splash = document.getElementById('splash-screen');
+  if (splash) {
+    // Aguardar um tempo mínimo para mostrar a logo (800ms)
+    setTimeout(() => {
+      splash.classList.add('fade-out');
+      // Remover do DOM após a animação
+      setTimeout(() => {
+        splash.remove();
+      }, 500);
+    }, 800);
+  }
+}
 
 // ===== INICIALIZAR ELEMENTOS =====
 function initializeElements() {
