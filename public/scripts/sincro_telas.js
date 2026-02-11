@@ -121,8 +121,20 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             console.log('✅ Todos os scripts carregados com sucesso');
         }
+        // Esconder splash screen quando scripts carregarem
+        hideSplashScreen();
     }, 2000);
 });
+
+// ===== ESCONDER SPLASH SCREEN =====
+function hideSplashScreen() {
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+        splash.classList.add('fade-out');
+        setTimeout(() => splash.remove(), 500);
+        console.log('✅ Splash screen removida');
+    }
+}
 
 // ===== CARREGAR PLANO DO USUÁRIO NA SIDEBAR =====
 async function loadUserPlanBadge() {
