@@ -153,46 +153,30 @@ body {
 }
 
 .brand-logo {
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
-  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(145deg, #1a2744 0%, #0f1829 100%);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .brand-logo svg {
-  width: 16px;
-  height: 16px;
-  stroke: white;
-  stroke-width: 2.5;
-}
-
-.brand-logo img {
-  width: 18px;
-  height: 18px;
-}
-
-.logo-letter {
-  color: white;
-  font-weight: 700;
-  font-size: 0.875rem;
+  width: 22px;
+  height: 22px;
 }
 
 .brand-name {
-  font-weight: 600;
-  font-size: 1.25rem;
-  color: #ffffff;
-  letter-spacing: -0.01em;
-}
-
-/* ===== LOGO IMAGEM ===== */
-.brand-logo-img {
-  height: 42px;
-  width: auto;
-  object-fit: contain;
+  font-weight: 700;
+  font-size: 1.35rem;
+  background: linear-gradient(180deg, #22d3ee 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
 /* ===== USER PROFILE ===== */

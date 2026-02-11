@@ -47,7 +47,18 @@
     <aside class="sidebar" id="sidebar">
       <!-- Logo/Brand -->
       <div class="sidebar-brand">
-        <img src="../imgs/logo-texto-divy.jpeg" alt="Divy" class="brand-logo-img">
+        <div class="brand-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <defs>
+              <linearGradient id="logoGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#22d3ee"/>
+                <stop offset="100%" style="stop-color:#3b82f6"/>
+              </linearGradient>
+            </defs>
+            <path d="M10 2h4v6h6v4h-6v10h-4V12H4V8h6V2z" fill="url(#logoGradient)"/>
+          </svg>
+        </div>
+        <span class="brand-name">Divy</span>
 
         <!-- Botão fechar sidebar (mobile) -->
         <button class="btn-close-sidebar hide-desktop" id="btnCloseSidebar" aria-label="Fechar menu">
