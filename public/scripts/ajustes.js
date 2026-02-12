@@ -849,8 +849,16 @@ async function loadWhatsappStatus() {
         });
 
         const data = await response.json();
+        console.log('📱 Resposta status WhatsApp:', data);
 
-        if (data.success && data.data.linked) {
+        // Verificar se resposta é válida
+        if (!response.ok || !data.success) {
+            console.log('⚠️ WhatsApp status não disponível, mostrando estado não vinculado');
+            showWhatsappNotLinkedState();
+            return;
+        }
+
+        if (data.data && data.data.linked) {
             // WhatsApp vinculado
             showWhatsappLinkedState(data.data.phoneNumber);
         } else {
@@ -862,7 +870,8 @@ async function loadWhatsappStatus() {
 
     } catch (error) {
         console.error('❌ Erro ao carregar status WhatsApp:', error);
-        whatsappSection.style.display = 'none';
+        // Mostrar estado não vinculado em caso de erro
+        showWhatsappNotLinkedState();
     }
 }
 
