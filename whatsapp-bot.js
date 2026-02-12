@@ -17,32 +17,44 @@ setInterval(() => {
     }
 }, 10 * 60 * 1000);
 
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+
 async function connectToWhatsApp() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
-    
+
     sock = makeWASocket({
-        auth: state,
-        printQRInTerminal: true
+        auth: state
+        // printQRInTerminal removido (deprecado)
     });
 
     sock.ev.on('creds.update', saveCreds);
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
-        
+
         if (qr) {
             console.log('📱 Escaneie o QR Code com seu WhatsApp:');
             qrcode.generate(qr, { small: true });
+            reconnectAttempts = 0; // Reset ao receber QR
         }
 
         if (connection === 'close') {
-            const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-            console.log('❌ Conexão fechada. Reconectando:', shouldReconnect);
-            if (shouldReconnect) {
-                connectToWhatsApp();
+            const statusCode = lastDisconnect?.error?.output?.statusCode;
+            const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+
+            console.log(`❌ Conexão fechada. Status: ${statusCode}, Reconectando: ${shouldReconnect}`);
+
+            if (shouldReconnect && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                reconnectAttempts++;
+                console.log(`🔄 Tentativa de reconexão ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
+                setTimeout(() => connectToWhatsApp(), 5000); // Aguardar 5s antes de reconectar
+            } else if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+                console.log('⚠️ Máximo de tentativas atingido. Delete auth_info_baileys e escaneie o QR novamente.');
             }
         } else if (connection === 'open') {
             console.log('✅ WhatsApp conectado!');
+            reconnectAttempts = 0; // Reset ao conectar
         }
     });
 
