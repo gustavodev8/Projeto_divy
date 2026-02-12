@@ -839,6 +839,8 @@ async function loadWhatsappStatus() {
 
         // Buscar status de vinculação
         const token = localStorage.getItem('nura_access_token');
+        console.log('🔑 Token WhatsApp:', token ? 'encontrado' : 'NÃO ENCONTRADO');
+
         const response = await fetch(`${API_URL}/v1/whatsapp/status`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -914,6 +916,15 @@ async function requestWhatsappVerification() {
 
     try {
         const token = localStorage.getItem('nura_access_token');
+        console.log('🔑 Token para verificação:', token ? `${token.substring(0, 20)}...` : 'NÃO ENCONTRADO');
+
+        if (!token) {
+            showNotification('Sessão expirada. Faça login novamente.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = 'Vincular WhatsApp';
+            return;
+        }
+
         const response = await fetch(`${API_URL}/v1/whatsapp/request-verification`, {
             method: 'POST',
             headers: {
@@ -924,6 +935,14 @@ async function requestWhatsappVerification() {
         });
 
         const data = await response.json();
+        console.log('📱 Resposta WhatsApp:', data);
+
+        if (response.status === 401) {
+            showNotification('Sessão expirada. Faça login novamente.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = 'Vincular WhatsApp';
+            return;
+        }
 
         if (data.success) {
             whatsappVerificationPhone = phone;
