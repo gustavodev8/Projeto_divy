@@ -707,8 +707,9 @@ function confirmLogout() {
     localStorage.removeItem('nura_user');
     localStorage.removeItem('nura_dark_mode');
     localStorage.removeItem('nura_settings');
-    localStorage.removeItem('nura_token');
+    localStorage.removeItem('nura_access_token');
     localStorage.removeItem('nura_refresh_token');
+    localStorage.removeItem('nura_logged_in');
 
     // Redirecionar para login
     window.location.href = 'Tela_Login.html';
@@ -837,7 +838,7 @@ async function loadWhatsappStatus() {
         whatsappSection.style.display = '';
 
         // Buscar status de vinculação
-        const token = localStorage.getItem('nura_token');
+        const token = localStorage.getItem('nura_access_token');
         const response = await fetch(`${API_URL}/v1/whatsapp/status`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -912,7 +913,7 @@ async function requestWhatsappVerification() {
     btn.innerHTML = '<span class="loading-spinner"></span> Enviando...';
 
     try {
-        const token = localStorage.getItem('nura_token');
+        const token = localStorage.getItem('nura_access_token');
         const response = await fetch(`${API_URL}/v1/whatsapp/request-verification`, {
             method: 'POST',
             headers: {
@@ -963,7 +964,7 @@ async function verifyWhatsappCode() {
     btn.textContent = 'Verificando...';
 
     try {
-        const token = localStorage.getItem('nura_token');
+        const token = localStorage.getItem('nura_access_token');
         const response = await fetch(`${API_URL}/v1/whatsapp/verify-code`, {
             method: 'POST',
             headers: {
@@ -1010,7 +1011,7 @@ async function resendVerificationCode() {
     }
 
     try {
-        const token = localStorage.getItem('nura_token');
+        const token = localStorage.getItem('nura_access_token');
         const response = await fetch(`${API_URL}/v1/whatsapp/resend-code`, {
             method: 'POST',
             headers: {
@@ -1057,7 +1058,7 @@ async function unlinkWhatsapp() {
     }
 
     try {
-        const token = localStorage.getItem('nura_token');
+        const token = localStorage.getItem('nura_access_token');
         const response = await fetch(`${API_URL}/v1/whatsapp/unlink`, {
             method: 'DELETE',
             headers: {
