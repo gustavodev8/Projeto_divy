@@ -17,8 +17,11 @@ function toggleViewOptionsMenu() {
 
 function openViewOptionsMenu() {
     const menu = document.getElementById('viewOptionsMenu');
+    const btn = document.getElementById('btnMoreOptions');
+
     menu.classList.add('active');
-    
+    btn?.classList.add('active');
+
     // Criar overlay
     let overlay = document.getElementById('viewOptionsOverlay');
     if (!overlay) {
@@ -39,10 +42,12 @@ function openViewOptionsMenu() {
 function closeViewOptionsMenu() {
     const menu = document.getElementById('viewOptionsMenu');
     const overlay = document.getElementById('viewOptionsOverlay');
-    
+    const btn = document.getElementById('btnMoreOptions');
+
     menu.classList.remove('active');
+    btn?.classList.remove('active');
     if (overlay) overlay.classList.remove('active');
-    
+
     console.log('📋 Menu de opções fechado');
 }
 
