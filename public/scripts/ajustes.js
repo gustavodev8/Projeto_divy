@@ -955,7 +955,9 @@ async function requestWhatsappVerification() {
 
         if (data.success) {
             whatsappVerificationPhone = phone;
-            showWhatsappVerificationState(data.data.phoneNumber);
+            // Suporta ambos formatos: data.data.phoneNumber ou data.phoneNumber
+            const phoneNumber = data.data?.phoneNumber || data.phoneNumber;
+            showWhatsappVerificationState(phoneNumber);
             showNotification('Código enviado para seu WhatsApp', 'success');
         } else {
             showNotification(data.message || 'Erro ao enviar código', 'error');
