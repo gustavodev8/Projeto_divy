@@ -155,7 +155,12 @@ async function selectList(listId) {
     if (typeof updatePageTitle === 'function') {
         updatePageTitle();
     }
-    
+
+    // ✅ ATUALIZAR ESTATÍSTICAS (filtradas pela lista)
+    if (typeof atualizarEstatisticas === 'function') {
+        atualizarEstatisticas();
+    }
+
     console.log('✅ Lista selecionada:', listId);
 }
 

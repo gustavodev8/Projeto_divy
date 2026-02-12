@@ -1,6 +1,6 @@
 // ==========================================
 // SISTEMA DE ESTATÍSTICAS - NURA (Backend)
-// Versão: 2.2 - Sem logs excessivos
+// Versão: 3.0 - Filtro por lista
 // ==========================================
 
 // Usar variável global existente ou definir se não existir
@@ -16,7 +16,7 @@ function getCurrentUser() {
     try {
         const userStr = localStorage.getItem('nura_user');
         if (!userStr) return null;
-        
+
         const user = JSON.parse(userStr);
         return user && user.id ? user : null;
     } catch (error) {
@@ -31,18 +31,17 @@ function getCurrentUser() {
  */
 async function getTasks() {
     const currentUser = getCurrentUser();
-    
+
     if (!currentUser) {
         console.error('❌ Usuário não está logado!');
         return [];
     }
-    
+
     try {
         const response = await fetch(`${STATS_API_URL}/api/tasks?user_id=${currentUser.id}`);
         const data = await response.json();
-        
+
         if (data.success) {
-            // ✅ REMOVIDO: console.log desnecessário
             return data.tasks;
         } else {
             console.error('❌ Erro na API:', data.error);
@@ -55,58 +54,88 @@ async function getTasks() {
 }
 
 /**
+ * Filtra tarefas baseado no contexto atual (lista, filtro inteligente)
+ * @param {Array} tasks - Array de todas as tarefas
+ * @returns {Array} Array de tarefas filtradas
+ */
+function filterTasksByContext(tasks) {
+    // Se estiver no filtro "Todas as Tarefas", retorna todas
+    if (window.currentSmartFilter === 'all') {
+        return tasks;
+    }
+
+    // Se estiver em uma lista específica
+    if (window.currentListId) {
+        return tasks.filter(task => task.list_id === parseInt(window.currentListId));
+    }
+
+    // Se estiver em um filtro inteligente
+    if (window.currentSmartFilter) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const in7Days = new Date(today);
+        in7Days.setDate(in7Days.getDate() + 7);
+
+        switch(window.currentSmartFilter) {
+            case 'inbox':
+                return tasks.filter(task => !task.due_date || !task.list_id);
+            case 'today':
+                return tasks.filter(task => {
+                    if (!task.due_date) return false;
+                    const taskDate = new Date(task.due_date);
+                    taskDate.setHours(0, 0, 0, 0);
+                    return taskDate.getTime() === today.getTime();
+                });
+            case 'next7days':
+                return tasks.filter(task => {
+                    if (!task.due_date) return false;
+                    const taskDate = new Date(task.due_date);
+                    taskDate.setHours(0, 0, 0, 0);
+                    return taskDate >= today && taskDate <= in7Days;
+                });
+            default:
+                return tasks;
+        }
+    }
+
+    // Fallback: retorna todas
+    return tasks;
+}
+
+/**
  * Calcula todas as estatísticas das tarefas
  * @returns {Promise<Object>} Objeto com todas as estatísticas
  */
 async function calcularEstatisticas() {
-    const tasks = await getTasks();
-    
-    // Total de tarefas
+    const allTasks = await getTasks();
+
+    // Filtrar tarefas pelo contexto atual
+    const tasks = filterTasksByContext(allTasks);
+
+    // Total de tarefas no contexto
     const totalTarefas = tasks.length;
-    
-    // Tarefas Ativas (NÃO completed)
-    const tarefasAtivas = tasks.filter(task => 
+
+    // Tarefas Ativas (NÃO completed) - inclui pending e in_progress
+    const tarefasAtivas = tasks.filter(task =>
         task.status !== 'completed'
     ).length;
-    
-    // Tarefas Em Andamento (status "in_progress")
-    const tarefasEmAndamento = tasks.filter(task => 
-        task.status === 'in_progress'
-    ).length;
-    
-    // Tarefas Pendentes
-    const tarefasPendentes = tasks.filter(task => 
+
+    // Tarefas Pendentes (status "pending")
+    const tarefasPendentes = tasks.filter(task =>
         task.status === 'pending'
     ).length;
-    
-    // Tarefas Concluídas HOJE
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    
-    const concluidasHoje = tasks.filter(task => {
-        if (task.status !== 'completed') return false;
-        
-        if (task.updated_at) {
-            const dataAtualizacao = new Date(task.updated_at);
-            dataAtualizacao.setHours(0, 0, 0, 0);
-            return dataAtualizacao.getTime() === hoje.getTime();
-        }
-        
-        return false;
-    }).length;
-    
-    // Percentual de conclusão hoje
-    const percentualConcluidas = totalTarefas > 0 
-        ? Math.round((concluidasHoje / totalTarefas) * 100) 
-        : 0;
-    
+
+    // Tarefas Em Andamento (status "in_progress")
+    const tarefasEmAndamento = tasks.filter(task =>
+        task.status === 'in_progress'
+    ).length;
+
     return {
         totalTarefas,
         tarefasAtivas,
-        tarefasEmAndamento,
         tarefasPendentes,
-        concluidasHoje,
-        percentualConcluidas
+        tarefasEmAndamento
     };
 }
 
@@ -115,26 +144,24 @@ async function calcularEstatisticas() {
  */
 async function atualizarEstatisticas() {
     const stats = await calcularEstatisticas();
-    
+
     // Atualizar Tarefas Ativas
     const ativasElement = document.getElementById('tarefas-ativas');
     if (ativasElement) {
         ativasElement.textContent = stats.tarefasAtivas;
     }
-    
-    // Atualizar Percentual Concluídas
-    const percentualElement = document.getElementById('percentual-concluidas');
-    if (percentualElement) {
-        percentualElement.textContent = `${stats.percentualConcluidas}%`;
+
+    // Atualizar Tarefas Pendentes
+    const pendentesElement = document.getElementById('tarefas-pendentes');
+    if (pendentesElement) {
+        pendentesElement.textContent = stats.tarefasPendentes;
     }
-    
-    // Atualizar Em Andamento
+
+    // Atualizar Em Andamento (se existir)
     const andamentoElement = document.getElementById('tarefas-andamento');
     if (andamentoElement) {
         andamentoElement.textContent = stats.tarefasEmAndamento;
     }
-    
-    // ✅ REMOVIDO: console.log que aparecia a cada 5 segundos
 }
 
 /**
@@ -142,17 +169,17 @@ async function atualizarEstatisticas() {
  */
 function inicializarEstatisticas() {
     const currentUser = getCurrentUser();
-    
+
     if (!currentUser) {
         console.warn('⚠️ Sistema de estatísticas: usuário não logado');
         return;
     }
-    
+
     console.log(`✅ Sistema de estatísticas ativo para ${currentUser.username}`);
-    
+
     // Atualizar na carga da página
     atualizarEstatisticas();
-    
+
     // Atualizar a cada 5 segundos (SILENCIOSAMENTE)
     setInterval(atualizarEstatisticas, 5000);
 }
@@ -162,7 +189,6 @@ function inicializarEstatisticas() {
  * Útil para chamar após adicionar/remover/atualizar tarefas
  */
 function forcarAtualizacaoEstatisticas() {
-    // ✅ Log apenas quando forçado manualmente
     console.log('🔄 Atualizando estatísticas...');
     atualizarEstatisticas();
 }
@@ -174,41 +200,15 @@ async function mostrarInfoEstatisticas() {
     const stats = await calcularEstatisticas();
     const tasks = await getTasks();
     const currentUser = getCurrentUser();
-    
+
     console.log('\n📊 === INFORMAÇÕES DETALHADAS DAS ESTATÍSTICAS ===');
     console.log('👤 Usuário:', currentUser ? currentUser.username : 'Não logado');
-    console.log('📝 Total de tarefas:', stats.totalTarefas);
+    console.log('📍 Contexto:', window.currentSmartFilter || window.currentListId || 'Geral');
+    console.log('📝 Total de tarefas (contexto):', stats.totalTarefas);
     console.log('✅ Tarefas ativas:', stats.tarefasAtivas);
-    console.log('⏳ Em andamento:', stats.tarefasEmAndamento);
     console.log('⏸️  Pendentes:', stats.tarefasPendentes);
-    console.log('🎉 Concluídas hoje:', stats.concluidasHoje);
-    console.log('📈 Percentual concluído:', stats.percentualConcluidas + '%');
+    console.log('⏳ Em andamento:', stats.tarefasEmAndamento);
     console.log('================================================\n');
-    
-    if (tasks.length > 0) {
-        console.log('📋 Lista de tarefas:');
-        tasks.forEach((task, index) => {
-            const statusEmoji = {
-                'pending': '⏸️',
-                'in_progress': '⏳',
-                'completed': '✅'
-            };
-            
-            const priorityEmoji = {
-                'high': '🔴',
-                'medium': '🟡',
-                'low': '🟢'
-            };
-            
-            console.log(
-                `${index + 1}. ${statusEmoji[task.status] || '❓'} ` +
-                `${priorityEmoji[task.priority] || '⚪'} ` +
-                `${task.title} - Status: ${task.status}`
-            );
-        });
-    } else {
-        console.log('ℹ️ Nenhuma tarefa cadastrada ainda.');
-    }
 }
 
 // ==========================================

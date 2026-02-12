@@ -27,7 +27,12 @@ function applySmartFilter(filterType) {
     if (typeof updateAddTaskButtonState === 'function') {
         updateAddTaskButtonState();
     }
-    
+
+    // ✅ ATUALIZAR ESTATÍSTICAS (filtradas pelo contexto)
+    if (typeof atualizarEstatisticas === 'function') {
+        atualizarEstatisticas();
+    }
+
     console.log('✅ Filtro aplicado com sucesso');
     console.log('🔍 ===== FIM DO FILTRO INTELIGENTE =====\n');
 }
