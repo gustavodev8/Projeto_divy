@@ -121,21 +121,21 @@ async function calcularEstatisticas() {
         task.status !== 'completed'
     ).length;
 
-    // Tarefas Pendentes (status "pending")
+    // Tarefas Pendentes (status "pending" ou "in_progress")
     const tarefasPendentes = tasks.filter(task =>
-        task.status === 'pending'
+        task.status === 'pending' || task.status === 'in_progress'
     ).length;
 
-    // Tarefas Em Andamento (status "in_progress")
-    const tarefasEmAndamento = tasks.filter(task =>
-        task.status === 'in_progress'
+    // Tarefas Concluídas (status "completed")
+    const tarefasConcluidas = tasks.filter(task =>
+        task.status === 'completed'
     ).length;
 
     return {
         totalTarefas,
         tarefasAtivas,
         tarefasPendentes,
-        tarefasEmAndamento
+        tarefasConcluidas
     };
 }
 
@@ -145,22 +145,16 @@ async function calcularEstatisticas() {
 async function atualizarEstatisticas() {
     const stats = await calcularEstatisticas();
 
-    // Atualizar Tarefas Ativas
-    const ativasElement = document.getElementById('tarefas-ativas');
-    if (ativasElement) {
-        ativasElement.textContent = stats.tarefasAtivas;
-    }
-
     // Atualizar Tarefas Pendentes
     const pendentesElement = document.getElementById('tarefas-pendentes');
     if (pendentesElement) {
         pendentesElement.textContent = stats.tarefasPendentes;
     }
 
-    // Atualizar Em Andamento (se existir)
-    const andamentoElement = document.getElementById('tarefas-andamento');
-    if (andamentoElement) {
-        andamentoElement.textContent = stats.tarefasEmAndamento;
+    // Atualizar Tarefas Concluídas
+    const concluidasElement = document.getElementById('tarefas-concluidas');
+    if (concluidasElement) {
+        concluidasElement.textContent = stats.tarefasConcluidas;
     }
 }
 
@@ -205,9 +199,8 @@ async function mostrarInfoEstatisticas() {
     console.log('👤 Usuário:', currentUser ? currentUser.username : 'Não logado');
     console.log('📍 Contexto:', window.currentSmartFilter || window.currentListId || 'Geral');
     console.log('📝 Total de tarefas (contexto):', stats.totalTarefas);
-    console.log('✅ Tarefas ativas:', stats.tarefasAtivas);
     console.log('⏸️  Pendentes:', stats.tarefasPendentes);
-    console.log('⏳ Em andamento:', stats.tarefasEmAndamento);
+    console.log('✅ Concluídas:', stats.tarefasConcluidas);
     console.log('================================================\n');
 }
 
