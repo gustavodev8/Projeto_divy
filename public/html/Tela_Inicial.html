@@ -239,7 +239,7 @@
               <span class="title-emoji">👋</span>
               <span class="title-text">Bem-vindo</span>
             </h1>
-            <span class="task-count" id="taskCountHeader">Você tem 0 tarefas pendentes</span>
+            <span class="task-count" id="taskCountHeader">🌟 Carregando suas tarefas...</span>
           </div>
         </div>
         
@@ -1169,7 +1169,12 @@
     function updateTaskCountHeader(count) {
       const taskCountHeader = document.getElementById('taskCountHeader');
       if (taskCountHeader) {
-        taskCountHeader.textContent = `Você tem ${count} tarefa${count !== 1 ? 's' : ''} pendente${count !== 1 ? 's' : ''}`;
+        // Usar frase motivacional se disponível
+        if (typeof getMotivationalPhrase === 'function') {
+          taskCountHeader.textContent = getMotivationalPhrase(count);
+        } else {
+          taskCountHeader.textContent = `Você tem ${count} tarefa${count !== 1 ? 's' : ''} pendente${count !== 1 ? 's' : ''}`;
+        }
       }
     }
     

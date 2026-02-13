@@ -11,6 +11,72 @@ window.homeTasks = [];
 let currentViewMode = 'lista'; // Modo padrão
 window.currentListTasks = []; // Cache de tarefas filtradas por lista
 
+/* ========================================
+   FRASES MOTIVACIONAIS
+   ======================================== */
+
+const motivationalPhrases = {
+    // Quando não tem tarefas pendentes
+    zero: [
+        "🎉 Parabéns! Você zerou suas tarefas!",
+        "✨ Incrível! Nenhuma tarefa pendente!",
+        "🏆 Você é demais! Tudo em dia!",
+        "🌟 Perfeito! Hora de relaxar!",
+        "💪 Mandou bem! Tudo concluído!"
+    ],
+    // Poucas tarefas (1-3)
+    few: [
+        "💪 Você está quase lá! Só mais um pouco!",
+        "🚀 Foco! Você consegue!",
+        "⭐ Poucas tarefas, você dá conta!",
+        "🎯 Quase lá! Continue assim!",
+        "✨ Você está arrasando!"
+    ],
+    // Algumas tarefas (4-7)
+    some: [
+        "📋 Bora organizar o dia!",
+        "💡 Um passo de cada vez!",
+        "🎯 Foco e determinação!",
+        "🌟 Você consegue dar conta!",
+        "⚡ Energia positiva! Vamos lá!"
+    ],
+    // Muitas tarefas (8+)
+    many: [
+        "🔥 Dia cheio? Você aguenta!",
+        "💪 Grandes conquistas exigem esforço!",
+        "🚀 Divida e conquiste!",
+        "⭐ Cada tarefa concluída é uma vitória!",
+        "🎯 Respire fundo e comece pelo mais importante!"
+    ]
+};
+
+/**
+ * Retorna uma frase motivacional baseada no número de tarefas
+ * @param {number} count - Número de tarefas pendentes
+ * @returns {string} Frase motivacional
+ */
+function getMotivationalPhrase(count) {
+    let category;
+
+    if (count === 0) {
+        category = 'zero';
+    } else if (count <= 3) {
+        category = 'few';
+    } else if (count <= 7) {
+        category = 'some';
+    } else {
+        category = 'many';
+    }
+
+    const phrases = motivationalPhrases[category];
+    const randomIndex = Math.floor(Math.random() * phrases.length);
+
+    return phrases[randomIndex];
+}
+
+// Exportar função globalmente
+window.getMotivationalPhrase = getMotivationalPhrase;
+
 // ===== GERAR OU MELHORAR DESCRIÇÃO COM IA =====
 async function generateAIDescription(taskTitle, existingDescription = '') {
     console.log('🤖 Verificando se deve processar descrição automática...');
@@ -2536,9 +2602,9 @@ function updatePageTitle() {
         pageTitleElement.appendChild(document.createTextNode(title));
     }
     
-    // Atualizar contador
+    // Atualizar contador com frase motivacional
     if (taskCountElement) {
-        taskCountElement.textContent = `Você tem ${count} tarefa${count !== 1 ? 's' : ''} pendente${count !== 1 ? 's' : ''}`;
+        taskCountElement.textContent = getMotivationalPhrase(count);
     }
 
     console.log(`📝 Título atualizado: ${emoji} ${title} (${count} tarefas)`);

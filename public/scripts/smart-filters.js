@@ -161,9 +161,14 @@ function updatePageTitle(filterType) {
     
     if (countElement) {
         const count = window.currentListTasks?.length || 0;
-        countElement.textContent = `Você tem ${count} tarefa${count !== 1 ? 's' : ''} pendente${count !== 1 ? 's' : ''}`;
+        // Usar frase motivacional se disponível
+        if (typeof getMotivationalPhrase === 'function') {
+            countElement.textContent = getMotivationalPhrase(count);
+        } else {
+            countElement.textContent = `Você tem ${count} tarefa${count !== 1 ? 's' : ''} pendente${count !== 1 ? 's' : ''}`;
+        }
     }
-    
+
     console.log('✅ Título atualizado:', config.text);
 }
 
