@@ -858,18 +858,14 @@ async function loadWhatsappStatus() {
             return;
         }
 
-        console.log('🔍 Verificando condição linked:', {
-            'data.data': data.data,
-            'data.data?.linked': data.data?.linked,
-            'data.linked': data.linked
-        });
+        // Suportar ambos os formatos de resposta (data.data.linked ou data.linked)
+        const isLinked = data.data?.linked || data.linked;
+        const phoneNumber = data.data?.phoneNumber || data.phoneNumber;
 
-        if (data.data && data.data.linked) {
-            console.log('➡️ Chamando showWhatsappLinkedState');
+        if (isLinked) {
             // WhatsApp vinculado
-            showWhatsappLinkedState(data.data.phoneNumber);
+            showWhatsappLinkedState(phoneNumber);
         } else {
-            console.log('➡️ Chamando showWhatsappNotLinkedState');
             // Não vinculado
             showWhatsappNotLinkedState();
         }
