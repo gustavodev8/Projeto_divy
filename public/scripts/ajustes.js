@@ -1010,7 +1010,9 @@ async function verifyWhatsappCode() {
         const data = await response.json();
 
         if (data.success) {
-            showWhatsappLinkedState(data.data.phoneNumber);
+            // Suportar ambos os formatos de resposta
+            const phoneNumber = data.data?.phoneNumber || data.phoneNumber;
+            showWhatsappLinkedState(phoneNumber);
             showNotification('WhatsApp vinculado com sucesso!', 'success');
             whatsappVerificationPhone = null;
         } else {
