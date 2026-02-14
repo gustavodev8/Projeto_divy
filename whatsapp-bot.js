@@ -427,12 +427,12 @@ async function handleMessage(from, text, msg) {
             } else {
                 await sock.sendMessage(from, {
                     text: `*DIVY* 📋\n\n` +
-                          `Vincule seu WhatsApp para começar!\n\n` +
-                          `━━━━━━━━━━━━━━━\n` +
-                          `🔗 *vincular* [email] [numero]\n` +
-                          `━━━━━━━━━━━━━━━\n\n` +
-                          `Ex: vincular seu@email.com 557592488820\n\n` +
-                          `⚠️ Número: 55 + DDD + número (sem o 9 extra)`
+                          `Para usar o bot, vincule seu WhatsApp nas configurações do app:\n\n` +
+                          `1️⃣ Acesse *nura.app*\n` +
+                          `2️⃣ Vá em *Configurações*\n` +
+                          `3️⃣ Na seção *WhatsApp*, insira seu número\n` +
+                          `4️⃣ Digite o código recebido\n\n` +
+                          `✅ Pronto! Depois é só digitar *oi* aqui.`
                 });
             }
             console.log('✅ Mensagem enviada com sucesso');
@@ -444,7 +444,7 @@ async function handleMessage(from, text, msg) {
 
             if (!estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: '❌ Vincule seu WhatsApp primeiro!\n\n*vincular* [email] [numero]'
+                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app nura.app'
                 });
                 return;
             }
@@ -483,7 +483,7 @@ async function handleMessage(from, text, msg) {
 
             if (!estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: '❌ Vincule seu WhatsApp primeiro!\n\n*vincular* [email] [numero]'
+                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app nura.app'
                 });
                 return;
             }
@@ -508,118 +508,12 @@ async function handleMessage(from, text, msg) {
             }, 3000);
         }
 
-        else if (comando.startsWith('vincular ')) {
-            console.log('✅ Executando comando: VINCULAR');
-            const params = text.substring(9).trim();
-
-            // Verificar se tem número manual: "vincular email 557592488820"
-            const partes = params.split(' ');
-            let email = partes[0];
-            let numeroManual = partes[1] || null;
-
-            console.log('📧 Email recebido:', email);
-            console.log('📱 Número manual:', numeroManual);
-
-            if (!email || !email.includes('@')) {
-                await sock.sendMessage(from, {
-                    text: '❌ Use: *vincular [seu-email] [seu-numero]*\nExemplo: vincular seu@email.com 557592488820\n\n⚠️ Número no formato: 55 + DDD + número (sem o 9 extra)'
-                });
-                return;
-            }
-
-            // Número é obrigatório agora (não dá pra confiar no LID)
-            if (!numeroManual) {
-                await sock.sendMessage(from, {
-                    text: '❌ Informe seu número!\n\n*vincular [email] [número]*\nExemplo: vincular seu@email.com 557592488820\n\n⚠️ Formato: 55 + DDD + número (sem o 9 extra)'
-                });
-                return;
-            }
-
-            // Formatar número: remover tudo que não é dígito
-            let numeroFormatado = numeroManual.replace(/\D/g, '');
-
-            // Validar formato básico (deve ter 12 dígitos: 55 + DDD + 8 dígitos)
-            if (numeroFormatado.length < 12 || numeroFormatado.length > 13) {
-                await sock.sendMessage(from, {
-                    text: '❌ Número inválido!\n\nFormato correto: 55 + DDD + número\nExemplo: 557592488820 (12 dígitos)\n\n⚠️ NÃO coloque o 9 extra na frente!'
-                });
-                return;
-            }
-
-            // Se tem 13 dígitos e o 5º dígito é 9, remover (é o 9 extra)
-            if (numeroFormatado.length === 13 && numeroFormatado[4] === '9') {
-                numeroFormatado = numeroFormatado.slice(0, 4) + numeroFormatado.slice(5);
-                console.log('📱 Removido 9 extra, número corrigido:', numeroFormatado);
-            }
-
-            console.log('🔍 Buscando usuário no banco...');
-
-            // Buscar user_id pelo email
-            const result = await db.query('SELECT id FROM users WHERE email = $1', [email]);
-
-            console.log('📊 Resultado da busca:', result);
-
-            if (result.length === 0) {
-                await sock.sendMessage(from, {
-                    text: '❌ Email não encontrado. Crie sua conta em https://nura.app primeiro!'
-                });
-                return;
-            }
-
-            const userId = result[0].id;
-            console.log('✅ User ID encontrado:', userId);
-
-            const numeroParaSalvar = numeroFormatado;
-            console.log('📱 Número que será salvo:', numeroParaSalvar);
-
-            // Criar tabela se não existir
-            console.log('🔧 Criando/verificando tabela users_whatsapp...');
-            await db.query(`
-                CREATE TABLE IF NOT EXISTS users_whatsapp (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER NOT NULL,
-                    phone_number TEXT UNIQUE NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (user_id) REFERENCES users(id)
-                )
-            `);
-            console.log('✅ Tabela OK');
-
-            // Extrair LID do remetente para salvar também
-            const lidDoRemetente = from.includes('@lid') ? from.replace('@lid', '') : null;
-            console.log('🔗 Vinculando telefone:', numeroParaSalvar, '-> user_id:', userId, 'LID:', lidDoRemetente);
-
-            await db.query(
-                `INSERT INTO users_whatsapp (user_id, phone_number, whatsapp_lid)
-                 VALUES ($1, $2, $3)
-                 ON CONFLICT (phone_number) DO UPDATE SET user_id = $1, whatsapp_lid = $3`,
-                [userId, numeroParaSalvar, lidDoRemetente]
-            );
-            console.log('✅ Vinculação concluída');
-
-            // Verificar quantas tarefas o usuário já tem
-            const tarefasExistentes = await db.query(
-                `SELECT COUNT(*) as total FROM tasks WHERE user_id = $1 AND status NOT IN ('completed', 'concluido') AND (deleted_at IS NULL)`,
-                [userId]
-            );
-            const totalTarefas = tarefasExistentes[0]?.total || 0;
-            console.log('📊 Tarefas existentes do usuário:', totalTarefas);
-
-            await sock.sendMessage(from, {
-                text: `✅ *WhatsApp vinculado com sucesso!*\n\n` +
-                      `📧 Email: ${email}\n` +
-                      `📋 Tarefas pendentes: ${totalTarefas}\n\n` +
-                      `Agora você pode gerenciar suas tarefas por aqui!\n\n` +
-                      `Digite *tarefas* para ver sua lista.`
-            });
-        }
-        
         else if (comando === 'tarefas') {
             console.log('✅ Executando comando: TAREFAS');
 
             if (!estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: '❌ Vincule seu WhatsApp primeiro!\n\n*vincular* [email] [numero]'
+                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app nura.app'
                 });
                 return;
             }
@@ -659,7 +553,7 @@ async function handleMessage(from, text, msg) {
 
             if (!estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: '❌ Vincule seu WhatsApp primeiro!\n\n*vincular* [email] [numero]'
+                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app nura.app'
                 });
                 return;
             }
@@ -776,7 +670,7 @@ async function handleMessage(from, text, msg) {
 
             if (!estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: '❌ Vincule seu WhatsApp primeiro!\n\n*vincular* [email] [numero]'
+                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app nura.app'
                 });
                 return;
             }
@@ -825,8 +719,9 @@ async function handleMessage(from, text, msg) {
             } else {
                 await sock.sendMessage(from, {
                     text: `*DIVY* 📋\n\n` +
-                          `🔗 *vincular* [email] [numero]\n\n` +
-                          `Ex: vincular seu@email.com 557592488820`
+                          `Para usar o bot, vincule seu WhatsApp nas configurações do app:\n\n` +
+                          `🌐 Acesse *nura.app*\n` +
+                          `⚙️ Vá em *Configurações > WhatsApp*`
                 });
             }
         }
@@ -951,13 +846,19 @@ async function getUserIdPorTelefone(telefone, lid = null) {
             telefoneVariacoes.push(semNove);
         }
 
-        console.log('📱 Variações de telefone para busca:', telefoneVariacoes);
+        // Extrair os últimos 8 dígitos para busca parcial
+        const ultimos8 = telefone ? telefone.slice(-8) : '';
 
-        // Buscar por número (todas as variações) OU por LID
+        console.log('📱 Variações de telefone para busca:', telefoneVariacoes);
+        console.log('📱 Últimos 8 dígitos:', ultimos8);
+
+        // Buscar por número (todas as variações), por LID, ou pelos últimos 8 dígitos
         const result = await db.query(
             `SELECT user_id, phone_number FROM users_whatsapp
-             WHERE phone_number = ANY($1) OR whatsapp_lid = $2`,
-            [telefoneVariacoes, lid || telefone]
+             WHERE phone_number = ANY($1)
+                OR whatsapp_lid = $2
+                OR phone_number LIKE $3`,
+            [telefoneVariacoes, lid || telefone, '%' + ultimos8]
         );
 
         console.log('📋 Resultado da busca users_whatsapp:', result);
@@ -965,7 +866,7 @@ async function getUserIdPorTelefone(telefone, lid = null) {
         if (result.length > 0) {
             console.log('✅ User ID encontrado:', result[0].user_id, '- Número salvo:', result[0].phone_number);
 
-            // Se encontrou por variação diferente, atualizar o LID para próximas buscas
+            // Atualizar o LID para próximas buscas
             if (lid && result[0].phone_number) {
                 try {
                     await db.query(
