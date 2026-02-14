@@ -7,6 +7,20 @@ let sock;
 // Estado para rastrear conversas aguardando resposta
 const conversationState = new Map();
 
+// Mapa para associar números a LIDs pendentes
+// Quando enviamos mensagem para um número, guardamos para depois associar o LID
+const pendingLidAssociations = new Map();
+
+// Limpar associações antigas a cada 30 minutos
+setInterval(() => {
+    const agora = Date.now();
+    for (const [key, value] of pendingLidAssociations.entries()) {
+        if (agora - value.timestamp > 30 * 60 * 1000) { // 30 minutos
+            pendingLidAssociations.delete(key);
+        }
+    }
+}, 30 * 60 * 1000);
+
 // Limpar estados antigos a cada 10 minutos
 setInterval(() => {
     const agora = Date.now();
@@ -846,6 +860,15 @@ async function getUserIdPorTelefone(telefone, lid = null) {
             telefoneVariacoes.push(semNove);
         }
 
+        // Adicionar números que estão aguardando associação de LID
+        // Isso ajuda a encontrar o usuário mesmo quando o LID ainda não foi salvo
+        for (const [numero, data] of pendingLidAssociations.entries()) {
+            if (!telefoneVariacoes.includes(numero)) {
+                telefoneVariacoes.push(numero);
+                console.log('📝 Adicionando número pendente à busca:', numero);
+            }
+        }
+
         // Extrair os últimos 8 dígitos para busca parcial
         const ultimos8 = telefone ? telefone.slice(-8) : '';
 
@@ -866,8 +889,10 @@ async function getUserIdPorTelefone(telefone, lid = null) {
         if (result.length > 0) {
             console.log('✅ User ID encontrado:', result[0].user_id, '- Número salvo:', result[0].phone_number);
 
-            // Atualizar o LID para próximas buscas
+            // Atualizar o LID para próximas buscas (importante!)
             if (lid && result[0].phone_number) {
+                // Remover do pendingLidAssociations já que vamos salvar o LID
+                pendingLidAssociations.delete(result[0].phone_number);
                 try {
                     await db.query(
                         'UPDATE users_whatsapp SET whatsapp_lid = $1 WHERE phone_number = $2',
@@ -880,10 +905,48 @@ async function getUserIdPorTelefone(telefone, lid = null) {
             }
 
             return result[0].user_id;
-        } else {
-            console.log('❌ Nenhum vínculo encontrado');
-            return null;
         }
+
+        // Se não encontrou e temos um LID, verificar se há algum número pendente de associação
+        // que foi vinculado recentemente (últimos 30 minutos)
+        if (lid && pendingLidAssociations.size > 0) {
+            console.log('🔍 Verificando números pendentes de associação de LID...');
+            console.log('📋 Números pendentes:', Array.from(pendingLidAssociations.keys()));
+
+            // Buscar todos os números pendentes no banco
+            const numerosPendentes = Array.from(pendingLidAssociations.keys());
+            const resultPendente = await db.query(
+                `SELECT user_id, phone_number FROM users_whatsapp
+                 WHERE phone_number = ANY($1)
+                   AND created_at > NOW() - INTERVAL '30 minutes'
+                 ORDER BY created_at DESC
+                 LIMIT 1`,
+                [numerosPendentes]
+            );
+
+            if (resultPendente.length > 0) {
+                console.log('✅ Encontrado número recentemente vinculado:', resultPendente[0].phone_number);
+
+                // Salvar o LID para esse número
+                try {
+                    await db.query(
+                        'UPDATE users_whatsapp SET whatsapp_lid = $1 WHERE phone_number = $2',
+                        [lid, resultPendente[0].phone_number]
+                    );
+                    console.log('📝 LID', lid, 'associado ao número:', resultPendente[0].phone_number);
+
+                    // Remover da lista de pendentes
+                    pendingLidAssociations.delete(resultPendente[0].phone_number);
+                } catch (updateErr) {
+                    console.error('⚠️ Erro ao atualizar LID:', updateErr);
+                }
+
+                return resultPendente[0].user_id;
+            }
+        }
+
+        console.log('❌ Nenhum vínculo encontrado');
+        return null;
     } catch (error) {
         console.error('❌ Erro ao buscar user_id:', error);
         return null;
@@ -1535,9 +1598,18 @@ setTimeout(() => {
 
 }, 30000); // Aguarda 30s após iniciar o bot
 
+// Função para registrar número aguardando associação de LID
+function registerPendingLid(phoneNumber) {
+    console.log('📝 Registrando número para associação de LID:', phoneNumber);
+    pendingLidAssociations.set(phoneNumber, {
+        timestamp: Date.now()
+    });
+}
+
 // Exporta o socket e as funções
 module.exports = {
     get sock() { return sock; },
     enviarResumoDiarioWhatsApp,
-    verificarEEnviarNotificacoes
+    verificarEEnviarNotificacoes,
+    registerPendingLid
 };

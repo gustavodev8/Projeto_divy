@@ -297,12 +297,19 @@ module.exports = function(db, isPostgres) {
                 // Remover verificação pendente
                 pendingVerifications.delete(verificationKey);
 
-                // Enviar mensagem de confirmação
+                // Enviar mensagem de confirmação e registrar pendingLidAssociation
                 try {
                     const whatsappBot = require('../../whatsapp-bot');
                     const sock = whatsappBot.sock;
 
                     if (sock) {
+                        // Registrar número para associação de LID
+                        // Quando o usuário responder, o bot vai capturar o LID
+                        if (whatsappBot.registerPendingLid) {
+                            whatsappBot.registerPendingLid(cleanNumber);
+                            console.log('📝 Número registrado para associação de LID:', cleanNumber);
+                        }
+
                         await sock.sendMessage(`${cleanNumber}@s.whatsapp.net`, {
                             text: `✅ *WhatsApp vinculado com sucesso!*\n\n` +
                                   `Agora você pode gerenciar suas tarefas por aqui.\n\n` +
