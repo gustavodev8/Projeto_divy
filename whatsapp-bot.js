@@ -935,16 +935,49 @@ async function getUserIdPorTelefone(telefone, lid = null) {
     try {
         console.log('🔎 Buscando user_id para telefone:', telefone, 'ou LID:', lid);
 
-        // Buscar por número OU por LID
+        // Criar variações do número para busca
+        // Alguns números podem ter sido salvos com ou sem o 9
+        let telefoneVariacoes = [telefone];
+
+        // Se o telefone tem 12 dígitos (55 + DDD + 8 dígitos), tentar com 9
+        if (telefone && telefone.length === 12) {
+            const comNove = telefone.slice(0, 4) + '9' + telefone.slice(4);
+            telefoneVariacoes.push(comNove);
+        }
+
+        // Se o telefone tem 13 dígitos (55 + DDD + 9 + 8 dígitos), tentar sem o 9
+        if (telefone && telefone.length === 13 && telefone[4] === '9') {
+            const semNove = telefone.slice(0, 4) + telefone.slice(5);
+            telefoneVariacoes.push(semNove);
+        }
+
+        console.log('📱 Variações de telefone para busca:', telefoneVariacoes);
+
+        // Buscar por número (todas as variações) OU por LID
         const result = await db.query(
-            `SELECT user_id FROM users_whatsapp WHERE phone_number = $1 OR whatsapp_lid = $2`,
-            [telefone, lid || telefone]
+            `SELECT user_id, phone_number FROM users_whatsapp
+             WHERE phone_number = ANY($1) OR whatsapp_lid = $2`,
+            [telefoneVariacoes, lid || telefone]
         );
 
         console.log('📋 Resultado da busca users_whatsapp:', result);
 
         if (result.length > 0) {
-            console.log('✅ User ID encontrado:', result[0].user_id);
+            console.log('✅ User ID encontrado:', result[0].user_id, '- Número salvo:', result[0].phone_number);
+
+            // Se encontrou por variação diferente, atualizar o LID para próximas buscas
+            if (lid && result[0].phone_number) {
+                try {
+                    await db.query(
+                        'UPDATE users_whatsapp SET whatsapp_lid = $1 WHERE phone_number = $2',
+                        [lid, result[0].phone_number]
+                    );
+                    console.log('📝 LID atualizado para o número:', result[0].phone_number);
+                } catch (updateErr) {
+                    // Ignorar erro de atualização
+                }
+            }
+
             return result[0].user_id;
         } else {
             console.log('❌ Nenhum vínculo encontrado');

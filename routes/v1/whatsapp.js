@@ -193,6 +193,16 @@ module.exports = function(db, isPostgres) {
             // Código correto - vincular WhatsApp
             try {
                 if (isPostgres) {
+                    // Garantir que a coluna whatsapp_lid existe
+                    try {
+                        await db.query(`
+                            ALTER TABLE users_whatsapp
+                            ADD COLUMN IF NOT EXISTS whatsapp_lid TEXT
+                        `);
+                    } catch (alterErr) {
+                        // Ignorar erro se coluna já existe
+                    }
+
                     // Verificar se já existe registro para atualizar
                     const existing = await db.query(
                         'SELECT id FROM users_whatsapp WHERE user_id = $1',
