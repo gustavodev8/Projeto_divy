@@ -858,10 +858,18 @@ async function loadWhatsappStatus() {
             return;
         }
 
+        console.log('🔍 Verificando condição linked:', {
+            'data.data': data.data,
+            'data.data?.linked': data.data?.linked,
+            'data.linked': data.linked
+        });
+
         if (data.data && data.data.linked) {
+            console.log('➡️ Chamando showWhatsappLinkedState');
             // WhatsApp vinculado
             showWhatsappLinkedState(data.data.phoneNumber);
         } else {
+            console.log('➡️ Chamando showWhatsappNotLinkedState');
             // Não vinculado
             showWhatsappNotLinkedState();
         }
@@ -901,12 +909,30 @@ function showWhatsappVerificationState(phoneNumber) {
 }
 
 function showWhatsappLinkedState(phoneNumber) {
-    document.getElementById('whatsapp-not-linked').style.display = 'none';
-    document.getElementById('whatsapp-verification').style.display = 'none';
-    document.getElementById('whatsapp-linked').style.display = '';
+    console.log('🟢 showWhatsappLinkedState chamado com:', phoneNumber);
+
+    const notLinked = document.getElementById('whatsapp-not-linked');
+    const verification = document.getElementById('whatsapp-verification');
+    const linked = document.getElementById('whatsapp-linked');
+
+    console.log('🔍 Elementos encontrados:', {
+        notLinked: !!notLinked,
+        verification: !!verification,
+        linked: !!linked
+    });
+
+    if (notLinked) notLinked.style.display = 'none';
+    if (verification) verification.style.display = 'none';
+    if (linked) linked.style.display = '';
 
     // Atualizar número exibido
-    document.getElementById('linkedWhatsappNumber').textContent = phoneNumber;
+    const numberElement = document.getElementById('linkedWhatsappNumber');
+    if (numberElement) {
+        numberElement.textContent = phoneNumber;
+        console.log('📱 Número atualizado para:', phoneNumber);
+    }
+
+    console.log('✅ Estado vinculado aplicado');
 }
 
 // ===== WHATSAPP: SOLICITAR VERIFICAÇÃO =====
