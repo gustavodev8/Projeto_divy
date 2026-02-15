@@ -16,8 +16,8 @@ async function login(event) {
     }
 
     submitButton.disabled = true;
-    const originalValue = submitButton.value;
-    submitButton.value = 'Entrando...';
+    const originalHTML = submitButton.innerHTML;
+    submitButton.classList.add('loading');
     
     try {
         console.log('🔐 Tentando login...');
@@ -62,39 +62,34 @@ async function login(event) {
             if (data.code === 'NEEDS_PASSWORD') {
                 showSetPasswordModal(data.email);
                 submitButton.disabled = false;
-                submitButton.value = originalValue;
+                submitButton.classList.remove('loading');
+                submitButton.innerHTML = originalHTML;
                 return;
             }
 
             showMessage(data.error || 'Usuário ou senha incorretos', 'error');
             submitButton.disabled = false;
-            submitButton.value = originalValue;
+            submitButton.classList.remove('loading');
+            submitButton.innerHTML = originalHTML;
         }
         
     } catch (error) {
         console.error('💥 Erro de conexão:', error);
         showMessage('Erro de conexão com o servidor', 'error');
         submitButton.disabled = false;
-        submitButton.value = originalValue;
+        submitButton.classList.remove('loading');
+        submitButton.innerHTML = originalHTML;
     }
 }
 
 // ===== MOSTRAR MENSAGEM =====
 function showMessage(message, type) {
     const messageDiv = document.getElementById('login-message');
-    
+
     if (!messageDiv) return;
-    
+
     messageDiv.textContent = message;
-    messageDiv.style.display = 'block';
-    
-    if (type === 'success') {
-        messageDiv.style.backgroundColor = '#4CAF50';
-        messageDiv.style.color = 'white';
-    } else {
-        messageDiv.style.backgroundColor = '#f44336';
-        messageDiv.style.color = 'white';
-    }
+    messageDiv.className = type; // 'success' ou 'error'
     
     setTimeout(() => {
         messageDiv.style.display = 'none';
