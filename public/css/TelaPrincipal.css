@@ -3862,17 +3862,29 @@ input[type="color"]:focus {
         display: flex !important;
     }
 
-    /* === SIDEBAR BRAND === */
+    /* === SIDEBAR COM HEADER FIXO === */
+    .sidebar {
+        overflow: hidden !important;
+        display: flex;
+        flex-direction: column;
+    }
+
     .sidebar-brand {
         padding: 16px;
-        position: sticky;
-        top: 0;
         background: #0b0a18;
         z-index: 10;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        flex-shrink: 0;
     }
 
-    /* === SIDEBAR USER === */
+    /* Conteúdo scrollável da sidebar */
+    .sidebar-content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .sidebar-user {
         padding: 12px 16px;
     }
@@ -4406,6 +4418,10 @@ input[type="color"]:focus {
     .dark-mode .sidebar-brand {
         background: #0b0a18;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dark-mode .sidebar-content {
+        background: #0b0a18;
     }
 
     .dark-mode .sidebar.active {
