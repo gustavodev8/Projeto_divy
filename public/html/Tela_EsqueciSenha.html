@@ -3,49 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Esqueci minha senha - Divy.ia</title>
+    <title>Recuperar Senha - Divy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/styleEsqueciSenha.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/auth-pages.css">
 </head>
 
 <body>
-    <main>
-        <section id="logins">
-            <div id="imagem"></div>
-
-            <div id="text">
-                <!-- Etapa 1: Email -->
-                <div id="step-email" class="step active">
-                    <h1>Esqueceu sua senha?</h1>
-                    <p class="subtitle">Digite seu e-mail para receber o codigo de recuperacao</p>
-
-                    <form id="forgot-form">
-                        <div id="message-container" style="display: none;"></div>
-
-                        <p id="email">
-                            <label for="iemail">E-mail</label>
-                            <input type="email" name="email" id="iemail" placeholder="Digite seu e-mail cadastrado" required>
-                        </p>
-
-                        <p id="enviar">
-                            <input type="submit" value="Enviar codigo" id="ienviar">
-                        </p>
-                    </form>
-
-                    <div class="back-link">
-                        <a href="/login">← Voltar para o login</a>
-                    </div>
+    <div class="auth-container">
+        <!-- Lado Esquerdo - Hero Section -->
+        <div class="auth-hero">
+            <div class="hero-content">
+                <!-- Logo -->
+                <div class="hero-logo">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>DIVY</span>
                 </div>
 
-                <!-- Etapa 2: Codigo de verificacao -->
-                <div id="step-code" class="step">
-                    <h1>Verifique seu e-mail</h1>
-                    <p class="subtitle">
-                        Enviamos um codigo de 6 digitos para<br>
-                        <strong id="email-display"></strong>
+                <!-- Badge -->
+                <div class="hero-badge">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Recuperação de conta
+                </div>
+
+                <!-- Título Principal -->
+                <h1 class="hero-title">
+                    Não se preocupe,<br>
+                    <span>acontece com todos</span>
+                </h1>
+
+                <!-- Descrição -->
+                <p class="hero-description">
+                    Vamos ajudar você a recuperar o acesso à sua conta de forma rápida e segura.
+                </p>
+
+                <!-- Features -->
+                <div class="hero-features">
+                    <div class="feature-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span>Processo seguro</span>
+                    </div>
+                    <div class="feature-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span>Rápido e simples</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Background Effects -->
+            <div class="hero-bg-effects">
+                <div class="glow glow-1"></div>
+                <div class="glow glow-2"></div>
+                <div class="glow glow-3"></div>
+            </div>
+        </div>
+
+        <!-- Lado Direito - Formulário -->
+        <div class="auth-form-section">
+            <div class="form-container">
+
+                <!-- Etapa 1: Email -->
+                <div id="step-email" class="step active">
+                    <div class="form-header">
+                        <h2>Esqueceu sua senha?</h2>
+                        <p>Digite seu email para receber o código de recuperação</p>
+                    </div>
+
+                    <form id="forgot-form">
+                        <div id="message-container" class="message"></div>
+
+                        <div class="form-group">
+                            <label for="iemail">Email</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                                <input type="email" name="email" id="iemail" placeholder="seu@email.com" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="ienviar">
+                            Enviar código
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </form>
+
+                    <p class="auth-link">
+                        Lembrou a senha? <a href="/login">Fazer login</a>
                     </p>
+                </div>
+
+                <!-- Etapa 2: Código de verificação -->
+                <div id="step-code" class="step">
+                    <div class="form-header">
+                        <h2>Verifique seu email</h2>
+                        <p>
+                            Enviamos um código de 6 dígitos para<br>
+                            <strong id="email-display"></strong>
+                        </p>
+                    </div>
 
                     <div class="code-inputs-container">
                         <input type="text" maxlength="1" class="code-input" data-index="0" inputmode="numeric" pattern="[0-9]">
@@ -58,43 +132,61 @@
 
                     <div id="code-error" class="error-message"></div>
 
-                    <button id="btn-verify" class="btn-primary" onclick="verifyCode()">
-                        Verificar codigo
+                    <button id="btn-verify" class="btn-submit" onclick="verifyCode()">
+                        Verificar código
                     </button>
 
                     <div class="resend-section">
-                        <span>Nao recebeu?</span>
+                        <span>Não recebeu?</span>
                         <button id="btn-resend" class="btn-link" onclick="resendCode()" disabled>
                             Reenviar (<span id="resend-timer">60</span>s)
                         </button>
                     </div>
 
                     <button class="btn-back" onclick="goToStep('email')">
-                        ← Usar outro e-mail
+                        ← Usar outro email
                     </button>
                 </div>
 
                 <!-- Etapa 3: Nova senha -->
                 <div id="step-password" class="step">
-                    <h1>Criar nova senha</h1>
-                    <p class="subtitle">Digite sua nova senha abaixo</p>
+                    <div class="form-header">
+                        <h2>Criar nova senha</h2>
+                        <p>Digite sua nova senha abaixo</p>
+                    </div>
 
                     <form id="reset-form">
-                        <p id="senha">
+                        <div class="form-group">
                             <label for="inova-senha">Nova senha</label>
-                            <input type="password" name="nova-senha" id="inova-senha" placeholder="Minimo 6 caracteres" required minlength="6">
-                        </p>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                                <input type="password" name="nova-senha" id="inova-senha" placeholder="Mínimo 6 caracteres" required minlength="6">
+                            </div>
+                        </div>
 
-                        <p id="confirmar">
+                        <div class="form-group">
                             <label for="iconfirmar-senha">Confirmar senha</label>
-                            <input type="password" name="confirmar-senha" id="iconfirmar-senha" placeholder="Digite novamente" required minlength="6">
-                        </p>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                                <input type="password" name="confirmar-senha" id="iconfirmar-senha" placeholder="Digite novamente" required minlength="6">
+                            </div>
+                        </div>
 
                         <div id="password-error" class="error-message"></div>
 
-                        <p id="enviar">
-                            <input type="submit" value="Redefinir senha" id="isubmit-reset">
-                        </p>
+                        <button type="submit" class="btn-submit" id="isubmit-reset">
+                            Redefinir senha
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </button>
                     </form>
                 </div>
 
@@ -102,26 +194,26 @@
                 <div id="step-success" class="step">
                     <div class="success-container">
                         <div class="success-icon">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
                             </svg>
                         </div>
-                        <h1>Senha redefinida!</h1>
-                        <p class="subtitle">Sua senha foi alterada com sucesso.</p>
-                        <a href="/login" class="btn-primary">
+                        <h2>Senha redefinida!</h2>
+                        <p>Sua senha foi alterada com sucesso.</p>
+                        <a href="/login" class="btn-submit" style="text-decoration: none; display: inline-flex;">
                             Fazer login
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
                         </a>
                     </div>
                 </div>
-            </div>
 
-            <footer>
-                <p>Lembrou a senha?</p>
-                <a href="/login"><strong>Faca login</strong></a>
-            </footer>
-        </section>
-    </main>
+            </div>
+        </div>
+    </div>
 
     <script src="../scripts/forgotPassword.js"></script>
 </body>
