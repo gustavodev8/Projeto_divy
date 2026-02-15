@@ -762,6 +762,16 @@ app.get("/api/status", async (req, res) => {
 
 // ===== ROTAS PARA SERVIR PÁGINAS HTML =====
 
+// Termos de Serviço
+app.get('/termos', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Termos.html'));
+});
+
+// Política de Privacidade
+app.get('/privacidade', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/html/Tela_Privacidade.html'));
+});
+
 // Login
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/html/Tela_Login.html'));
