@@ -89,14 +89,18 @@ async function register(event) {
     }
 }
 
-// ===== MOSTRAR MODAL DE VERIFICAÇÃO =====
+// ===== MOSTRAR STEP DE VERIFICAÇÃO =====
 function showVerificationModal(email) {
-    const modal = document.getElementById('verification-modal');
+    const stepRegister = document.getElementById('step-register');
+    const stepVerify = document.getElementById('step-verify');
     const emailSpan = document.getElementById('verification-email');
 
-    if (modal && emailSpan) {
+    if (stepRegister && stepVerify && emailSpan) {
         emailSpan.textContent = email;
-        modal.classList.add('active');
+
+        // Trocar de step
+        stepRegister.classList.remove('active');
+        stepVerify.classList.add('active');
 
         // Focar no primeiro input
         setTimeout(() => {
@@ -112,11 +116,14 @@ function showVerificationModal(email) {
     }
 }
 
-// ===== FECHAR MODAL DE VERIFICAÇÃO =====
+// ===== VOLTAR PARA REGISTRO =====
 function closeVerificationModal() {
-    const modal = document.getElementById('verification-modal');
-    if (modal) {
-        modal.classList.remove('active');
+    const stepRegister = document.getElementById('step-register');
+    const stepVerify = document.getElementById('step-verify');
+
+    if (stepRegister && stepVerify) {
+        stepVerify.classList.remove('active');
+        stepRegister.classList.add('active');
         clearCodeInputs();
         stopResendTimer();
     }

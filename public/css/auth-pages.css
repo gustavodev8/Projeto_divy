@@ -656,6 +656,39 @@ input::placeholder {
     color: var(--text-primary);
 }
 
+/* Back Link Button */
+.btn-back-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 16px;
+    transition: all 0.2s;
+}
+
+.btn-back-link:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Email Display */
+.email-display {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 15px;
+    margin-top: 4px;
+}
+
 /* Success Container */
 .success-container {
     text-align: center;
