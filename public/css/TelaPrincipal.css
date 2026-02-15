@@ -3867,8 +3867,9 @@ input[type="color"]:focus {
         padding: 16px;
         position: sticky;
         top: 0;
-        background: var(--surface-main);
+        background: #0b0a18;
         z-index: 10;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     /* === SIDEBAR USER === */
@@ -4400,6 +4401,11 @@ input[type="color"]:focus {
 @media (max-width: 768px) {
     .dark-mode .sidebar {
         background: #0b0a18;
+    }
+
+    .dark-mode .sidebar-brand {
+        background: #0b0a18;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .dark-mode .sidebar.active {
