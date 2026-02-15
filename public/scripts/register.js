@@ -45,8 +45,8 @@ async function register(event) {
 
     // Desabilitar botão
     submitButton.disabled = true;
-    const originalValue = submitButton.value;
-    submitButton.value = 'Enviando código...';
+    const originalHTML = submitButton.innerHTML;
+    submitButton.classList.add('loading');
 
     try {
         console.log('📧 Enviando código de verificação...');
@@ -69,20 +69,23 @@ async function register(event) {
             console.log('✅ Código enviado!');
             pendingEmail = email;
             showVerificationModal(email);
-            submitButton.value = originalValue;
+            submitButton.innerHTML = originalHTML;
+            submitButton.classList.remove('loading');
             submitButton.disabled = false;
         } else {
             console.error('❌ Erro ao enviar código:', data.error);
             showMessage(data.error || 'Erro ao enviar código de verificação', 'error');
             submitButton.disabled = false;
-            submitButton.value = originalValue;
+            submitButton.classList.remove('loading');
+            submitButton.innerHTML = originalHTML;
         }
 
     } catch (error) {
         console.error('💥 Erro de conexão:', error);
         showMessage('Erro de conexão com o servidor', 'error');
         submitButton.disabled = false;
-        submitButton.value = originalValue;
+        submitButton.classList.remove('loading');
+        submitButton.innerHTML = originalHTML;
     }
 }
 
@@ -93,7 +96,7 @@ function showVerificationModal(email) {
 
     if (modal && emailSpan) {
         emailSpan.textContent = email;
-        modal.classList.add('visible');
+        modal.classList.add('active');
 
         // Focar no primeiro input
         setTimeout(() => {
@@ -113,7 +116,7 @@ function showVerificationModal(email) {
 function closeVerificationModal() {
     const modal = document.getElementById('verification-modal');
     if (modal) {
-        modal.classList.remove('visible');
+        modal.classList.remove('active');
         clearCodeInputs();
         stopResendTimer();
     }
