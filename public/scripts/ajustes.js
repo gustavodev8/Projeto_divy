@@ -14,18 +14,14 @@ let whatsappVerificationPhone = null;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('⚙️ Inicializando sistema de ajustes...');
-
     // Verificar autenticação
     currentUser = getCurrentUser();
 
     if (!currentUser) {
-        console.error('❌ Usuário não autenticado');
+        console.error('Usuário não autenticado');
         window.location.href = 'Tela_Login.html';
         return;
     }
-
-    console.log('👤 Usuário:', currentUser.username);
 
     // Atualizar informações da conta
     updateAccountInfo();
@@ -44,8 +40,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Inicializar inputs de código de verificação
     initializeCodeInputs();
-
-    console.log('✅ Sistema de ajustes carregado');
 });
 
 // ===== ATUALIZAR INFORMAÇÕES DA CONTA =====
@@ -64,7 +58,6 @@ function updateAccountInfo() {
 
 // ===== CARREGAR INFORMAÇÕES DO PLANO =====
 async function loadPlanInfo() {
-    console.log('💎 Carregando informações do plano...');
 
     const container = document.getElementById('plan-info-container');
     if (!container) return;
@@ -905,17 +898,9 @@ function showWhatsappVerificationState(phoneNumber) {
 }
 
 function showWhatsappLinkedState(phoneNumber) {
-    console.log('🟢 showWhatsappLinkedState chamado com:', phoneNumber);
-
     const notLinked = document.getElementById('whatsapp-not-linked');
     const verification = document.getElementById('whatsapp-verification');
     const linked = document.getElementById('whatsapp-linked');
-
-    console.log('🔍 Elementos encontrados:', {
-        notLinked: !!notLinked,
-        verification: !!verification,
-        linked: !!linked
-    });
 
     if (notLinked) notLinked.style.display = 'none';
     if (verification) verification.style.display = 'none';
@@ -925,10 +910,7 @@ function showWhatsappLinkedState(phoneNumber) {
     const numberElement = document.getElementById('linkedWhatsappNumber');
     if (numberElement) {
         numberElement.textContent = phoneNumber;
-        console.log('📱 Número atualizado para:', phoneNumber);
     }
-
-    console.log('✅ Estado vinculado aplicado');
 }
 
 // ===== WHATSAPP: SOLICITAR VERIFICAÇÃO =====

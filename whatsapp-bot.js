@@ -842,40 +842,25 @@ async function getTarefasHoje(telefone, hoje) {
 
 async function getUserIdPorTelefone(telefone, lid = null) {
     try {
-        console.log('🔎 Buscando user_id para telefone:', telefone, 'ou LID:', lid);
-
-        // Criar variações do número para busca
-        // Alguns números podem ter sido salvos com ou sem o 9
+        // Criar variações do número (com/sem 9)
         let telefoneVariacoes = [telefone];
 
-        // Se o telefone tem 12 dígitos (55 + DDD + 8 dígitos), tentar com 9
         if (telefone && telefone.length === 12) {
-            const comNove = telefone.slice(0, 4) + '9' + telefone.slice(4);
-            telefoneVariacoes.push(comNove);
+            telefoneVariacoes.push(telefone.slice(0, 4) + '9' + telefone.slice(4));
         }
-
-        // Se o telefone tem 13 dígitos (55 + DDD + 9 + 8 dígitos), tentar sem o 9
         if (telefone && telefone.length === 13 && telefone[4] === '9') {
-            const semNove = telefone.slice(0, 4) + telefone.slice(5);
-            telefoneVariacoes.push(semNove);
+            telefoneVariacoes.push(telefone.slice(0, 4) + telefone.slice(5));
         }
 
-        // Adicionar números que estão aguardando associação de LID
-        // Isso ajuda a encontrar o usuário mesmo quando o LID ainda não foi salvo
-        for (const [numero, data] of pendingLidAssociations.entries()) {
+        // Adicionar números pendentes de associação de LID
+        for (const [numero] of pendingLidAssociations.entries()) {
             if (!telefoneVariacoes.includes(numero)) {
                 telefoneVariacoes.push(numero);
-                console.log('📝 Adicionando número pendente à busca:', numero);
             }
         }
 
-        // Extrair os últimos 8 dígitos para busca parcial
         const ultimos8 = telefone ? telefone.slice(-8) : '';
 
-        console.log('📱 Variações de telefone para busca:', telefoneVariacoes);
-        console.log('📱 Últimos 8 dígitos:', ultimos8);
-
-        // Buscar por número (todas as variações), por LID, ou pelos últimos 8 dígitos
         const result = await db.query(
             `SELECT user_id, phone_number FROM users_whatsapp
              WHERE phone_number = ANY($1)
@@ -884,36 +869,26 @@ async function getUserIdPorTelefone(telefone, lid = null) {
             [telefoneVariacoes, lid || telefone, '%' + ultimos8]
         );
 
-        console.log('📋 Resultado da busca users_whatsapp:', result);
-
         if (result.length > 0) {
-            console.log('✅ User ID encontrado:', result[0].user_id, '- Número salvo:', result[0].phone_number);
-
-            // Atualizar o LID para próximas buscas (importante!)
+            // Atualizar LID se necessário
             if (lid && result[0].phone_number) {
-                // Remover do pendingLidAssociations já que vamos salvar o LID
                 pendingLidAssociations.delete(result[0].phone_number);
                 try {
                     await db.query(
                         'UPDATE users_whatsapp SET whatsapp_lid = $1 WHERE phone_number = $2',
                         [lid, result[0].phone_number]
                     );
-                    console.log('📝 LID atualizado para o número:', result[0].phone_number);
                 } catch (updateErr) {
-                    // Ignorar erro de atualização
+                    // Ignorar erro
                 }
             }
-
             return result[0].user_id;
         }
 
         // Se não encontrou e temos um LID, verificar se há algum número pendente de associação
         // que foi vinculado recentemente (últimos 30 minutos)
+        // Verificar números pendentes de associação de LID
         if (lid && pendingLidAssociations.size > 0) {
-            console.log('🔍 Verificando números pendentes de associação de LID...');
-            console.log('📋 Números pendentes:', Array.from(pendingLidAssociations.keys()));
-
-            // Buscar todos os números pendentes no banco
             const numerosPendentes = Array.from(pendingLidAssociations.keys());
             const resultPendente = await db.query(
                 `SELECT user_id, phone_number FROM users_whatsapp
@@ -925,27 +900,19 @@ async function getUserIdPorTelefone(telefone, lid = null) {
             );
 
             if (resultPendente.length > 0) {
-                console.log('✅ Encontrado número recentemente vinculado:', resultPendente[0].phone_number);
-
-                // Salvar o LID para esse número
                 try {
                     await db.query(
                         'UPDATE users_whatsapp SET whatsapp_lid = $1 WHERE phone_number = $2',
                         [lid, resultPendente[0].phone_number]
                     );
-                    console.log('📝 LID', lid, 'associado ao número:', resultPendente[0].phone_number);
-
-                    // Remover da lista de pendentes
                     pendingLidAssociations.delete(resultPendente[0].phone_number);
                 } catch (updateErr) {
-                    console.error('⚠️ Erro ao atualizar LID:', updateErr);
+                    // Ignorar erro
                 }
-
                 return resultPendente[0].user_id;
             }
         }
 
-        console.log('❌ Nenhum vínculo encontrado');
         return null;
     } catch (error) {
         console.error('❌ Erro ao buscar user_id:', error);

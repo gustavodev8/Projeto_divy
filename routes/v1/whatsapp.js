@@ -24,19 +24,12 @@ module.exports = function(db, isPostgres) {
         }
     }, 5 * 60 * 1000);
 
-    // ===== VERIFICAR STATUS DE VINCULAÇÃO =====
+    // ===== VERIFICAR STATUS DE VINCULACAO =====
     router.get('/status', authenticateToken, async (req, res) => {
         try {
             const userId = req.user.id;
-            console.log('🔍 Verificando status WhatsApp para user_id:', userId);
 
-            // DEBUG: Listar todos os registros da tabela
-            if (isPostgres) {
-                const todosRegistros = await db.query('SELECT * FROM users_whatsapp LIMIT 10');
-                console.log('📋 Todos os registros na tabela users_whatsapp:', todosRegistros);
-            }
-
-            // Buscar vinculação existente
+            // Buscar vinculacao existente
             let whatsappRecord;
             if (isPostgres) {
                 const result = await db.query(
@@ -44,15 +37,12 @@ module.exports = function(db, isPostgres) {
                     [userId]
                 );
                 whatsappRecord = result[0];
-                console.log('📱 Registro encontrado para user_id', userId, ':', whatsappRecord);
             }
 
             if (whatsappRecord && whatsappRecord.phone_number) {
-                // Formatar número para exibição
+                // Formatar numero para exibicao
                 const phone = whatsappRecord.phone_number;
                 const formattedPhone = `+${phone.slice(0, 2)} ${phone.slice(2, 4)} ${phone.slice(4)}`;
-
-                console.log('✅ WhatsApp vinculado:', formattedPhone);
 
                 return success(res, {
                     linked: true,
@@ -60,8 +50,6 @@ module.exports = function(db, isPostgres) {
                     linkedAt: whatsappRecord.created_at
                 }, 'WhatsApp vinculado');
             }
-
-            console.log('❌ WhatsApp não vinculado');
 
             return success(res, {
                 linked: false,
@@ -99,10 +87,7 @@ module.exports = function(db, isPostgres) {
                 return badRequest(res, 'Número inválido. Use formato: DDD + número', 'INVALID_PHONE');
             }
 
-            console.log('📱 Número limpo para vinculação:', cleanNumber, '- Tamanho:', cleanNumber.length);
-
             // Verificar se número já está vinculado a outra conta
-            // Buscar também variações com/sem 9
             if (isPostgres) {
                 let variationsToCheck = [cleanNumber];
 
@@ -126,7 +111,6 @@ module.exports = function(db, isPostgres) {
                 // Se já está vinculado ao mesmo usuário, usar o número existente
                 if (existingLink[0] && existingLink[0].user_id === userId) {
                     cleanNumber = existingLink[0].phone_number;
-                    console.log('📱 Número já vinculado ao usuário, usando:', cleanNumber);
                 }
             }
 
@@ -197,8 +181,6 @@ module.exports = function(db, isPostgres) {
                 cleanNumber = '55' + cleanNumber;
             }
 
-            console.log('🔍 Verificando código para número:', cleanNumber);
-
             // Buscar verificação pendente (tentar variações)
             let verificationKey = `${userId}_${cleanNumber}`;
             let verification = pendingVerifications.get(verificationKey);
@@ -216,8 +198,6 @@ module.exports = function(db, isPostgres) {
                 verification = pendingVerifications.get(verificationKey);
                 if (verification) cleanNumber = semNove;
             }
-
-            console.log('🔑 Verificação encontrada:', !!verification, 'Key:', verificationKey);
 
             if (!verification) {
                 return unauthorized(res, 'Código expirado ou não encontrado. Solicite um novo código.', 'NO_VERIFICATION');
@@ -244,8 +224,6 @@ module.exports = function(db, isPostgres) {
             // Código correto - vincular WhatsApp
             try {
                 if (isPostgres) {
-                    console.log('💾 Salvando vinculação: user_id=', userId, 'phone=', cleanNumber);
-
                     // Garantir que a coluna whatsapp_lid existe
                     try {
                         await db.query(`
@@ -262,36 +240,24 @@ module.exports = function(db, isPostgres) {
                         [userId]
                     );
 
-                    console.log('📋 Registro existente:', existing[0] ? 'sim' : 'não');
-
                     if (existing[0]) {
-                        // Atualizar número existente
-                        const updateResult = await db.query(
-                            'UPDATE users_whatsapp SET phone_number = $1, created_at = NOW() WHERE user_id = $2 RETURNING *',
+                        await db.query(
+                            'UPDATE users_whatsapp SET phone_number = $1, created_at = NOW() WHERE user_id = $2',
                             [cleanNumber, userId]
                         );
-                        console.log('✏️ Resultado UPDATE:', updateResult);
                     } else {
-                        // Primeiro, deletar qualquer registro com esse número (evitar conflito)
+                        // Deletar qualquer registro com esse número (evitar conflito)
                         await db.query(
                             'DELETE FROM users_whatsapp WHERE phone_number = $1 AND user_id != $2',
                             [cleanNumber, userId]
                         );
 
                         // Criar novo registro
-                        const insertResult = await db.query(
-                            'INSERT INTO users_whatsapp (user_id, phone_number, created_at) VALUES ($1, $2, NOW()) RETURNING *',
+                        await db.query(
+                            'INSERT INTO users_whatsapp (user_id, phone_number, created_at) VALUES ($1, $2, NOW())',
                             [userId, cleanNumber]
                         );
-                        console.log('➕ Resultado INSERT:', insertResult);
                     }
-
-                    // Verificar se foi salvo corretamente
-                    const verificacao = await db.query(
-                        'SELECT * FROM users_whatsapp WHERE user_id = $1',
-                        [userId]
-                    );
-                    console.log('✅ Verificação final:', verificacao[0]);
                 }
 
                 // Remover verificação pendente
@@ -304,10 +270,8 @@ module.exports = function(db, isPostgres) {
 
                     if (sock) {
                         // Registrar número para associação de LID
-                        // Quando o usuário responder, o bot vai capturar o LID
                         if (whatsappBot.registerPendingLid) {
                             whatsappBot.registerPendingLid(cleanNumber);
-                            console.log('📝 Número registrado para associação de LID:', cleanNumber);
                         }
 
                         await sock.sendMessage(`${cleanNumber}@s.whatsapp.net`, {
