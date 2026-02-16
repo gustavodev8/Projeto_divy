@@ -12,7 +12,11 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npm start)",
+      "Bash(npm cache clean:*)",
+      "Bash(npx expo:*)",
+      "Bash(exit:*)"
     ]
   }
 }
