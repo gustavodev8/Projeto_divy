@@ -18,7 +18,17 @@ module.exports = function(db, isPostgres) {
         try {
             const { email, username, password } = req.body;
 
+            // LOG TEMPORÁRIO PARA DEBUG
+            console.log('📥 Login request recebido:', {
+                email,
+                username,
+                hasPassword: !!password,
+                passwordLength: password ? password.length : 0,
+                body: req.body
+            });
+
             if (!email && !username) {
+                console.log('❌ Erro: Email ou username não fornecido');
                 return badRequest(res, 'Email ou username é obrigatório', 'MISSING_CREDENTIALS');
             }
 

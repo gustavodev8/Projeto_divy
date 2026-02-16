@@ -11,6 +11,13 @@ const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
+        // LOG TEMPORÁRIO PARA DEBUG
+        console.log('❌ Erros de validação:', {
+            path: req.path,
+            body: req.body,
+            errors: errors.array()
+        });
+
         return res.status(400).json({
             success: false,
             error: 'Dados inválidos',
