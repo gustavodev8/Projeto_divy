@@ -31,8 +31,7 @@ const validateLogin = [
     body('email')
         .optional()
         .isEmail()
-        .withMessage('Email inválido')
-        .normalizeEmail(),
+        .withMessage('Email inválido'),
     body('username')
         .optional()
         .isLength({ min: 3, max: 50 })
@@ -59,8 +58,7 @@ const validateRegister = [
         .notEmpty()
         .withMessage('Email é obrigatório')
         .isEmail()
-        .withMessage('Email inválido')
-        .normalizeEmail(),
+        .withMessage('Email inválido'),
     body('password')
         .notEmpty()
         .withMessage('Senha é obrigatória')
