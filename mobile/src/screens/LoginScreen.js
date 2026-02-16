@@ -27,17 +27,33 @@ const LoginScreen = ({ navigation }) => {
   const { signIn } = useAuth();
 
   const handleLogin = async () => {
+    console.log('🔵 handleLogin chamado');
+    console.log('📧 Email:', email);
+    console.log('🔑 Password:', password ? '***' : 'vazio');
+
     if (!email || !password) {
       Alert.alert('Erro', 'Preencha todos os campos');
       return;
     }
 
     setLoading(true);
-    const result = await signIn(email, password);
-    setLoading(false);
+    console.log('⏳ Chamando signIn...');
 
-    if (!result.success) {
-      Alert.alert('Erro', result.error || 'Erro ao fazer login');
+    try {
+      const result = await signIn(email, password);
+      console.log('✅ Resultado do signIn:', result);
+      setLoading(false);
+
+      if (!result.success) {
+        console.log('❌ Login falhou:', result.error);
+        Alert.alert('Erro', result.error || 'Erro ao fazer login');
+      } else {
+        console.log('🎉 Login bem-sucedido!');
+      }
+    } catch (error) {
+      console.error('💥 Erro ao fazer login:', error);
+      setLoading(false);
+      Alert.alert('Erro', 'Erro inesperado ao fazer login');
     }
   };
 

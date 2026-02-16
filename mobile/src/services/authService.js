@@ -11,15 +11,24 @@ import api from './api';
  */
 export const login = async (emailOrUsername, password) => {
   try {
+    console.log('🔶 authService.login chamado');
+    console.log('📧 emailOrUsername:', emailOrUsername);
+
     // Detectar se é email (contém @) ou username
     const isEmail = emailOrUsername.includes('@');
+    console.log('🔍 É email?', isEmail);
 
-    const response = await api.post('/v1/auth/login', {
+    const payload = {
       ...(isEmail ? { email: emailOrUsername } : { username: emailOrUsername }),
       password,
-    });
+    };
+    console.log('📤 Payload da request:', { ...payload, password: '***' });
+
+    const response = await api.post('/v1/auth/login', payload);
+    console.log('📥 Response recebida:', response.data);
 
     if (response.data.success && response.data.token) {
+      console.log('✅ Login bem-sucedido, salvando no AsyncStorage');
       // Salvar token e user no AsyncStorage
       await AsyncStorage.setItem('token', response.data.token);
       await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
@@ -31,12 +40,14 @@ export const login = async (emailOrUsername, password) => {
       };
     }
 
+    console.log('⚠️ Response sem success ou token');
     return {
       success: false,
       error: response.data.error || 'Erro ao fazer login',
     };
   } catch (error) {
-    console.error('❌ Erro no login:', error);
+    console.error('❌ Erro no login (catch):', error);
+    console.error('❌ Error.response:', error.response?.data);
     return {
       success: false,
       error: error.response?.data?.error || 'Erro de conexão com o servidor',

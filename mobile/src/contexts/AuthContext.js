@@ -31,11 +31,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signIn = async (email, password) => {
-    const result = await authService.login(email, password);
-    if (result.success) {
-      setUser(result.user);
+    console.log('🔷 AuthContext.signIn chamado');
+    console.log('📧 Email recebido:', email);
+
+    try {
+      const result = await authService.login(email, password);
+      console.log('📦 Resultado do authService.login:', result);
+
+      if (result.success) {
+        console.log('✅ Login bem-sucedido, setando user:', result.user);
+        setUser(result.user);
+      } else {
+        console.log('❌ Login falhou:', result.error);
+      }
+
+      return result;
+    } catch (error) {
+      console.error('💥 Erro em signIn:', error);
+      return { success: false, error: error.message };
     }
-    return result;
   };
 
   const signUp = async (email, code) => {
