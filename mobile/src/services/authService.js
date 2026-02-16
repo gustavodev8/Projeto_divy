@@ -27,16 +27,19 @@ export const login = async (emailOrUsername, password) => {
     const response = await api.post('/v1/auth/login', payload);
     console.log('📥 Response recebida:', response.data);
 
-    if (response.data.success && response.data.token) {
+    // Backend retorna accessToken, não token
+    const token = response.data.accessToken || response.data.token;
+
+    if (response.data.success && token) {
       console.log('✅ Login bem-sucedido, salvando no AsyncStorage');
       // Salvar token e user no AsyncStorage
-      await AsyncStorage.setItem('token', response.data.token);
+      await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
 
       return {
         success: true,
         user: response.data.user,
-        token: response.data.token,
+        token: token,
       };
     }
 
@@ -89,15 +92,18 @@ export const verifyCode = async (email, code) => {
       code,
     });
 
-    if (response.data.success && response.data.token) {
+    // Backend retorna accessToken, não token
+    const token = response.data.accessToken || response.data.token;
+
+    if (response.data.success && token) {
       // Salvar token e user no AsyncStorage
-      await AsyncStorage.setItem('token', response.data.token);
+      await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
 
       return {
         success: true,
         user: response.data.user,
-        token: response.data.token,
+        token: token,
       };
     }
 
