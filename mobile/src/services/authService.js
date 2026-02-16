@@ -9,10 +9,13 @@ import api from './api';
 /**
  * Login do usuário
  */
-export const login = async (email, password) => {
+export const login = async (emailOrUsername, password) => {
   try {
+    // Detectar se é email (contém @) ou username
+    const isEmail = emailOrUsername.includes('@');
+
     const response = await api.post('/v1/auth/login', {
-      email,
+      ...(isEmail ? { email: emailOrUsername } : { username: emailOrUsername }),
       password,
     });
 

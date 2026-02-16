@@ -60,13 +60,12 @@ const LoginScreen = ({ navigation }) => {
         {/* Form */}
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>Email ou Username</Text>
             <TextInput
               style={styles.input}
-              placeholder="seu@email.com"
+              placeholder="seu@email.com ou username"
               value={email}
               onChangeText={setEmail}
-              keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
             />
