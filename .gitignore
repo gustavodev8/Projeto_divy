@@ -34,3 +34,18 @@ build/
 ngrok.exe
 ngrok.zip
 nul
+
+# Mobile (React Native + Expo)
+mobile/node_modules/
+mobile/.expo/
+mobile/.expo-shared/
+mobile/dist/
+mobile/npm-debug.*
+mobile/*.jks
+mobile/*.p8
+mobile/*.p12
+mobile/*.key
+mobile/*.mobileprovision
+mobile/*.orig.*
+mobile/web-build/
+mobile/.metro-health-check*
