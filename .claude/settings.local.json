@@ -16,7 +16,12 @@
       "Bash(npm start)",
       "Bash(npm cache clean:*)",
       "Bash(npx expo:*)",
-      "Bash(exit:*)"
+      "Bash(exit:*)",
+      "Bash(python:*)",
+      "Bash(node convert_homescreen.js:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(curl:*)"
     ]
   }
 }

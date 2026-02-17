@@ -1,6 +1,6 @@
 /**
- * DIVY - Home Screen
- * Tela principal com lista de tarefas
+ * DIVY - Tasks Screen
+ * Tela de gerenciamento de tarefas
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -15,21 +15,34 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  SafeAreaView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useAuth } from '../contexts/AuthContext';
 import TaskItem from '../components/TaskItem';
 import * as taskService from '../services/taskService';
 import theme from '../styles/theme';
+import { Task } from '../types/api';
+import { NavigationProp } from '../types/navigation';
 
-const HomeScreen = () => {
-  const { user, signOut } = useAuth();
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
-  const [formData, setFormData] = useState({
+interface TasksScreenProps {
+  navigation: NavigationProp<'Tasks'>;
+}
+
+type TaskPriority = 'low' | 'medium' | 'high';
+
+interface FormData {
+  title: string;
+  description: string;
+  priority: TaskPriority;
+}
+
+const TasksScreen: React.FC<TasksScreenProps> = ({ navigation }) => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
     priority: 'medium',
@@ -38,7 +51,7 @@ const HomeScreen = () => {
   // Carregar tarefas
   const loadTasks = useCallback(async () => {
     const result = await taskService.getTasks();
-    if (result.success) {
+    if (result.success && result.tasks) {
       setTasks(result.tasks);
     } else {
       Alert.alert('Erro', result.error);
@@ -52,20 +65,20 @@ const HomeScreen = () => {
   }, [loadTasks]);
 
   // Refresh
-  const onRefresh = () => {
+  const onRefresh = (): void => {
     setRefreshing(true);
     loadTasks();
   };
 
   // Abrir modal para criar tarefa
-  const handleCreateTask = () => {
+  const handleCreateTask = (): void => {
     setEditingTask(null);
     setFormData({ title: '', description: '', priority: 'medium' });
     setModalVisible(true);
   };
 
   // Abrir modal para editar tarefa
-  const handleEditTask = (task) => {
+  const handleEditTask = (task: Task): void => {
     setEditingTask(task);
     setFormData({
       title: task.title,
@@ -76,7 +89,7 @@ const HomeScreen = () => {
   };
 
   // Salvar tarefa (criar ou editar)
-  const handleSaveTask = async () => {
+  const handleSaveTask = async (): Promise<void> => {
     if (!formData.title.trim()) {
       Alert.alert('Erro', 'Digite um título para a tarefa');
       return;
@@ -99,7 +112,7 @@ const HomeScreen = () => {
   };
 
   // Toggle status da tarefa
-  const handleToggleTask = async (task) => {
+  const handleToggleTask = async (task: Task): Promise<void> => {
     const result = await taskService.toggleTaskStatus(task.id, task.status);
     if (result.success) {
       loadTasks();
@@ -109,7 +122,7 @@ const HomeScreen = () => {
   };
 
   // Deletar tarefa
-  const handleDeleteTask = (task) => {
+  const handleDeleteTask = (task: Task): void => {
     Alert.alert(
       'Confirmar',
       `Deseja deletar a tarefa "${task.title}"?`,
@@ -136,20 +149,21 @@ const HomeScreen = () => {
   const completedTasks = tasks.filter((t) => t.status === 'completed');
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
 
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Minhas Tarefas</Text>
-          <Text style={styles.subtitle}>
-            Olá, {user?.name || user?.email || 'Usuário'}!
-          </Text>
-        </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
-          <Text style={styles.logoutIcon}>🚪</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backIcon}>‹</Text>
         </TouchableOpacity>
+        <View style={styles.headerCenter}>
+          <Text style={styles.title}>Minhas Tarefas</Text>
+        </View>
+        <View style={styles.headerRight} />
       </View>
 
       {/* Stats */}
@@ -224,6 +238,7 @@ const HomeScreen = () => {
             <TextInput
               style={styles.input}
               placeholder="Título da tarefa"
+              placeholderTextColor={theme.colors.textMuted}
               value={formData.title}
               onChangeText={(text) =>
                 setFormData({ ...formData, title: text })
@@ -233,6 +248,7 @@ const HomeScreen = () => {
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Descrição (opcional)"
+              placeholderTextColor={theme.colors.textMuted}
               value={formData.description}
               onChangeText={(text) =>
                 setFormData({ ...formData, description: text })
@@ -243,7 +259,7 @@ const HomeScreen = () => {
 
             <Text style={styles.label}>Prioridade:</Text>
             <View style={styles.priorityContainer}>
-              {['low', 'medium', 'high'].map((p) => (
+              {(['low', 'medium', 'high'] as TaskPriority[]).map((p) => (
                 <TouchableOpacity
                   key={p}
                   style={[
@@ -282,7 +298,7 @@ const HomeScreen = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -293,32 +309,40 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: theme.spacing.lg,
-    backgroundColor: theme.colors.primary,
-    paddingTop: theme.spacing.xxl + 20,
+    paddingTop: theme.spacing.md,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backIcon: {
+    fontSize: 32,
+    color: theme.colors.text,
+    fontWeight: '300',
+  },
+  headerCenter: {
+    flex: 1,
     alignItems: 'center',
   },
+  headerRight: {
+    width: 40,
+  },
   title: {
-    fontSize: theme.fontSize.xxl,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.textWhite,
-    marginBottom: theme.spacing.xs,
-  },
-  subtitle: {
-    fontSize: theme.fontSize.md,
-    color: theme.colors.textWhite,
-    opacity: 0.9,
-  },
-  logoutButton: {
-    padding: theme.spacing.sm,
-  },
-  logoutIcon: {
-    fontSize: 24,
+    fontSize: theme.fontSize.xl,
+    fontWeight: theme.fontWeight.bold as any,
+    color: theme.colors.text,
   },
   statsContainer: {
     flexDirection: 'row',
     padding: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
     gap: theme.spacing.md,
   },
   statCard: {
@@ -327,11 +351,12 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.lg,
     alignItems: 'center',
-    ...theme.shadows.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   statNumber: {
     fontSize: theme.fontSize.xl,
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: theme.fontWeight.bold as any,
     color: theme.colors.primary,
   },
   statLabel: {
@@ -345,6 +370,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
     paddingBottom: 80,
   },
   emptyContainer: {
@@ -358,7 +384,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
+    fontWeight: theme.fontWeight.semibold as any,
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -381,11 +407,11 @@ const styles = StyleSheet.create({
   fabIcon: {
     fontSize: 32,
     color: theme.colors.textWhite,
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: theme.fontWeight.bold as any,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'flex-end',
   },
   modalContent: {
@@ -397,7 +423,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: theme.fontSize.xl,
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: theme.fontWeight.bold as any,
     color: theme.colors.text,
     marginBottom: theme.spacing.lg,
   },
@@ -409,6 +435,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     backgroundColor: theme.colors.surface,
     marginBottom: theme.spacing.md,
+    color: theme.colors.text,
   },
   textArea: {
     height: 100,
@@ -416,7 +443,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.medium,
+    fontWeight: theme.fontWeight.medium as any,
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
   },
@@ -432,6 +459,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
     alignItems: 'center',
+    backgroundColor: theme.colors.surface,
   },
   priorityButtonActive: {
     backgroundColor: theme.colors.primary,
@@ -443,7 +471,7 @@ const styles = StyleSheet.create({
   },
   priorityButtonTextActive: {
     color: theme.colors.textWhite,
-    fontWeight: theme.fontWeight.semibold,
+    fontWeight: theme.fontWeight.semibold as any,
   },
   modalActions: {
     flexDirection: 'row',
@@ -456,11 +484,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
     alignItems: 'center',
+    backgroundColor: theme.colors.surface,
   },
   modalButtonTextCancel: {
     fontSize: theme.fontSize.md,
     color: theme.colors.text,
-    fontWeight: theme.fontWeight.semibold,
+    fontWeight: theme.fontWeight.semibold as any,
   },
   modalButtonSave: {
     flex: 1,
@@ -472,8 +501,8 @@ const styles = StyleSheet.create({
   modalButtonTextSave: {
     fontSize: theme.fontSize.md,
     color: theme.colors.textWhite,
-    fontWeight: theme.fontWeight.semibold,
+    fontWeight: theme.fontWeight.semibold as any,
   },
 });
 
-export default HomeScreen;
+export default TasksScreen;

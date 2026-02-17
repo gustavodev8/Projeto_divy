@@ -7,10 +7,12 @@ import React from 'react';
 import { AuthProvider } from './src/contexts/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
-export default function App() {
+const App: React.FC = () => {
   return (
     <AuthProvider>
       <AppNavigator />
     </AuthProvider>
   );
-}
+};
+
+export default App;

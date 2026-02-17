@@ -3,21 +3,42 @@
  * Gerencia estado global de autenticação
  */
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import authService from '../services/authService';
+import { User } from '../types/api';
 
-const AuthContext = createContext({});
+interface AuthContextData {
+  user: User | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signUp: (email: string, code: string) => Promise<AuthResult>;
+  signOut: () => Promise<void>;
+}
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+interface AuthResult {
+  success: boolean;
+  user?: User;
+  token?: string;
+  error?: string;
+}
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+const AuthContext = createContext<AuthContextData>({} as AuthContextData);
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Verificar se usuário está logado ao iniciar app
   useEffect(() => {
     checkAuth();
   }, []);
 
-  const checkAuth = async () => {
+  const checkAuth = async (): Promise<void> => {
     try {
       const storedData = await authService.getStoredUser();
       if (storedData) {
@@ -30,7 +51,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signIn = async (email, password) => {
+  const signIn = async (email: string, password: string): Promise<AuthResult> => {
     console.log('🔷 AuthContext.signIn chamado');
     console.log('📧 Email recebido:', email);
 
@@ -38,7 +59,7 @@ export const AuthProvider = ({ children }) => {
       const result = await authService.login(email, password);
       console.log('📦 Resultado do authService.login:', result);
 
-      if (result.success) {
+      if (result.success && result.user) {
         console.log('✅ Login bem-sucedido, setando user:', result.user);
         setUser(result.user);
       } else {
@@ -48,19 +69,20 @@ export const AuthProvider = ({ children }) => {
       return result;
     } catch (error) {
       console.error('💥 Erro em signIn:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      return { success: false, error: errorMessage };
     }
   };
 
-  const signUp = async (email, code) => {
+  const signUp = async (email: string, code: string): Promise<AuthResult> => {
     const result = await authService.verifyCode(email, code);
-    if (result.success) {
+    if (result.success && result.user) {
       setUser(result.user);
     }
     return result;
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<void> => {
     await authService.logout();
     setUser(null);
   };
@@ -81,7 +103,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextData => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within AuthProvider');

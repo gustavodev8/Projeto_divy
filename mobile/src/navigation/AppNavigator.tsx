@@ -8,16 +8,18 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../contexts/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
+import { RootStackParamList } from '../types/navigation';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
+import TasksScreen from '../screens/TasksScreen';
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
 
 // Auth Stack (Login, Register)
-const AuthNavigator = () => (
+const AuthNavigator: React.FC = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="Register" component={RegisterScreen} />
@@ -25,18 +27,23 @@ const AuthNavigator = () => (
 );
 
 // Main Stack (Home, Tasks, etc)
-const MainNavigator = () => (
+const MainNavigator: React.FC = () => (
   <Stack.Navigator>
     <Stack.Screen
       name="Home"
       component={HomeScreen}
       options={{ headerShown: false }}
     />
+    <Stack.Screen
+      name="Tasks"
+      component={TasksScreen}
+      options={{ headerShown: false }}
+    />
   </Stack.Navigator>
 );
 
 // Root Navigator
-const AppNavigator = () => {
+const AppNavigator: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
 
   // Loading

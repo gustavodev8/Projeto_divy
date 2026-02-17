@@ -6,11 +6,21 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import theme from '../styles/theme';
+import { Task } from '../types/api';
 
-const TaskItem = ({ task, onToggle, onEdit, onDelete }) => {
+interface TaskItemProps {
+  task: Task;
+  onToggle: (task: Task) => void;
+  onEdit: (task: Task) => void;
+  onDelete: (task: Task) => void;
+}
+
+type Priority = 'low' | 'medium' | 'high';
+
+const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onEdit, onDelete }) => {
   const isCompleted = task.status === 'completed';
 
-  const getPriorityColor = (priority) => {
+  const getPriorityColor = (priority: Priority): string => {
     switch (priority) {
       case 'high':
         return '#ef4444';
@@ -23,7 +33,7 @@ const TaskItem = ({ task, onToggle, onEdit, onDelete }) => {
     }
   };
 
-  const getPriorityLabel = (priority) => {
+  const getPriorityLabel = (priority: Priority): string => {
     switch (priority) {
       case 'high':
         return 'Alta';
@@ -121,14 +131,14 @@ const styles = StyleSheet.create({
   checkmark: {
     color: theme.colors.textWhite,
     fontSize: 14,
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: theme.fontWeight.bold as any,
   },
   taskInfo: {
     flex: 1,
   },
   title: {
     fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.semibold,
+    fontWeight: theme.fontWeight.semibold as any,
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -153,7 +163,7 @@ const styles = StyleSheet.create({
   priorityText: {
     fontSize: theme.fontSize.xs,
     color: theme.colors.textWhite,
-    fontWeight: theme.fontWeight.semibold,
+    fontWeight: theme.fontWeight.semibold as any,
   },
   actions: {
     flexDirection: 'row',

@@ -3,27 +3,30 @@
  * Design System para o App Mobile
  */
 
-export const theme = {
+import { Theme } from '../types/theme';
+
+export const theme: Theme = {
   colors: {
     // Primary Colors (Azul)
     primary: '#3b82f6',
     primaryDark: '#2563eb',
     primaryLight: '#60a5fa',
 
-    // Background
-    background: '#ffffff',
-    backgroundSecondary: '#f9fafb',
-    surface: '#ffffff',
-    surfaceHover: '#f3f4f6',
+    // Background - Dark Theme
+    background: '#0f172a',
+    backgroundSecondary: '#1e293b',
+    surface: '#1e293b',
+    surfaceHover: '#334155',
+    surfaceCard: '#1e293b',
 
     // Text
-    text: '#111827',
-    textSecondary: '#6b7280',
-    textMuted: '#9ca3af',
+    text: '#f1f5f9',
+    textSecondary: '#94a3b8',
+    textMuted: '#64748b',
     textWhite: '#ffffff',
 
     // Border
-    border: '#e5e7eb',
+    border: '#334155',
     borderFocus: '#3b82f6',
 
     // Status
