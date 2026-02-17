@@ -391,7 +391,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
         <View style={styles.sectionsContainer}>
           {selectedList.sections.length === 0 ? (
-            <Text style={styles.emptyText}>Nenhuma seção nesta lista</Text>
+            <View style={styles.emptyStateCard}>
+              <Ionicons name="folder-open-outline" size={48} color="#d1d5db" />
+              <Text style={styles.emptyStateTitle}>Nenhuma seção nesta lista</Text>
+              <Text style={styles.emptyStateSubtitle}>
+                As seções ajudam a organizar suas tarefas em grupos
+              </Text>
+            </View>
           ) : (
             selectedList.sections.map(section => {
               console.log('  📁 Renderizando seção:', section.name, 'com', section.tasks.length, 'tarefas');
@@ -702,6 +708,28 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     fontSize: 14,
     paddingVertical: 20,
+  },
+  emptyStateCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 32,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderStyle: 'dashed',
+  },
+  emptyStateTitle: {
+    fontSize: 16,
+    fontWeight: '600' as any,
+    color: '#6b7280',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  emptyStateSubtitle: {
+    fontSize: 14,
+    color: '#9ca3af',
+    marginTop: 4,
+    textAlign: 'center',
   },
   listCard: {
     backgroundColor: '#ffffff',

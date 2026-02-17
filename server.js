@@ -2163,6 +2163,57 @@ app.delete('/api/sections/:id', async (req, res) => {
     }
 });
 
+// POST - Criar seções de exemplo (para debug/teste)
+app.post('/api/sections/seed', async (req, res) => {
+    try {
+        const userId = req.body.user_id || req.headers['x-user-id'];
+        const listId = req.body.list_id;
+
+        if (!userId) return res.status(401).json({ success: false, error: 'Usuário não identificado' });
+        if (!listId) return res.status(400).json({ success: false, error: 'list_id é obrigatório' });
+
+        console.log(`🌱 Criando seções de exemplo para user ${userId}, lista ${listId}`);
+
+        const exampleSections = [
+            { name: 'Tarefas', emoji: '📋', position: 0 },
+            { name: 'Em Progresso', emoji: '🚀', position: 1 },
+            { name: 'Concluído', emoji: '✅', position: 2 },
+        ];
+
+        const createdSections = [];
+
+        for (const section of exampleSections) {
+            if (db.isPostgres) {
+                const result = await db.query(`
+                    INSERT INTO sections (name, emoji, user_id, list_id, position, created_at)
+                    VALUES ($1, $2, $3, $4, $5, NOW())
+                    RETURNING *
+                `, [section.name, section.emoji, userId, listId, section.position]);
+                createdSections.push(result[0]);
+            } else {
+                const result = await db.query(`
+                    INSERT INTO sections (name, emoji, user_id, list_id, position, created_at)
+                    VALUES (?, ?, ?, ?, ?, datetime('now'))
+                `, [section.name, section.emoji, userId, listId, section.position]);
+
+                const newSection = await db.query('SELECT * FROM sections WHERE id = ?', [result.lastID]);
+                createdSections.push(newSection[0]);
+            }
+        }
+
+        console.log(`✅ ${createdSections.length} seções de exemplo criadas`);
+        res.json({
+            success: true,
+            sections: createdSections,
+            message: `${createdSections.length} seções criadas`
+        });
+
+    } catch (err) {
+        console.error('❌ Erro ao criar seções de exemplo:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // PUT - Mover tarefa para seção
 app.put('/api/tasks/:id/move', async (req, res) => {
     try {
