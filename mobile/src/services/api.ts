@@ -29,8 +29,9 @@ api.interceptors.request.use(
       const token = await AsyncStorage.getItem('token');
       const userJson = await AsyncStorage.getItem('user');
 
-      console.log('🔑 Token do AsyncStorage:', token ? `${token.substring(0, 20)}...` : 'null');
-      console.log('📍 URL da request:', config.url);
+      console.log('🔍 INTERCEPTOR - URL:', config.url);
+      console.log('🔑 INTERCEPTOR - Token existe?', !!token);
+      console.log('👤 INTERCEPTOR - UserJson existe?', !!userJson);
 
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -43,14 +44,23 @@ api.interceptors.request.use(
       if (userJson) {
         try {
           const user = JSON.parse(userJson);
+          console.log('👤 INTERCEPTOR - User parseado:', user);
+          console.log('🆔 INTERCEPTOR - User.id:', user.id);
+
           if (user.id && config.headers) {
             config.headers['x-user-id'] = user.id.toString();
             console.log('✅ Header x-user-id adicionado:', user.id);
+          } else {
+            console.log('⚠️ user.id não existe ou headers não disponível');
           }
         } catch (parseError) {
           console.error('❌ Erro ao parsear user do AsyncStorage:', parseError);
         }
+      } else {
+        console.log('⚠️ userJson não existe no AsyncStorage');
       }
+
+      console.log('📋 INTERCEPTOR - Headers finais:', config.headers);
     } catch (error) {
       console.error('❌ Erro ao obter token:', error);
     }
