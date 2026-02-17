@@ -468,10 +468,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         >
           {/* Título */}
           <View style={styles.titleContainer}>
-            <View style={styles.pageTitleRow}>
-              {selectedList?.emoji && <Text style={styles.pageTitleEmoji}>{selectedList.emoji}</Text>}
-              <Text style={styles.pageTitle}>{selectedList?.name || 'Minhas Tarefas'}</Text>
-            </View>
+            <Text style={styles.pageTitle}>{selectedList?.name || 'Minhas Tarefas'}</Text>
             <Text style={styles.pageSubtitle}>
               {selectedList?.sections.length || 0} seção(ões)
             </Text>
@@ -693,14 +690,6 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     marginBottom: 16,
-  },
-  pageTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  pageTitleEmoji: {
-    fontSize: 24,
   },
   pageTitle: {
     fontSize: 24,
