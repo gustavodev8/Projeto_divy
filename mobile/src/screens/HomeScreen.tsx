@@ -123,7 +123,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               return {
                 ...section,
                 tasks,
-                expanded: true, // Seções começam expandidas
+                expanded: false, // Seções começam colapsadas
               };
             })
           );
@@ -323,26 +323,42 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  // Renderizar seção como card completo (sempre expandido)
+  // Renderizar seção como card (colapsável)
   const renderSection = (list: ListWithSections, section: SectionWithTasks): React.JSX.Element => (
     <View key={section.id} style={styles.sectionCard}>
-      <View style={styles.sectionHeader}>
+      <TouchableOpacity
+        style={[
+          styles.sectionHeader,
+          !section.expanded && styles.sectionHeaderCollapsed
+        ]}
+        onPress={() => toggleSection(list.id, section.id)}
+        activeOpacity={0.7}
+      >
         <View style={styles.sectionTitleContainer}>
           {section.emoji && <Text style={styles.sectionEmoji}>{section.emoji}</Text>}
           <Text style={styles.sectionTitle}>{section.name}</Text>
         </View>
-        <View style={styles.sectionBadge}>
-          <Text style={styles.sectionBadgeText}>{section.tasks.length}</Text>
+        <View style={styles.sectionBadgeContainer}>
+          <View style={styles.sectionBadge}>
+            <Text style={styles.sectionBadgeText}>{section.tasks.length}</Text>
+          </View>
+          <Ionicons
+            name={section.expanded ? "chevron-down" : "chevron-forward"}
+            size={20}
+            color="#6b7280"
+          />
         </View>
-      </View>
+      </TouchableOpacity>
 
-      <View style={styles.taskList}>
-        {section.tasks.length === 0 ? (
-          <Text style={styles.emptyText}>Nenhuma tarefa nesta seção</Text>
-        ) : (
-          section.tasks.map(renderTask)
-        )}
-      </View>
+      {section.expanded && (
+        <View style={styles.taskList}>
+          {section.tasks.length === 0 ? (
+            <Text style={styles.emptyText}>Nenhuma tarefa nesta seção</Text>
+          ) : (
+            section.tasks.map(renderTask)
+          )}
+        </View>
+      )}
     </View>
   );
 
@@ -813,6 +829,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f3f4f6',
   },
+  sectionHeaderCollapsed: {
+    marginBottom: 0,
+    paddingBottom: 0,
+    borderBottomWidth: 0,
+  },
   sectionTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -826,6 +847,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700' as any,
     color: '#111827',
+  },
+  sectionBadgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   sectionBadge: {
     backgroundColor: '#111827',
