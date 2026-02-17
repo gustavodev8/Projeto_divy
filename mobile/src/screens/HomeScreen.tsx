@@ -392,35 +392,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     console.log('  Seções:', selectedList.sections.length);
 
     return (
-      <View style={styles.listCard}>
-        <View style={styles.listHeaderView}>
-          <View style={styles.listTitleContainer}>
-            <Text style={styles.listEmoji}>{selectedList.emoji}</Text>
-            <Text style={styles.listTitle}>{selectedList.name}</Text>
+      <View style={styles.sectionsContainer}>
+        {selectedList.sections.length === 0 ? (
+          <View style={styles.emptyStateCard}>
+            <Ionicons name="folder-open-outline" size={48} color="#d1d5db" />
+            <Text style={styles.emptyStateTitle}>Nenhuma seção nesta lista</Text>
+            <Text style={styles.emptyStateSubtitle}>
+              As seções ajudam a organizar suas tarefas em grupos
+            </Text>
           </View>
-          <View style={styles.listBadgeContainer}>
-            <View style={[styles.listBadge, { backgroundColor: selectedList.color }]}>
-              <Text style={styles.listBadgeText}>{selectedList.sections.length}</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.sectionsContainer}>
-          {selectedList.sections.length === 0 ? (
-            <View style={styles.emptyStateCard}>
-              <Ionicons name="folder-open-outline" size={48} color="#d1d5db" />
-              <Text style={styles.emptyStateTitle}>Nenhuma seção nesta lista</Text>
-              <Text style={styles.emptyStateSubtitle}>
-                As seções ajudam a organizar suas tarefas em grupos
-              </Text>
-            </View>
-          ) : (
-            selectedList.sections.map(section => {
-              console.log('  📁 Renderizando seção:', section.name, 'com', section.tasks.length, 'tarefas');
-              return renderSection(selectedList, section);
-            })
-          )}
-        </View>
+        ) : (
+          selectedList.sections.map(section => {
+            console.log('  📁 Renderizando seção:', section.name, 'com', section.tasks.length, 'tarefas');
+            return renderSection(selectedList, section);
+          })
+        )}
       </View>
     );
   };
@@ -482,7 +468,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         >
           {/* Título */}
           <View style={styles.titleContainer}>
-            <Text style={styles.pageTitle}>{selectedList?.name || 'Minhas Tarefas'}</Text>
+            <View style={styles.pageTitleRow}>
+              {selectedList?.emoji && <Text style={styles.pageTitleEmoji}>{selectedList.emoji}</Text>}
+              <Text style={styles.pageTitle}>{selectedList?.name || 'Minhas Tarefas'}</Text>
+            </View>
             <Text style={styles.pageSubtitle}>
               {selectedList?.sections.length || 0} seção(ões)
             </Text>
@@ -704,6 +693,14 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     marginBottom: 16,
+  },
+  pageTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  pageTitleEmoji: {
+    fontSize: 24,
   },
   pageTitle: {
     fontSize: 24,
