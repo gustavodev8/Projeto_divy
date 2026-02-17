@@ -938,6 +938,10 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     backgroundColor: '#ffffff',
     paddingVertical: 8,
