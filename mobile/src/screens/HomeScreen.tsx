@@ -279,7 +279,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         activeOpacity={0.7}
       >
         <View style={styles.sectionTitleContainer}>
-          {section.emoji && <Text style={styles.sectionEmoji}>{section.emoji}</Text>}
+          <View style={[styles.sectionAccent, { backgroundColor: list.color || '#111827' }]} />
           <Text style={styles.sectionTitle}>{section.name}</Text>
         </View>
         <View style={styles.sectionBadgeContainer}>
@@ -756,8 +756,11 @@ const styles = StyleSheet.create({
     gap: 8,
     flex: 1,
   },
-  sectionEmoji: {
-    fontSize: 18,
+  sectionAccent: {
+    width: 3,
+    height: 18,
+    borderRadius: 2,
+    marginRight: 10,
   },
   sectionTitle: {
     fontSize: 16,
