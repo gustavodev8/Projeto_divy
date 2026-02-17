@@ -32,6 +32,9 @@ interface CreateTaskPayload {
   description?: string;
   priority?: TaskPriority;
   status?: TaskStatus;
+  due_date?: string;
+  list_id?: number;
+  section_id?: number;
 }
 
 interface UpdateTaskPayload {
@@ -88,7 +91,8 @@ export const getTasks = async (): Promise<TasksResponse> => {
 export const createTask = async (
   title: string,
   description: string = '',
-  priority: TaskPriority = 'medium'
+  priority: TaskPriority = 'medium',
+  options?: { due_date?: string; list_id?: number; section_id?: number }
 ): Promise<TaskResponse> => {
   try {
     const payload: CreateTaskPayload = {
@@ -96,6 +100,9 @@ export const createTask = async (
       description,
       priority,
       status: 'pending',
+      ...(options?.due_date && { due_date: options.due_date }),
+      ...(options?.list_id && { list_id: options.list_id }),
+      ...(options?.section_id && { section_id: options.section_id }),
     };
 
     const response = await api.post<ApiResponse<Task>>('/api/tasks', payload);

@@ -11,7 +11,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   TextInput,
   RefreshControl,
   ActivityIndicator,
@@ -19,6 +18,7 @@ import {
   Modal,
   Animated,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
@@ -39,6 +39,8 @@ interface NewTaskState {
   title: string;
   description: string;
   priority: 'low' | 'medium' | 'high';
+  dueDate: string;
+  sectionId: number | null;
 }
 
 interface DateInfo {
@@ -169,7 +171,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [newTask, setNewTask] = useState<NewTaskState>({
     title: '',
     description: '',
-    priority: 'medium'
+    priority: 'medium',
+    dueDate: '',
+    sectionId: null,
   });
 
   // Carregar dados completos: Listas → Seções → Tarefas
@@ -239,12 +243,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     const result = await taskService.createTask(
       newTask.title,
       newTask.description,
-      newTask.priority
+      newTask.priority,
+      {
+        due_date: newTask.dueDate || undefined,
+        list_id: selectedList?.id || undefined,
+        section_id: newTask.sectionId || undefined,
+      }
     );
 
     if (result.success) {
       setModalVisible(false);
-      setNewTask({ title: '', description: '', priority: 'medium' });
+      setNewTask({ title: '', description: '', priority: 'medium', dueDate: '', sectionId: null });
       loadData();
     } else {
       Alert.alert('Erro', result.error || 'Erro ao criar tarefa');
@@ -453,6 +462,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         />
       </View>
 
+      {/* ScrollView com flex: 1 isolado */}
       {loading ? (
         <ActivityIndicator size="large" color="#111827" style={styles.loading} />
       ) : (
@@ -486,7 +496,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <Ionicons name="add" size={28} color="#ffffff" />
       </TouchableOpacity>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - SEMPRE FIXO */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navItem}
@@ -537,68 +547,139 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       {/* Modal Criar Tarefa */}
       <Modal
         visible={modalVisible}
-        animationType="slide"
+        animationType="fade"
         transparent
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
+            {/* Header */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Nova Tarefa</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#6b7280" />
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalCloseBtn}>
+                <Ionicons name="close" size={20} color="#6b7280" />
               </TouchableOpacity>
             </View>
 
+            {/* Título */}
             <TextInput
-              style={styles.input}
+              style={styles.modalInput}
               placeholder="Título da tarefa"
               placeholderTextColor="#9ca3af"
               value={newTask.title}
               onChangeText={(text) => setNewTask({ ...newTask, title: text })}
+              autoFocus
             />
 
+            {/* Descrição */}
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[styles.modalInput, styles.modalTextArea]}
               placeholder="Descrição (opcional)"
               placeholderTextColor="#9ca3af"
               value={newTask.description}
               onChangeText={(text) => setNewTask({ ...newTask, description: text })}
               multiline
-              numberOfLines={4}
+              numberOfLines={3}
+              textAlignVertical="top"
             />
 
-            <Text style={styles.label}>Prioridade:</Text>
-            <View style={styles.priorityContainer}>
-              {(['low', 'medium', 'high'] as const).map((p) => (
+            {/* Linha: Data + Prioridade */}
+            <View style={styles.modalRow}>
+              {/* Data de vencimento */}
+              <View style={styles.modalFieldHalf}>
+                <View style={styles.modalFieldLabel}>
+                  <Ionicons name="calendar-outline" size={13} color="#6b7280" />
+                  <Text style={styles.modalFieldLabelText}>Data de vencimento</Text>
+                </View>
+                <TextInput
+                  style={styles.modalInputSmall}
+                  placeholder="dd/mm/aaaa"
+                  placeholderTextColor="#9ca3af"
+                  value={newTask.dueDate}
+                  onChangeText={(text) => setNewTask({ ...newTask, dueDate: text })}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              {/* Prioridade */}
+              <View style={styles.modalFieldHalf}>
+                <View style={styles.modalFieldLabel}>
+                  <Ionicons name="flag-outline" size={13} color="#6b7280" />
+                  <Text style={styles.modalFieldLabelText}>Prioridade</Text>
+                </View>
                 <TouchableOpacity
-                  key={p}
-                  style={[
-                    styles.priorityButton,
-                    newTask.priority === p && styles.priorityButtonActive,
-                  ]}
-                  onPress={() => setNewTask({ ...newTask, priority: p })}
+                  style={styles.modalInputSmall}
+                  onPress={() => {
+                    const order: Array<'low' | 'medium' | 'high'> = ['low', 'medium', 'high'];
+                    const next = order[(order.indexOf(newTask.priority) + 1) % 3];
+                    setNewTask({ ...newTask, priority: next });
+                  }}
                   activeOpacity={0.7}
                 >
-                  <Text
-                    style={[
-                      styles.priorityButtonText,
-                      newTask.priority === p && styles.priorityButtonTextActive,
-                    ]}
-                  >
-                    {p === 'low' ? 'Baixa' : p === 'medium' ? 'Média' : 'Alta'}
-                  </Text>
+                  <View style={styles.priorityRow}>
+                    <View style={[
+                      styles.priorityDot,
+                      newTask.priority === 'high' && styles.priorityDotHigh,
+                      newTask.priority === 'medium' && styles.priorityDotMedium,
+                      newTask.priority === 'low' && styles.priorityDotLow,
+                    ]} />
+                    <Text style={styles.prioritySelectText}>
+                      {newTask.priority === 'high' ? 'Alta' : newTask.priority === 'medium' ? 'Média' : 'Baixa'}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
-              ))}
+              </View>
             </View>
 
-            <TouchableOpacity
-              style={styles.modalButtonSave}
-              onPress={handleCreateTask}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.modalButtonTextSave}>Criar Tarefa</Text>
-            </TouchableOpacity>
+            {/* Seção */}
+            <View style={styles.modalFieldFull}>
+              <View style={styles.modalFieldLabel}>
+                <Ionicons name="folder-outline" size={13} color="#6b7280" />
+                <Text style={styles.modalFieldLabelText}>Seção</Text>
+              </View>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.sectionPicker}>
+                <TouchableOpacity
+                  style={[styles.sectionPickerItem, newTask.sectionId === null && styles.sectionPickerItemActive]}
+                  onPress={() => setNewTask({ ...newTask, sectionId: null })}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.sectionPickerText, newTask.sectionId === null && styles.sectionPickerTextActive]}>
+                    Sem seção
+                  </Text>
+                </TouchableOpacity>
+                {selectedList?.sections.map(s => (
+                  <TouchableOpacity
+                    key={s.id}
+                    style={[styles.sectionPickerItem, newTask.sectionId === s.id && styles.sectionPickerItemActive]}
+                    onPress={() => setNewTask({ ...newTask, sectionId: s.id })}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.sectionPickerText, newTask.sectionId === s.id && styles.sectionPickerTextActive]}>
+                      {s.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Botões */}
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalBtnCancel}
+                onPress={() => setModalVisible(false)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.modalBtnCancelText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalBtnSave}
+                onPress={handleCreateTask}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="add" size={18} color="#ffffff" />
+                <Text style={styles.modalBtnSaveText}>Criar Tarefa</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -682,9 +763,10 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
+    marginBottom: 65,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 80,
   },
   titleContainer: {
     marginBottom: 16,
@@ -924,7 +1006,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 90,
+    bottom: 75,
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -935,7 +1017,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 8,
+    elevation: 25,
+    zIndex: 25,
   },
   bottomNav: {
     position: 'absolute',
@@ -952,7 +1035,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
-    elevation: 5,
+    elevation: 20,
+    zIndex: 20,
   },
   navItem: {
     flex: 1,
@@ -974,89 +1058,177 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   modalContent: {
     backgroundColor: '#ffffff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    minHeight: '60%',
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 12,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '700' as any,
     color: '#111827',
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 12,
-    padding: 14,
+  modalCloseBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalInput: {
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
     fontSize: 15,
-    backgroundColor: '#ffffff',
-    marginBottom: 16,
+    backgroundColor: '#fafafa',
+    marginBottom: 12,
     color: '#111827',
   },
-  textArea: {
-    height: 100,
+  modalTextArea: {
+    height: 80,
     textAlignVertical: 'top',
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600' as any,
-    color: '#111827',
-    marginBottom: 10,
-  },
-  priorityContainer: {
+  modalRow: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 24,
+    marginBottom: 12,
   },
-  priorityButton: {
+  modalFieldHalf: {
     flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
+  },
+  modalFieldFull: {
+    marginBottom: 16,
+  },
+  modalFieldLabel: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    gap: 4,
+    marginBottom: 6,
   },
-  priorityButtonActive: {
-    backgroundColor: '#111827',
-    borderColor: '#111827',
+  modalFieldLabelText: {
+    fontSize: 12,
+    color: '#6b7280',
+    fontWeight: '500' as any,
   },
-  priorityButtonText: {
+  modalInputSmall: {
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    backgroundColor: '#fafafa',
+    color: '#111827',
+    justifyContent: 'center',
+  },
+  priorityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  priorityDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#d1d5db',
+  },
+  priorityDotHigh: {
+    backgroundColor: '#ef4444',
+  },
+  priorityDotMedium: {
+    backgroundColor: '#f59e0b',
+  },
+  priorityDotLow: {
+    backgroundColor: '#22c55e',
+  },
+  prioritySelectText: {
     fontSize: 14,
     color: '#111827',
     fontWeight: '500' as any,
   },
-  priorityButtonTextActive: {
-    color: '#ffffff',
-    fontWeight: '700' as any,
+  sectionPicker: {
+    flexDirection: 'row',
   },
-  modalButtonSave: {
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: '#111827',
+  sectionPickerItem: {
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    marginRight: 8,
+    backgroundColor: '#fafafa',
+  },
+  sectionPickerItemActive: {
+    backgroundColor: '#eff6ff',
+    borderColor: '#3b82f6',
+  },
+  sectionPickerText: {
+    fontSize: 13,
+    color: '#6b7280',
+    fontWeight: '500' as any,
+  },
+  sectionPickerTextActive: {
+    color: '#3b82f6',
+    fontWeight: '600' as any,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 4,
+  },
+  modalBtnCancel: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
     alignItems: 'center',
-    shadowColor: '#111827',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    backgroundColor: '#ffffff',
+  },
+  modalBtnCancelText: {
+    fontSize: 15,
+    color: '#374151',
+    fontWeight: '500' as any,
+  },
+  modalBtnSave: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 10,
+    backgroundColor: '#3b82f6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
     elevation: 4,
   },
-  modalButtonTextSave: {
-    fontSize: 16,
+  modalBtnSaveText: {
+    fontSize: 15,
     color: '#ffffff',
-    fontWeight: '700' as any,
+    fontWeight: '600' as any,
   },
 });
 

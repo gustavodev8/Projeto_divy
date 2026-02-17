@@ -1181,7 +1181,8 @@ app.get('/api/tasks/:id', async (req, res) => {
 app.post('/api/tasks', async (req, res) => {
     console.log('📥 POST /api/tasks - Criar tarefa');
 
-    const { title, description, due_date, priority, status, user_id, list_id, section_id } = req.body;
+    const { title, description, due_date, priority, status, list_id, section_id } = req.body;
+    const user_id = req.body.user_id || req.headers['x-user-id'];
 
     if (!title || !user_id) {
         return res.status(400).json({
@@ -1277,14 +1278,16 @@ app.post('/api/tasks', async (req, res) => {
 app.put('/api/tasks/:id', async (req, res) => {
     const taskId = req.params.id;
     const updates = req.body;
-    
-    console.log('📝 PUT /api/tasks/' + taskId);
-    console.log('   Body:', updates);
+
+    // Aceitar user_id do body ou do header x-user-id
+    if (!updates.user_id) {
+        updates.user_id = req.headers['x-user-id'];
+    }
 
     if (!updates.user_id) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'user_id é obrigatório' 
+        return res.status(400).json({
+            success: false,
+            error: 'user_id é obrigatório'
         });
     }
 
