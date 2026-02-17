@@ -753,14 +753,14 @@ const styles = StyleSheet.create({
   sectionTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 0,
     flex: 1,
   },
   sectionAccent: {
     width: 3,
     height: 18,
     borderRadius: 2,
-    marginRight: 10,
+    marginRight: 8,
   },
   sectionTitle: {
     fontSize: 16,
