@@ -26,6 +26,7 @@ interface SectionsResponse {
 
 /**
  * Listar todas as seções de uma lista
+ * user_id é enviado automaticamente no header x-user-id pelo interceptor
  */
 export const getSectionsByList = async (listId: number): Promise<SectionsResponse> => {
   try {
