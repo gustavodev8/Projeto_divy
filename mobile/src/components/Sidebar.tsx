@@ -16,19 +16,16 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { List, getLists } from '../services/listService';
 
 const { width } = Dimensions.get('window');
 const SIDEBAR_WIDTH = width * 0.65; // 65% da largura da tela
 
-type IconType = 'ionicons' | 'mci';
-
 interface MenuItem {
   id: string;
   icon: string;
-  iconType: IconType;
   label: string;
   screen: string | null;
 }
@@ -63,16 +60,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [visible]);
 
   const loadUserLists = async () => {
-    console.log('📋 SIDEBAR: Carregando listas...');
     setLoadingLists(true);
     const result = await getLists();
-    console.log('📋 SIDEBAR: Resultado getLists:', result);
-
     if (result.success && result.lists) {
-      console.log(`✅ SIDEBAR: ${result.lists.length} listas carregadas`);
       setLists(result.lists);
-    } else {
-      console.error('❌ SIDEBAR: Erro ao carregar listas:', result.error);
     }
     setLoadingLists(false);
   };
@@ -110,12 +101,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [visible, slideAnim, fadeAnim]);
 
   const menuItems: MenuItem[] = [
-    { id: 'inicio', icon: 'home-outline', iconType: 'ionicons', label: 'Início', screen: 'Home' },
-    { id: 'agenda', icon: 'calendar-outline', iconType: 'ionicons', label: 'Agenda', screen: null },
-    { id: 'tarefas', icon: 'checkmark-circle-outline', iconType: 'ionicons', label: 'Tarefas', screen: 'Tasks' },
-    { id: 'ia', icon: 'head-lightbulb-outline', iconType: 'mci', label: 'IA Assistente', screen: null },
-    { id: 'favoritos', icon: 'star-outline', iconType: 'ionicons', label: 'Favoritos', screen: null },
-    { id: 'arquivo', icon: 'archive-outline', iconType: 'ionicons', label: 'Arquivo', screen: null },
+    { id: 'inicio', icon: 'home-outline', label: 'Início', screen: 'Home' },
+    { id: 'tarefas', icon: 'checkmark-circle-outline', label: 'Tarefas', screen: 'Tasks' },
   ];
 
   const handleMenuPress = (item: MenuItem): void => {
@@ -134,27 +121,15 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const handleListSelect = (listId: number): void => {
-    console.log('🎯 SIDEBAR: handleListSelect CHAMADO! Lista ID:', listId);
-    console.log('📌 SIDEBAR: onSelectList existe?', !!onSelectList);
-
     if (onSelectList) {
-      console.log('✅ SIDEBAR: Chamando onSelectList com listId:', listId);
       onSelectList(listId);
-    } else {
-      console.warn('⚠️ SIDEBAR: onSelectList não foi passado como prop!');
     }
-
-    console.log('🚪 SIDEBAR: Fechando sidebar...');
     onClose();
   };
 
   const renderIcon = (item: MenuItem): React.JSX.Element => {
     const isActive = activeItem === item.id;
     const color = isActive ? '#4f46e5' : '#111827';
-
-    if (item.iconType === 'mci') {
-      return <MaterialCommunityIcons name={item.icon as any} size={22} color={color} />;
-    }
     return <Ionicons name={item.icon as any} size={22} color={color} />;
   };
 
@@ -254,14 +229,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Footer */}
             <View style={styles.footer}>
-              <TouchableOpacity style={styles.footerItem} activeOpacity={0.7}>
+              <TouchableOpacity
+                style={styles.footerItem}
+                activeOpacity={0.7}
+                onPress={() => { onClose(); navigation.navigate('Profile'); }}
+              >
                 <Ionicons name="person-outline" size={20} color="#111827" />
-                <Text style={styles.footerLabel}>Minha conta</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.footerItem} activeOpacity={0.7}>
-                <Ionicons name="settings-outline" size={20} color="#111827" />
-                <Text style={styles.footerLabel}>Configurações</Text>
+                <View style={styles.footerItemContent}>
+                  <Text style={styles.footerLabel}>{user?.name || 'Minha conta'}</Text>
+                  <Text style={styles.footerSubLabel}>{user?.email || ''}</Text>
+                </View>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.footerItem} onPress={handleSignOut} activeOpacity={0.7}>
@@ -463,11 +440,20 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
   },
+  footerItemContent: {
+    marginLeft: 16,
+    flex: 1,
+  },
   footerLabel: {
     fontSize: 14,
     color: '#111827',
     marginLeft: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  footerSubLabel: {
+    fontSize: 12,
+    color: '#9ca3af',
+    marginTop: 1,
   },
   footerLabelDanger: {
     color: '#ef4444',
