@@ -63,10 +63,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [visible]);
 
   const loadUserLists = async () => {
+    console.log('📋 SIDEBAR: Carregando listas...');
     setLoadingLists(true);
     const result = await getLists();
+    console.log('📋 SIDEBAR: Resultado getLists:', result);
+
     if (result.success && result.lists) {
+      console.log(`✅ SIDEBAR: ${result.lists.length} listas carregadas`);
       setLists(result.lists);
+    } else {
+      console.error('❌ SIDEBAR: Erro ao carregar listas:', result.error);
     }
     setLoadingLists(false);
   };
@@ -128,9 +134,17 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const handleListSelect = (listId: number): void => {
+    console.log('🎯 SIDEBAR: handleListSelect CHAMADO! Lista ID:', listId);
+    console.log('📌 SIDEBAR: onSelectList existe?', !!onSelectList);
+
     if (onSelectList) {
+      console.log('✅ SIDEBAR: Chamando onSelectList com listId:', listId);
       onSelectList(listId);
+    } else {
+      console.warn('⚠️ SIDEBAR: onSelectList não foi passado como prop!');
     }
+
+    console.log('🚪 SIDEBAR: Fechando sidebar...');
     onClose();
   };
 
