@@ -253,6 +253,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           style={styles.backdrop}
           activeOpacity={1}
           onPress={onClose}
+          pointerEvents="box-only"
         />
       </Animated.View>
     </Modal>
@@ -269,7 +270,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
-    left: 0,
+    left: SIDEBAR_WIDTH,
     right: 0,
   },
   sidebar: {
