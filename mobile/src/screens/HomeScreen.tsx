@@ -323,39 +323,26 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  // Renderizar seção
+  // Renderizar seção como card completo (sempre expandido)
   const renderSection = (list: ListWithSections, section: SectionWithTasks): React.JSX.Element => (
-    <View key={section.id} style={styles.sectionContainer}>
-      <TouchableOpacity
-        style={styles.sectionHeader}
-        onPress={() => toggleSection(list.id, section.id)}
-        activeOpacity={0.7}
-      >
+    <View key={section.id} style={styles.sectionCard}>
+      <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleContainer}>
           {section.emoji && <Text style={styles.sectionEmoji}>{section.emoji}</Text>}
           <Text style={styles.sectionTitle}>{section.name}</Text>
         </View>
-        <View style={styles.sectionBadgeContainer}>
-          <View style={styles.sectionBadge}>
-            <Text style={styles.sectionBadgeText}>{section.tasks.length}</Text>
-          </View>
-          <Ionicons
-            name={section.expanded ? "chevron-down" : "chevron-forward"}
-            size={20}
-            color="#6b7280"
-          />
+        <View style={styles.sectionBadge}>
+          <Text style={styles.sectionBadgeText}>{section.tasks.length}</Text>
         </View>
-      </TouchableOpacity>
+      </View>
 
-      {section.expanded && (
-        <View style={styles.taskList}>
-          {section.tasks.length === 0 ? (
-            <Text style={styles.emptyText}>Nenhuma tarefa nesta seção</Text>
-          ) : (
-            section.tasks.map(renderTask)
-          )}
-        </View>
-      )}
+      <View style={styles.taskList}>
+        {section.tasks.length === 0 ? (
+          <Text style={styles.emptyText}>Nenhuma tarefa nesta seção</Text>
+        ) : (
+          section.tasks.map(renderTask)
+        )}
+      </View>
     </View>
   );
 
@@ -775,20 +762,28 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   sectionsContainer: {
-    marginTop: 12,
+    gap: 16,
   },
-  sectionContainer: {
-    marginBottom: 8,
-    paddingLeft: 8,
+  sectionCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#f9fafb',
-    borderRadius: 8,
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
   },
   sectionTitleContainer: {
     flexDirection: 'row',
@@ -797,41 +792,38 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionEmoji: {
-    fontSize: 16,
+    fontSize: 18,
   },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: '600' as any,
+    fontSize: 16,
+    fontWeight: '700' as any,
     color: '#111827',
   },
-  sectionBadgeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
   sectionBadge: {
-    backgroundColor: '#6b7280',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    minWidth: 24,
+    backgroundColor: '#111827',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    minWidth: 28,
     alignItems: 'center',
   },
   sectionBadgeText: {
-    fontSize: 11,
-    fontWeight: '600' as any,
+    fontSize: 12,
+    fontWeight: '700' as any,
     color: '#ffffff',
   },
   taskList: {
-    marginTop: 8,
-    paddingLeft: 12,
+    gap: 8,
   },
   taskItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    paddingHorizontal: 12,
+    backgroundColor: '#f9fafb',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   checkbox: {
     width: 24,
