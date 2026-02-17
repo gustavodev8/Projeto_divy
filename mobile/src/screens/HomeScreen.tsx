@@ -57,6 +57,101 @@ interface SectionWithTasks extends Section {
   expanded: boolean;
 }
 
+// Componente accordion para seção com animação de altura
+interface SectionAccordionProps {
+  section: SectionWithTasks;
+  list: ListWithSections;
+  onToggle: () => void;
+  renderTask: (task: Task) => React.JSX.Element;
+  styles: any;
+}
+
+const SectionAccordion: React.FC<SectionAccordionProps> = ({ section, list, onToggle, renderTask, styles }) => {
+  const animHeight = React.useRef(new Animated.Value(0)).current;
+  const animRotate = React.useRef(new Animated.Value(0)).current;
+  const [contentHeight, setContentHeight] = React.useState(0);
+  const [measured, setMeasured] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!measured) return;
+    Animated.parallel([
+      Animated.spring(animHeight, {
+        toValue: section.expanded ? contentHeight : 0,
+        useNativeDriver: false,
+        bounciness: 0,
+        speed: 16,
+      }),
+      Animated.spring(animRotate, {
+        toValue: section.expanded ? 1 : 0,
+        useNativeDriver: true,
+        bounciness: 0,
+        speed: 16,
+      }),
+    ]).start();
+  }, [section.expanded, contentHeight, measured]);
+
+  const rotate = animRotate.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '90deg'],
+  });
+
+  return (
+    <View style={styles.sectionCard}>
+      <TouchableOpacity
+        style={[styles.sectionHeader, !section.expanded && styles.sectionHeaderCollapsed]}
+        onPress={onToggle}
+        activeOpacity={0.7}
+      >
+        <View style={styles.sectionTitleContainer}>
+          <View style={[styles.sectionAccent, { backgroundColor: list.color || '#111827' }]} />
+          <Text style={styles.sectionTitle}>{section.name}</Text>
+        </View>
+        <View style={styles.sectionBadgeContainer}>
+          <View style={styles.sectionBadge}>
+            <Text style={styles.sectionBadgeText}>{section.tasks.length}</Text>
+          </View>
+          <Animated.View style={{ transform: [{ rotate }] }}>
+            <Ionicons name="chevron-forward" size={20} color="#6b7280" />
+          </Animated.View>
+        </View>
+      </TouchableOpacity>
+
+      {/* Medir altura real do conteúdo de forma invisível */}
+      {!measured && (
+        <View
+          style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+          onLayout={(e) => {
+            setContentHeight(e.nativeEvent.layout.height);
+            setMeasured(true);
+            if (section.expanded) {
+              animHeight.setValue(e.nativeEvent.layout.height);
+            }
+          }}
+        >
+          <View style={styles.taskList}>
+            {section.tasks.length === 0 ? (
+              <Text style={styles.emptyText}>Nenhuma tarefa nesta seção</Text>
+            ) : (
+              section.tasks.map(renderTask)
+            )}
+          </View>
+        </View>
+      )}
+
+      {/* Conteúdo animado */}
+      <Animated.View style={{ height: animHeight, overflow: 'hidden' }}>
+        <View style={styles.taskList}>
+          {section.tasks.length === 0 ? (
+            <Text style={styles.emptyText}>Nenhuma tarefa nesta seção</Text>
+          ) : (
+            section.tasks.map(renderTask)
+          )}
+        </View>
+      </Animated.View>
+    </View>
+  );
+};
+
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { user } = useAuth();
   const [lists, setLists] = useState<ListWithSections[]>([]);
@@ -267,43 +362,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  // Renderizar seção como card (colapsável)
+  // Renderizar seção como card (colapsável com animação accordion)
   const renderSection = (list: ListWithSections, section: SectionWithTasks): React.JSX.Element => (
-    <View key={section.id} style={styles.sectionCard}>
-      <TouchableOpacity
-        style={[
-          styles.sectionHeader,
-          !section.expanded && styles.sectionHeaderCollapsed
-        ]}
-        onPress={() => toggleSection(list.id, section.id)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.sectionTitleContainer}>
-          <View style={[styles.sectionAccent, { backgroundColor: list.color || '#111827' }]} />
-          <Text style={styles.sectionTitle}>{section.name}</Text>
-        </View>
-        <View style={styles.sectionBadgeContainer}>
-          <View style={styles.sectionBadge}>
-            <Text style={styles.sectionBadgeText}>{section.tasks.length}</Text>
-          </View>
-          <Ionicons
-            name={section.expanded ? "chevron-down" : "chevron-forward"}
-            size={20}
-            color="#6b7280"
-          />
-        </View>
-      </TouchableOpacity>
-
-      {section.expanded && (
-        <View style={styles.taskList}>
-          {section.tasks.length === 0 ? (
-            <Text style={styles.emptyText}>Nenhuma tarefa nesta seção</Text>
-          ) : (
-            section.tasks.map(renderTask)
-          )}
-        </View>
-      )}
-    </View>
+    <SectionAccordion
+      key={section.id}
+      section={section}
+      list={list}
+      onToggle={() => toggleSection(list.id, section.id)}
+      renderTask={renderTask}
+      styles={styles}
+    />
   );
 
   // Handler para selecionar lista
