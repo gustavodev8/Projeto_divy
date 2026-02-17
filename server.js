@@ -1950,21 +1950,10 @@ app.get('/api/lists/:id/tasks', async (req, res) => {
 
 // GET - Listar seções do usuário
 app.get('/api/sections', async (req, res) => {
-    console.log('📂 GET /api/sections - DEBUG');
-    console.log('   req.query:', req.query);
-    console.log('   req.headers:', req.headers);
-    console.log('   req.headers["x-user-id"]:', req.headers['x-user-id']);
-    console.log('   req.query.user_id:', req.query.user_id);
-
     const userId = req.query.user_id || req.headers['x-user-id'];
-    const listId = req.query.list_id;  // ✅ IMPORTANTE
-
-    console.log('📂 GET /api/sections - RESULTADO');
-    console.log('   userId:', userId);
-    console.log('   listId:', listId);
+    const listId = req.query.list_id;
 
     if (!userId) {
-        console.log('❌ userId não encontrado! Retornando erro 400');
         return res.status(400).json({
             success: false,
             error: 'user_id é obrigatório'

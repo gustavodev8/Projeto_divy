@@ -81,86 +81,41 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const loadData = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
-      console.log('🔄 INICIANDO CARREGAMENTO DE DADOS...');
-      console.log('👤 Usuário atual:', user?.name, '(ID:', user?.id, ')');
 
-      // 1. Buscar todas as listas
-      console.log('📡 Chamando listService.getLists()...');
       const listsResult = await listService.getLists();
-      console.log('📥 Resultado getLists:', listsResult);
 
       if (!listsResult.success || !listsResult.lists) {
-        console.error('❌ Erro ao carregar listas:', listsResult.error);
         Alert.alert('Erro', listsResult.error || 'Erro ao carregar listas');
         setLoading(false);
         return;
       }
 
       const listsData = listsResult.lists;
-      console.log(`✅ ${listsData.length} listas carregadas:`, listsData.map(l => `${l.emoji} ${l.name}`));
 
-      // 2. Para cada lista, buscar suas seções
-      console.log('📂 Carregando seções para cada lista...');
       const listsWithSections: ListWithSections[] = await Promise.all(
         listsData.map(async (list) => {
-          console.log(`  📋 Lista: ${list.emoji} ${list.name} (ID: ${list.id})`);
-
           const sectionsResult = await sectionService.getSectionsByList(list.id);
-          console.log(`    📁 Seções recebidas:`, sectionsResult);
-
           const sections = sectionsResult.success ? sectionsResult.sections || [] : [];
-          console.log(`    ✅ ${sections.length} seções para lista ${list.id}`);
 
-          // 3. Para cada seção, buscar suas tarefas
           const sectionsWithTasks: SectionWithTasks[] = await Promise.all(
             sections.map(async (section) => {
-              console.log(`      📁 Seção: ${section.emoji || ''} ${section.name} (ID: ${section.id})`);
-
               const tasksResult = await taskService.getTasksBySection(section.id);
               const tasks = tasksResult.success ? tasksResult.tasks || [] : [];
-              console.log(`        ✅ ${tasks.length} tarefas para seção ${section.id}`);
-
-              return {
-                ...section,
-                tasks,
-                expanded: false, // Seções começam colapsadas
-              };
+              return { ...section, tasks, expanded: false };
             })
           );
 
-          return {
-            ...list,
-            sections: sectionsWithTasks,
-            expanded: true, // Listas começam expandidas
-          };
+          return { ...list, sections: sectionsWithTasks, expanded: true };
         })
       );
 
-      console.log('💾 Salvando listas no estado...');
       setLists(listsWithSections);
-      console.log('✅ Listas salvas no estado!');
 
-      // Selecionar primeira lista como padrão se nenhuma estiver selecionada
       if (!selectedListId && listsWithSections.length > 0) {
         const defaultList = listsWithSections.find(l => l.is_default) || listsWithSections[0];
-        console.log('🎯 Selecionando lista padrão:', defaultList.name, '(ID:', defaultList.id, ')');
         setSelectedListId(defaultList.id);
-      } else {
-        console.log('📌 Lista já selecionada:', selectedListId);
       }
-
-      console.log('✅ ✅ ✅ DADOS CARREGADOS COM SUCESSO! ✅ ✅ ✅');
-      console.log('📊 Resumo:');
-      console.log(`  - ${listsWithSections.length} listas`);
-      console.log(`  - Lista selecionada: ${selectedListId}`);
-      listsWithSections.forEach(list => {
-        console.log(`  - ${list.emoji} ${list.name}: ${list.sections.length} seções`);
-        list.sections.forEach(section => {
-          console.log(`    - ${section.emoji || ''} ${section.name}: ${section.tasks.length} tarefas`);
-        });
-      });
     } catch (error) {
-      console.error('❌ Erro ao carregar dados:', error);
       Alert.alert('Erro', 'Erro ao carregar dados');
     } finally {
       setLoading(false);
@@ -172,17 +127,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     loadData();
   }, []);
 
-  // Debug: monitorar mudanças na lista selecionada
-  useEffect(() => {
-    console.log('🔄 selectedListId MUDOU:', selectedListId);
-    console.log('📋 Total de listas carregadas:', lists.length);
-    const selected = lists.find(l => l.id === selectedListId);
-    if (selected) {
-      console.log('✅ Lista encontrada:', selected.name, 'com', selected.sections.length, 'seções');
-    } else {
-      console.log('⚠️ Lista não encontrada no array de listas');
-    }
-  }, [selectedListId, lists]);
 
   // Refresh
   const onRefresh = (): void => {
@@ -364,10 +308,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   // Handler para selecionar lista
   const handleSelectList = (listId: number): void => {
-    console.log('🎯 handleSelectList CHAMADO! Lista ID:', listId);
-    console.log('📋 Lista anterior:', selectedListId);
     setSelectedListId(listId);
-    console.log('✅ Lista atualizada para:', listId);
   };
 
   // Filtrar lista selecionada
@@ -375,21 +316,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   // Renderizar lista selecionada
   const renderSelectedList = (): React.JSX.Element | null => {
-    console.log('🎨 renderSelectedList CHAMADO');
-    console.log('  selectedListId:', selectedListId);
-    console.log('  selectedList:', selectedList ? `${selectedList.emoji} ${selectedList.name}` : 'null');
-
     if (!selectedList) {
-      console.log('⚠️ Nenhuma lista selecionada para renderizar');
       return (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Nenhuma lista selecionada</Text>
         </View>
       );
     }
-
-    console.log('✅ Renderizando lista:', selectedList.name);
-    console.log('  Seções:', selectedList.sections.length);
 
     return (
       <View style={styles.sectionsContainer}>
@@ -402,10 +335,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </Text>
           </View>
         ) : (
-          selectedList.sections.map(section => {
-            console.log('  📁 Renderizando seção:', section.name, 'com', section.tasks.length, 'tarefas');
-            return renderSection(selectedList, section);
-          })
+          selectedList.sections.map(section => renderSection(selectedList, section))
         )}
       </View>
     );
