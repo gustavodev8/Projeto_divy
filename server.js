@@ -41,8 +41,8 @@ app.use('/v1/auth', authRoutesV1);
 
 // ===== ROTAS DE PLANOS V1 =====
 const plansRoutesV1 = require('./routes/v1/plans')(db.isPostgres ? db : db, db.isPostgres);
-app.use('/v1/plans', plansRoutesV1);
-app.use('/api/plans', plansRoutesV1); // Também disponível na API legada
+app.use('/v1/plans', authenticateToken, plansRoutesV1);
+app.use('/api/plans', authenticateToken, plansRoutesV1); // Também disponível na API legada
 
 // ===== ROTAS DE CONFIGURAÇÃO V1 =====
 const configRoutesV1 = require('./routes/v1/config');
@@ -2005,7 +2005,8 @@ app.get('/api/sections', async (req, res) => {
 });
 // POST - Criar seção (COM LISTA)
 app.post('/api/sections', async (req, res) => {
-    const { name, user_id, list_id, position } = req.body;
+    const { name, list_id, position } = req.body;
+    const user_id = req.body.user_id || req.headers['x-user-id'];
 
     console.log('📂 POST /api/sections - Criar seção');
     console.log('   name:', name);
@@ -2503,8 +2504,11 @@ app.post("/api/login", async (req, res) => {
                 message: "Login realizado com sucesso!",
                 user: {
                     id: user.id,
+                    name: user.name || user.username,
                     username: user.username,
-                    email: user.email
+                    email: user.email,
+                    plan: user.plan || 'normal',
+                    plan_expires_at: user.plan_expires_at || null
                 },
                 // Tokens JWT (opcional - frontend pode usar ou não)
                 accessToken: tokens.accessToken,

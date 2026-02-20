@@ -11,6 +11,8 @@ export type RootStackParamList = {
   Register: undefined;
   Home: undefined;
   Tasks: undefined;
+  Settings: undefined;
+  TaskDetail: { taskId: number; listId: number };
 };
 
 export type NavigationProp<T extends keyof RootStackParamList> = StackNavigationProp<

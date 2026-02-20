@@ -6,9 +6,9 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// URL da API - usa localhost em dev, produção em build
+// URL da API - usa IP local em dev (celular físico não acessa localhost), produção em build
 const API_URL = __DEV__
-  ? 'http://localhost:3000'
+  ? 'http://192.168.0.7:3001'
   : 'https://projeto-divy.onrender.com';
 
 console.log('🌐 API URL:', API_URL);

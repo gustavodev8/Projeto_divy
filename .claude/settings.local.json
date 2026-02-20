@@ -21,7 +21,26 @@
       "Bash(node convert_homescreen.js:*)",
       "Bash(ls:*)",
       "Bash(npx tsc:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(ipconfig:*)",
+      "Bash(tasklist:*)",
+      "Bash(start \"DIVY Backend\" cmd /k \"node server.js\")",
+      "Bash(timeout:*)",
+      "Bash(cmd /c \"taskkill /PID 27348 /F\")",
+      "Bash(cmd /c \"netstat -ano | findstr :3000\")",
+      "Bash(cmd /c \"start \"\"DIVY\"\" /D \"\"C:\\\\Users\\\\Pichau\\\\Desktop\\\\projetos github\\\\divy_project\"\" node server.js\")",
+      "Bash(lsof:*)",
+      "Bash(ss:*)",
+      "Bash(fuser:*)",
+      "Bash(wmic process:*)",
+      "Bash(pm2:*)",
+      "Bash(npx pm2:*)",
+      "Bash(cmd /c \"for /f \"\"tokens=5\"\" %a in \\(''netstat -aon ^| findstr :3000 ^| findstr LISTENING''\\) do taskkill /F /PID %a\")",
+      "Bash(cmd /c \"taskkill /F /PID 28488\")",
+      "Bash(cmd /c \"taskkill /F /PID 28488 /T 2>&1\")",
+      "Bash(cmd /c \"wmic process where ProcessId=28488 get ProcessId,Name,CommandLine 2>&1\")",
+      "Bash(cmd /c \"wmic process where \"\"ProcessId=28488\"\" get Name,ExecutablePath 2>&1\")",
+      "Bash(cmd /c:*)"
     ]
   }
 }

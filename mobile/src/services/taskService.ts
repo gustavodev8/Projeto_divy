@@ -105,12 +105,12 @@ export const createTask = async (
       ...(options?.section_id && { section_id: options.section_id }),
     };
 
-    const response = await api.post<ApiResponse<Task>>('/api/tasks', payload);
+    const response = await api.post<any>('/api/tasks', payload);
 
     if (response.data.success) {
       return {
         success: true,
-        task: response.data.data,
+        task: response.data.task || response.data.data,
       };
     }
 
@@ -141,7 +141,7 @@ export const updateTask = async (
     if (response.data.success) {
       return {
         success: true,
-        task: response.data.data,
+        task: (response.data as any).task || response.data.data,
       };
     }
 

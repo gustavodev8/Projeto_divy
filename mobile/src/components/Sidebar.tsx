@@ -1,6 +1,6 @@
 /**
  * DIVY - Sidebar Component
- * Menu lateral com navegação e listas
+ * Menu lateral — replica fidedigna da referencia
  */
 
 import React, { useState, useEffect } from 'react';
@@ -11,21 +11,26 @@ import {
   TouchableOpacity,
   Modal,
   Animated,
+  Easing,
   Dimensions,
-  SafeAreaView,
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { List, getLists } from '../services/listService';
 
 const { width } = Dimensions.get('window');
-const SIDEBAR_WIDTH = width * 0.65; // 65% da largura da tela
+const SIDEBAR_WIDTH = width * 0.78;
+
+// Cores fixas para os circulos das listas — exatas da referencia
+const LIST_COLORS = ['#4b6ef5', '#f59e0b', '#f97316', '#3b82f6', '#f43f5e', '#10b981', '#8b5cf6', '#06b6d4'];
 
 interface MenuItem {
   id: string;
   icon: string;
+  iconActive: string;
   label: string;
   screen: string | null;
 }
@@ -33,7 +38,7 @@ interface MenuItem {
 interface SidebarProps {
   visible: boolean;
   onClose: () => void;
-  navigation: any; // TODO: Type navigation properly when migrating screens
+  navigation: any;
   selectedListId?: number | null;
   onSelectList?: (listId: number) => void;
 }
@@ -43,14 +48,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   onClose,
   navigation,
   selectedListId,
-  onSelectList
+  onSelectList,
 }) => {
   const { user, signOut } = useAuth();
+  const insets = useSafeAreaInsets();
   const slideAnim = React.useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const [activeItem, setActiveItem] = React.useState<string>('inicio');
   const [lists, setLists] = useState<List[]>([]);
   const [loadingLists, setLoadingLists] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Carregar listas quando abrir sidebar
   useEffect(() => {
@@ -70,17 +77,20 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   React.useEffect(() => {
     if (visible) {
+      setModalVisible(true);
+      slideAnim.setValue(-SIDEBAR_WIDTH);
+      fadeAnim.setValue(0);
       Animated.parallel([
-        Animated.spring(slideAnim, {
+        Animated.timing(slideAnim, {
           toValue: 0,
+          duration: 320,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
-          tension: 40,
-          friction: 8,
-          velocity: 2,
         }),
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 300,
+          duration: 280,
+          easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
       ]).start();
@@ -88,183 +98,207 @@ const Sidebar: React.FC<SidebarProps> = ({
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: -SIDEBAR_WIDTH,
-          duration: 250,
+          duration: 260,
+          easing: Easing.in(Easing.cubic),
           useNativeDriver: true,
         }),
         Animated.timing(fadeAnim, {
           toValue: 0,
-          duration: 250,
+          duration: 220,
+          easing: Easing.in(Easing.quad),
           useNativeDriver: true,
         }),
-      ]).start();
+      ]).start(({ finished }) => {
+        if (finished) setModalVisible(false);
+      });
     }
-  }, [visible, slideAnim, fadeAnim]);
+  }, [visible]);
 
   const menuItems: MenuItem[] = [
-    { id: 'inicio', icon: 'home-outline', label: 'Início', screen: 'Home' },
-    { id: 'tarefas', icon: 'checkmark-circle-outline', label: 'Tarefas', screen: 'Tasks' },
+    { id: 'inicio',  icon: 'home-outline',             iconActive: 'home',             label: 'Inicio',  screen: 'Home' },
+    { id: 'tarefas', icon: 'checkmark-circle-outline',  iconActive: 'checkmark-circle',  label: 'Tarefas', screen: 'Tasks' },
+    { id: 'ajustes', icon: 'settings-outline',           iconActive: 'settings',          label: 'Ajustes', screen: 'Settings' },
   ];
 
   const handleMenuPress = (item: MenuItem): void => {
     setActiveItem(item.id);
-    if (item.screen) {
-      navigation.navigate(item.screen);
-    }
+    if (item.screen) navigation.navigate(item.screen);
     onClose();
   };
 
   const handleSignOut = (): void => {
     onClose();
-    setTimeout(() => {
-      signOut();
-    }, 300);
+    setTimeout(() => signOut(), 300);
   };
 
   const handleListSelect = (listId: number): void => {
-    if (onSelectList) {
-      onSelectList(listId);
-    }
+    if (onSelectList) onSelectList(listId);
     onClose();
   };
 
-  const renderIcon = (item: MenuItem): React.JSX.Element => {
-    const isActive = activeItem === item.id;
-    const color = isActive ? '#4f46e5' : '#111827';
-    return <Ionicons name={item.icon as any} size={22} color={color} />;
+  const getListInitial = (name: string): string => name.charAt(0).toUpperCase();
+  const getFirstName = (name?: string): string => {
+    if (!name) return 'Minha conta';
+    return name.split(' ')[0];
+  };
+
+  // Cor do circulo da lista — usa list.color ou cores fixas
+  const getListCircleColor = (list: List, index: number): string => {
+    return list.color || LIST_COLORS[index % LIST_COLORS.length];
   };
 
   return (
     <Modal
-      visible={visible}
+      visible={modalVisible}
       transparent
       animationType="none"
       onRequestClose={onClose}
-      statusBarTranslucent
+      statusBarTranslucent={false}
     >
-      <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-        <Animated.View
-          style={[
-            styles.sidebar,
-            {
-              transform: [{ translateX: slideAnim }],
-            },
-          ]}
-        >
-          <SafeAreaView style={styles.sidebarContent}>
-            {/* Header */}
-            <View style={styles.header}>
-              <View style={styles.headerContent}>
-                <View style={styles.logoContainer}>
-                  <Text style={styles.logoText}>D</Text>
+      <Animated.View style={[st.overlay, { opacity: fadeAnim }]}>
+        <Animated.View style={[st.sidebar, { transform: [{ translateX: slideAnim }] }]}>
+          <View style={[st.sidebarInner, { paddingTop: insets.top }]}>
+
+            {/* ═══ HEADER ═══ */}
+            <View style={st.header}>
+              <View style={st.headerLeft}>
+                <View style={st.logoBubble}>
+                  <Text style={st.logoLetter}>D</Text>
                 </View>
-                <View style={styles.headerTextContainer}>
-                  <Text style={styles.brandName}>DIVY</Text>
-                  <Text style={styles.brandTagline}>Sua agenda inteligente</Text>
+                <View>
+                  <Text style={st.brandName}>DIVY</Text>
+                  <Text style={st.brandSub}>Sua agenda inteligente</Text>
                 </View>
               </View>
-              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <Ionicons name="close" size={24} color="#9ca3af" />
+              <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Ionicons name="close" size={22} color="#9ca3af" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-              {/* Menu Items */}
-              <View style={styles.menuContainer}>
-                {menuItems.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={[styles.menuItem, activeItem === item.id && styles.menuItemActive]}
-                    onPress={() => handleMenuPress(item)}
-                    activeOpacity={0.7}
-                  >
-                    {renderIcon(item)}
-                    <Text style={[styles.menuLabel, activeItem === item.id && styles.menuLabelActive]}>
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+            {/* ═══ SCROLL BODY ═══ */}
+            <ScrollView style={st.body} showsVerticalScrollIndicator={false}>
+
+              {/* Menu principal */}
+              <View style={st.menuBlock}>
+                {menuItems.map(item => {
+                  const isActive = activeItem === item.id;
+                  return (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={[st.menuRow, isActive && st.menuRowActive]}
+                      onPress={() => handleMenuPress(item)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name={(isActive ? item.iconActive : item.icon) as any}
+                        size={22}
+                        color={isActive ? '#3b82f6' : '#475569'}
+                      />
+                      <Text style={[st.menuLabel, isActive && st.menuLabelActive]}>
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
 
-              {/* Listas Section */}
-              <View style={styles.listsSection}>
-                <View style={styles.listsSectionHeader}>
-                  <Text style={styles.listsSectionTitle}>MINHAS LISTAS</Text>
-                  <TouchableOpacity style={styles.addListButton}>
-                    <Ionicons name="add" size={16} color="#6b7280" />
+              {/* Separador */}
+              <View style={st.divider} />
+
+              {/* Minhas listas */}
+              <View style={st.listsBlock}>
+                <View style={st.listsHeader}>
+                  <Text style={st.listsTitle}>MINHAS LISTAS</Text>
+                  <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                    <Ionicons name="add" size={20} color="#6b7280" />
                   </TouchableOpacity>
                 </View>
 
                 {loadingLists ? (
-                  <ActivityIndicator size="small" color="#4f46e5" style={styles.listsLoader} />
+                  <ActivityIndicator size="small" color="#3b82f6" style={{ marginVertical: 20 }} />
                 ) : (
-                  lists.map((list) => (
-                    <TouchableOpacity
-                      key={list.id}
-                      style={[
-                        styles.listItem,
-                        selectedListId === list.id && styles.listItemActive
-                      ]}
-                      onPress={() => handleListSelect(list.id)}
-                      activeOpacity={0.7}
-                    >
-                      <View style={styles.listItemContent}>
-                        <Text style={styles.listEmoji}>{list.emoji || '📋'}</Text>
-                        <Text style={[
-                          styles.listName,
-                          selectedListId === list.id && styles.listNameActive
-                        ]}>
+                  lists.map((list, i) => {
+                    const color = getListCircleColor(list, i);
+                    const selected = selectedListId === list.id;
+                    return (
+                      <TouchableOpacity
+                        key={list.id}
+                        style={[st.listRow, selected && st.listRowActive]}
+                        onPress={() => handleListSelect(list.id)}
+                        activeOpacity={0.7}
+                      >
+                        {/* Circulo com inicial */}
+                        <View style={[st.listCircle, { backgroundColor: color }]}>
+                          <Text style={st.listCircleLetter}>{getListInitial(list.name)}</Text>
+                        </View>
+
+                        {/* Nome */}
+                        <Text style={[st.listLabel, selected && st.listLabelActive]} numberOfLines={1}>
                           {list.name}
                         </Text>
-                      </View>
-                      {list.is_default && (
-                        <View style={styles.defaultBadge}>
-                          <Text style={styles.defaultBadgeText}>Padrão</Text>
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                  ))
+
+                        {/* Badge padrao */}
+                        {list.is_default && (
+                          <View style={st.defaultBadge}>
+                            <Text style={st.defaultBadgeText}>Padrao</Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })
                 )}
               </View>
             </ScrollView>
 
-            {/* Footer */}
-            <View style={styles.footer}>
+            {/* ═══ FOOTER ═══ */}
+            <View style={[st.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+
+              {/* User row */}
               <TouchableOpacity
-                style={styles.footerItem}
+                style={st.userRow}
                 activeOpacity={0.7}
-                onPress={() => { onClose(); navigation.navigate('Profile'); }}
+                onPress={() => { onClose(); navigation.navigate('Settings'); }}
               >
-                <Ionicons name="person-outline" size={20} color="#111827" />
-                <View style={styles.footerItemContent}>
-                  <Text style={styles.footerLabel}>{user?.name || 'Minha conta'}</Text>
-                  <Text style={styles.footerSubLabel}>{user?.email || ''}</Text>
+                <View style={st.userAvatar}>
+                  <Text style={st.userAvatarLetter}>
+                    {getFirstName(user?.name).charAt(0).toUpperCase()}
+                  </Text>
                 </View>
+                <View style={st.userInfo}>
+                  <Text style={st.userName} numberOfLines={1}>{user?.username || getFirstName(user?.name)}</Text>
+                  <Text style={st.userEmail} numberOfLines={1}>{user?.email || ''}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color="#d1d5db" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.footerItem} onPress={handleSignOut} activeOpacity={0.7}>
+              {/* Sair */}
+              <TouchableOpacity style={st.signOutRow} onPress={handleSignOut} activeOpacity={0.7}>
                 <Ionicons name="log-out-outline" size={20} color="#ef4444" />
-                <Text style={[styles.footerLabel, styles.footerLabelDanger]}>Sair</Text>
+                <Text style={st.signOutLabel}>Sair da conta</Text>
               </TouchableOpacity>
             </View>
-          </SafeAreaView>
+          </View>
         </Animated.View>
 
+        {/* Backdrop */}
         <TouchableOpacity
-          style={styles.backdrop}
+          style={st.backdrop}
           activeOpacity={1}
           onPress={onClose}
-          pointerEvents="box-only"
         />
       </Animated.View>
     </Modal>
   );
 };
 
-const styles = StyleSheet.create({
+// ═══════════════════════════════════════════════════════════════
+// STYLES — Replica fiel da imagem de referencia
+// ═══════════════════════════════════════════════════════════════
+const st = StyleSheet.create({
   overlay: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
   },
   backdrop: {
     position: 'absolute',
@@ -277,188 +311,222 @@ const styles = StyleSheet.create({
     width: SIDEBAR_WIDTH,
     height: '100%',
     backgroundColor: '#ffffff',
-    shadowColor: '#000',
+    shadowColor: '#0f172a',
     shadowOffset: { width: 4, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
     elevation: 10,
   },
-  sidebarContent: {
+  sidebarInner: {
     flex: 1,
   },
-  scrollContent: {
-    flex: 1,
-  },
+
+  // ── Header ──
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    paddingTop: 16,
+    paddingBottom: 16,
   },
-  headerContent: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    gap: 12,
   },
-  logoContainer: {
-    width: 44,
-    height: 44,
+  logoBubble: {
+    width: 40,
+    height: 40,
     borderRadius: 12,
-    backgroundColor: '#4f46e5',
+    backgroundColor: '#4b6ef5',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
   },
-  logoText: {
-    fontSize: 22,
+  logoLetter: {
+    fontSize: 20,
     fontWeight: '700',
     color: '#ffffff',
   },
-  headerTextContainer: {
-    flex: 1,
-  },
   brandName: {
     fontSize: 17,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '800',
+    color: '#1e293b',
     letterSpacing: 0.3,
   },
-  brandTagline: {
+  brandSub: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#94a3b8',
     marginTop: 1,
   },
-  closeButton: {
-    padding: 4,
+
+  // ── Body / Scroll ──
+  body: {
+    flex: 1,
   },
-  menuContainer: {
-    paddingTop: 12,
+
+  // ── Menu items ──
+  menuBlock: {
     paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
-  menuItem: {
+  menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 14,
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 10,
+    paddingVertical: 13,
+    borderRadius: 12,
     marginBottom: 2,
   },
-  menuItemActive: {
-    backgroundColor: '#eef2ff',
+  menuRowActive: {
+    backgroundColor: '#eff6ff',
   },
   menuLabel: {
     fontSize: 15,
-    color: '#111827',
-    marginLeft: 16,
     fontWeight: '500',
+    color: '#1e293b',
   },
   menuLabelActive: {
-    color: '#4f46e5',
+    color: '#3b82f6',
     fontWeight: '600',
   },
-  listsSection: {
-    paddingHorizontal: 12,
-    paddingTop: 20,
-    paddingBottom: 20,
+
+  // ── Divider ──
+  divider: {
+    height: 1,
+    backgroundColor: '#f1f5f9',
+    marginHorizontal: 20,
+    marginVertical: 6,
   },
-  listsSectionHeader: {
+
+  // ── Listas ──
+  listsBlock: {
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 16,
+  },
+  listsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingBottom: 8,
+    marginBottom: 8,
   },
-  listsSectionTitle: {
+  listsTitle: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#9ca3af',
-    letterSpacing: 0.5,
+    color: '#94a3b8',
+    letterSpacing: 1,
   },
-  addListButton: {
-    padding: 4,
-  },
-  listsLoader: {
-    paddingVertical: 20,
-  },
-  listItem: {
+
+  listRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
+    paddingVertical: 11,
+    borderRadius: 12,
     marginBottom: 2,
   },
-  listItemActive: {
-    backgroundColor: '#eef2ff',
+  listRowActive: {
+    backgroundColor: '#eff6ff',
   },
-  listItemContent: {
-    flexDirection: 'row',
+
+  // Circulo colorido — redondo como na referencia
+  listCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
-    flex: 1,
+    justifyContent: 'center',
+    marginRight: 14,
   },
-  listEmoji: {
-    fontSize: 16,
-    marginRight: 12,
-  },
-  listName: {
+  listCircleLetter: {
     fontSize: 14,
-    color: '#111827',
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+
+  listLabel: {
+    fontSize: 15,
     fontWeight: '500',
+    color: '#1e293b',
     flex: 1,
   },
-  listNameActive: {
-    color: '#4f46e5',
+  listLabelActive: {
+    color: '#3b82f6',
     fontWeight: '600',
   },
+
   defaultBadge: {
-    backgroundColor: '#f3f4f6',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 6,
   },
   defaultBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#6b7280',
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#94a3b8',
   },
-  spacer: {
-    flex: 1,
-  },
+
+  // ── Footer ──
   footer: {
     borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
-    paddingVertical: 8,
-    paddingHorizontal: 8,
+    borderTopColor: '#f1f5f9',
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    backgroundColor: '#ffffff',
   },
-  footerItem: {
+
+  userRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 12,
   },
-  footerItemContent: {
-    marginLeft: 16,
+  userAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#22c55e',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  userAvatarLetter: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  userInfo: {
     flex: 1,
   },
-  footerLabel: {
+  userName: {
     fontSize: 14,
-    color: '#111827',
-    marginLeft: 16,
     fontWeight: '600',
+    color: '#1e293b',
   },
-  footerSubLabel: {
+  userEmail: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: '#94a3b8',
     marginTop: 1,
   },
-  footerLabelDanger: {
+
+  signOutRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  signOutLabel: {
+    fontSize: 14,
+    fontWeight: '500',
     color: '#ef4444',
-    fontWeight: '600',
   },
 });
 

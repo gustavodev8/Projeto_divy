@@ -15,6 +15,8 @@ import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
 import TasksScreen from '../screens/TasksScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import TaskDetailScreen from '../screens/TaskDetailScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -38,6 +40,30 @@ const MainNavigator: React.FC = () => (
       name="Tasks"
       component={TasksScreen}
       options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Settings"
+      component={SettingsScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="TaskDetail"
+      component={TaskDetailScreen}
+      options={{
+        headerShown: false,
+        // Fade puro em entrada E saída — interpola opacidade nos dois sentidos
+        cardStyleInterpolator: ({ current, closing }) => ({
+          cardStyle: {
+            opacity: closing
+              ? current.progress   // saindo: 1 → 0
+              : current.progress,  // entrando: 0 → 1
+          },
+        }),
+        transitionSpec: {
+          open:  { animation: 'timing', config: { duration: 220 } },
+          close: { animation: 'timing', config: { duration: 200 } },
+        },
+      }}
     />
   </Stack.Navigator>
 );

@@ -24,6 +24,12 @@ interface SectionsResponse {
   error?: string;
 }
 
+interface SectionResponse {
+  success: boolean;
+  section?: Section;
+  error?: string;
+}
+
 /**
  * Listar todas as seções de uma lista
  * user_id é enviado automaticamente no header x-user-id pelo interceptor
@@ -43,6 +49,63 @@ export const getSectionsByList = async (listId: number): Promise<SectionsRespons
   }
 };
 
+/**
+ * Criar nova seção em uma lista
+ */
+export const createSection = async (name: string, listId: number): Promise<SectionResponse> => {
+  try {
+    const response = await api.post<any>('/api/sections', {
+      name,
+      list_id: listId,
+      position: 0,
+    });
+
+    if (response.data.success) {
+      return { success: true, section: response.data.section };
+    }
+
+    return { success: false, error: response.data.error || 'Erro ao criar seção' };
+  } catch (error) {
+    const axiosError = error as AxiosError<{ error?: string }>;
+    return { success: false, error: axiosError.response?.data?.error || 'Erro de conexão' };
+  }
+};
+
+/**
+ * Renomear uma seção
+ */
+export const updateSection = async (sectionId: number, name: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const response = await api.put<any>(`/api/sections/${sectionId}`, { name });
+    if (response.data.success) {
+      return { success: true };
+    }
+    return { success: false, error: response.data.error || 'Erro ao atualizar seção' };
+  } catch (error) {
+    const axiosError = error as AxiosError<{ error?: string }>;
+    return { success: false, error: axiosError.response?.data?.error || 'Erro de conexão' };
+  }
+};
+
+/**
+ * Excluir uma seção
+ */
+export const deleteSection = async (sectionId: number): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const response = await api.delete<any>(`/api/sections/${sectionId}`);
+    if (response.data.success) {
+      return { success: true };
+    }
+    return { success: false, error: response.data.error || 'Erro ao excluir seção' };
+  } catch (error) {
+    const axiosError = error as AxiosError<{ error?: string }>;
+    return { success: false, error: axiosError.response?.data?.error || 'Erro de conexão' };
+  }
+};
+
 export default {
   getSectionsByList,
+  createSection,
+  updateSection,
+  deleteSection,
 };
