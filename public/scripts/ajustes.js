@@ -26,14 +26,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Atualizar informações da conta
     updateAccountInfo();
 
-    // Carregar configurações salvas
-    await loadSettings();
-
-    // Carregar informações do plano
-    await loadPlanInfo();
-
-    // Carregar status do WhatsApp (se for ProMax)
-    await loadWhatsappStatus();
+    // Carregar tudo em paralelo para reduzir tempo de carregamento
+    await Promise.all([
+        loadSettings(),
+        loadPlanInfo(),
+        loadWhatsappStatus(),
+    ]);
 
     // Inicializar event listeners
     initializeEventListeners();
@@ -67,10 +65,13 @@ async function loadPlanInfo() {
         let planData = null;
 
         if (window.PlanService) {
-            planData = await window.PlanService.getMyPlan(true);
+            planData = await window.PlanService.getMyPlan(false);
         } else {
             // Fallback: fazer requisição direta
-            const response = await fetch(`${API_URL}/api/plans/my-plan?user_id=${currentUser.id}`);
+            const token = localStorage.getItem('nura_access_token');
+            const response = await fetch(`${API_URL}/api/plans/my-plan?user_id=${currentUser.id}`, {
+                headers: { 'Authorization': token ? `Bearer ${token}` : '' }
+            });
             planData = await response.json();
         }
 
@@ -817,7 +818,10 @@ async function loadWhatsappStatus() {
         if (window.PlanService) {
             planData = await window.PlanService.getMyPlan(false);
         } else {
-            const response = await fetch(`${API_URL}/api/plans/my-plan?user_id=${currentUser.id}`);
+            const token = localStorage.getItem('nura_access_token');
+            const response = await fetch(`${API_URL}/api/plans/my-plan?user_id=${currentUser.id}`, {
+                headers: { 'Authorization': token ? `Bearer ${token}` : '' }
+            });
             planData = await response.json();
         }
 

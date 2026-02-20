@@ -24,13 +24,18 @@ async function getMyPlan(forceRefresh = false) {
 
         const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
         const userId = userData.id;
+        const token = localStorage.getItem('nura_access_token');
 
         if (!userId) {
             console.warn('⚠️ Usuário não logado');
             return null;
         }
 
-        const response = await fetch(`${PLAN_API_URL}/api/plans/my-plan?user_id=${userId}`);
+        const response = await fetch(`${PLAN_API_URL}/api/plans/my-plan?user_id=${userId}`, {
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : ''
+            }
+        });
         const data = await response.json();
 
         if (data.success) {
@@ -58,10 +63,15 @@ async function canCreate(resource) {
     try {
         const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
         const userId = userData.id;
+        const token = localStorage.getItem('nura_access_token');
 
         if (!userId) return { canCreate: true }; // Default para não bloquear
 
-        const response = await fetch(`${PLAN_API_URL}/api/plans/check-limit/${resource}?user_id=${userId}`);
+        const response = await fetch(`${PLAN_API_URL}/api/plans/check-limit/${resource}?user_id=${userId}`, {
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : ''
+            }
+        });
         const data = await response.json();
 
         return data;
@@ -79,10 +89,15 @@ async function canUseFeature(feature) {
     try {
         const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
         const userId = userData.id;
+        const token = localStorage.getItem('nura_access_token');
 
         if (!userId) return { canUse: true };
 
-        const response = await fetch(`${PLAN_API_URL}/api/plans/can-use/${feature}?user_id=${userId}`);
+        const response = await fetch(`${PLAN_API_URL}/api/plans/can-use/${feature}?user_id=${userId}`, {
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : ''
+            }
+        });
         const data = await response.json();
 
         return data;

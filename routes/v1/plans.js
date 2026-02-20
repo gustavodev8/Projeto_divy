@@ -74,35 +74,30 @@ module.exports = function(db, isPostgres) {
                 });
             }
 
-            // Buscar plano atual do usuário
-            const userPlan = await getUserPlan(db, isPostgres, userId);
-            const planConfig = getPlan(userPlan);
+            // Buscar plano, expiração e contagens tudo em paralelo
+            const expiryQuery = isPostgres
+                ? db.query('SELECT plan_expires_at FROM users WHERE id = $1', [userId]).then(r => r[0]?.plan_expires_at ?? null)
+                : Promise.resolve(db.prepare('SELECT plan_expires_at FROM users WHERE id = ?').get(userId)?.plan_expires_at ?? null);
 
-            // Buscar data de expiração
-            let expiresAt = null;
-            if (isPostgres) {
-                const result = await db.query(
-                    'SELECT plan_expires_at FROM users WHERE id = $1',
-                    [userId]
-                );
-                expiresAt = result[0]?.plan_expires_at;
-            } else {
-                const result = db.prepare('SELECT plan_expires_at FROM users WHERE id = ?').get(userId);
-                expiresAt = result?.plan_expires_at;
-            }
-
-            // Contar uso atual
-            const [tasksCount, listsCount] = await Promise.all([
+            const [
+                userPlan,
+                expiresAt,
+                tasksCount,
+                listsCount,
+                routinesThisWeek,
+                descriptionsToday,
+                subtasksToday,
+            ] = await Promise.all([
+                getUserPlan(db, isPostgres, userId),
+                expiryQuery,
                 countUserResources(db, isPostgres, userId, 'tasks'),
-                countUserResources(db, isPostgres, userId, 'lists')
-            ]);
-
-            // Contar uso de IA hoje/semana
-            const [routinesThisWeek, descriptionsToday, subtasksToday] = await Promise.all([
+                countUserResources(db, isPostgres, userId, 'lists'),
                 countAIUsage(db, isPostgres, userId, 'routine', 'week'),
                 countAIUsage(db, isPostgres, userId, 'description', 'day'),
-                countAIUsage(db, isPostgres, userId, 'subtask', 'day')
+                countAIUsage(db, isPostgres, userId, 'subtask', 'day'),
             ]);
+
+            const planConfig = getPlan(userPlan);
 
             res.json({
                 success: true,

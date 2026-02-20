@@ -393,7 +393,7 @@ function updateListTaskCounts() {
 function showCreateListModal() {
     const modalHTML = `
         <div class="list-modal-overlay active" id="listModalOverlay" onclick="closeCreateListModal()">
-            <div class="list-modal" onclick="event.stopPropagation()">
+            <div class="list-modal active" onclick="event.stopPropagation()">
                 <div class="list-modal-header">
                     <h3 class="list-modal-title">Nova Lista</h3>
                     <button class="btn-close-modal" onclick="closeCreateListModal()">
