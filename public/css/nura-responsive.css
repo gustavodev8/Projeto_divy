@@ -1241,64 +1241,172 @@ body {
 }
 
 /* ========================================
-   SIDEBAR MOBILE - DESIGN BRANCO v3.0
+   SIDEBAR MOBILE - DESIGN MELHORADO v2.0
    ======================================== */
 
 @media (max-width: 768px) {
     /* ===== SIDEBAR CONTAINER ===== */
     .sidebar {
-        background: #ffffff;
-        border-right: none;
+        background: linear-gradient(180deg, #0a0f1a 0%, #0f172a 100%);
     }
 
     /* ===== HEADER/BRAND ===== */
     .sidebar-brand {
-        padding: 18px 18px 14px;
-        border-bottom: none;
+        padding: 16px 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .brand-logo {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .brand-logo svg {
+        width: 18px;
+        height: 18px;
+        stroke: white;
+    }
+
+    .brand-name {
+        font-size: 1.125rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: #ffffff;
     }
 
     .btn-close-sidebar {
         width: 36px;
         height: 36px;
         border-radius: 10px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        color: #64748b;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .btn-close-sidebar:active {
-        background: #f1f5f9;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ===== PERFIL DO USUÁRIO ===== */
+    .sidebar-user {
+        padding: 18px;
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(37, 99, 235, 0.03);
+    }
+
+    .user-avatar {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+        border: 2px solid rgba(59, 130, 246, 0.3);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .user-avatar svg {
+        width: 24px;
+        height: 24px;
+        color: #93c5fd;
+    }
+
+    .user-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .user-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #f1f5f9;
+        margin-bottom: 3px;
+    }
+
+    .user-plan {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: #60a5fa;
+        background: rgba(59, 130, 246, 0.15);
+        padding: 3px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* ===== BOTÃO ADICIONAR TAREFA ===== */
+    .sidebar-section {
+        padding: 14px 16px 16px;
+        border-bottom: none;
+    }
+
+    .btn-add-task {
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        border: none;
+        gap: 10px;
+    }
+
+    .btn-add-task:active {
+        transform: scale(0.98);
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-add-task svg {
+        width: 20px;
+        height: 20px;
     }
 
     /* ===== NAVEGAÇÃO PRINCIPAL ===== */
     .sidebar-nav {
-        padding: 4px 12px;
-        border-bottom: none;
+        padding: 8px 12px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .sidebar-nav .nav-item {
         padding: 14px 16px;
-        min-height: 50px;
+        min-height: 52px;
         border-radius: 12px;
         font-size: 0.9375rem;
         gap: 14px;
-        margin-bottom: 2px;
-        color: #1e293b;
+        margin-bottom: 4px;
+        color: #94a3b8;
+        transition: all 0.2s ease;
+    }
+
+    .sidebar-nav .nav-item:last-child {
+        margin-bottom: 0;
     }
 
     .sidebar-nav .nav-item:active {
-        background: #f8fafc;
+        background: rgba(255, 255, 255, 0.05);
     }
 
     .sidebar-nav .nav-item.active {
-        background: #eff6ff;
-        color: #3b82f6;
-        border: none;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(29, 78, 216, 0.15) 100%);
+        color: #ffffff;
+        border: 1px solid rgba(59, 130, 246, 0.2);
     }
 
     .sidebar-nav .nav-icon {
         width: 22px;
         height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .sidebar-nav .nav-icon svg {
@@ -1311,35 +1419,20 @@ body {
         flex: 1;
     }
 
-    .sidebar-nav .nav-item.active .nav-text {
-        font-weight: 600;
-        color: #3b82f6;
-    }
-
-    .sidebar-nav .nav-item .nav-icon {
-        color: #475569;
-    }
-
-    .sidebar-nav .nav-item.active .nav-icon {
-        color: #3b82f6;
-    }
-
     .sidebar-nav .nav-badge {
         font-size: 0.75rem;
-        font-weight: 500;
-        padding: 0 6px;
-        color: #94a3b8;
-        background: transparent;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 8px;
+        background: rgba(71, 85, 105, 0.5);
+        color: #cbd5e1;
+        min-width: 28px;
+        text-align: center;
     }
 
     .sidebar-nav .nav-item.active .nav-badge {
-        color: #3b82f6;
-    }
-
-    /* ===== SEPARADOR ===== */
-    .sidebar-divider {
-        margin: 6px 18px;
-        background: #f1f5f9;
+        background: rgba(59, 130, 246, 0.3);
+        color: #93c5fd;
     }
 
     /* ===== SEÇÃO MINHAS LISTAS ===== */
@@ -1348,59 +1441,85 @@ body {
     }
 
     .sidebar-lists-section .section-header {
-        padding: 4px 16px 8px;
-        margin-bottom: 4px;
+        padding: 12px 4px 8px;
+        margin-bottom: 6px;
     }
 
     .sidebar-lists-section .section-header-title {
         font-size: 0.6875rem;
         font-weight: 700;
-        color: #94a3b8;
-        letter-spacing: 1px;
+        color: #64748b;
+        letter-spacing: 0.08em;
+        gap: 8px;
+    }
+
+    .sidebar-lists-section .section-header-title svg {
+        width: 14px;
+        height: 14px;
+        opacity: 0.7;
     }
 
     /* ===== ITENS DE LISTA ===== */
     .lists-container {
         padding: 0;
-        gap: 2px;
+        gap: 4px;
     }
 
     .list-item {
-        padding: 11px 16px;
-        min-height: 50px;
+        padding: 14px 16px;
+        min-height: 52px;
         border-radius: 12px;
-        gap: 14px;
-        color: #1e293b;
+        font-size: 0.9375rem;
+        gap: 12px;
+        color: #94a3b8;
+        transition: all 0.2s ease;
     }
 
     .list-item:active {
-        background: #f8fafc;
+        background: rgba(255, 255, 255, 0.05);
     }
 
     .list-item.active {
-        background: #eff6ff;
-        border: none;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(29, 78, 216, 0.15) 100%);
+        color: #ffffff;
+        border: 1px solid rgba(59, 130, 246, 0.2);
     }
 
-    .list-item.active .list-name {
-        color: #3b82f6;
-        font-weight: 600;
+    .list-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    .list-name {
+        flex: 1;
+        font-weight: 500;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .list-count {
         font-size: 0.75rem;
-        font-weight: 500;
-        padding: 2px 8px;
-        border-radius: 10px;
-        background: #f1f5f9;
-        color: #94a3b8;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 8px;
+        background: rgba(71, 85, 105, 0.5);
+        color: #cbd5e1;
+        min-width: 28px;
+        text-align: center;
+        margin-left: auto;
+        flex-shrink: 0;
     }
 
     .list-item.active .list-count {
-        background: #dbeafe;
-        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.3);
+        color: #93c5fd;
     }
 
+    /* Ações da lista - sempre visíveis no mobile */
     .list-item-actions {
         opacity: 1;
         gap: 4px;
@@ -1411,23 +1530,17 @@ body {
         width: 32px;
         height: 32px;
         border-radius: 8px;
-        color: #94a3b8;
-    }
-
-    .list-item-actions .btn-icon-xs:hover {
-        background: #f1f5f9;
-        color: #1e293b;
     }
 
     /* ===== BOTÃO NOVA LISTA ===== */
     .btn-add-list {
-        padding: 12px 16px;
+        padding: 14px 16px;
         margin-top: 8px;
         border-radius: 12px;
         font-size: 0.875rem;
         font-weight: 500;
-        border: 1px dashed #e2e8f0;
-        color: #94a3b8;
+        border: 1px dashed rgba(100, 116, 139, 0.4);
+        color: #64748b;
         gap: 10px;
         min-height: 48px;
     }
@@ -1435,15 +1548,52 @@ body {
     .btn-add-list:active {
         border-color: #3b82f6;
         color: #3b82f6;
-        background: #eff6ff;
+        background: rgba(59, 130, 246, 0.05);
     }
 
-    /* ===== RODAPÉ/BOTTOM ===== */
+    .btn-add-list svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* ===== RODAPÉ/BOTTOM NAVIGATION ===== */
     .sidebar-bottom {
         margin-top: auto;
         padding: 12px 12px 20px;
-        border-top: 1px solid #f1f5f9;
-        background: transparent;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar-bottom .nav-item {
+        padding: 12px 16px;
+        min-height: 48px;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        gap: 12px;
+        margin-bottom: 4px;
+        color: #94a3b8;
+    }
+
+    .sidebar-bottom .nav-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .sidebar-bottom .nav-item:active {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar-bottom .nav-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .sidebar-bottom .nav-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .sidebar-bottom .nav-text {
+        font-weight: 500;
     }
 }
 
@@ -1454,14 +1604,34 @@ body {
         max-width: 300px;
     }
 
+    .sidebar-user {
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 42px;
+        height: 42px;
+    }
+
+    .user-name {
+        font-size: 0.9375rem;
+    }
+
     .sidebar-nav .nav-item,
     .list-item {
-        padding: 10px 14px;
-        min-height: 46px;
+        padding: 12px 14px;
+        min-height: 48px;
         font-size: 0.875rem;
     }
 
-    .sidebar-bottom {
-        padding: 10px 12px 16px;
+    .btn-add-task {
+        padding: 12px 14px;
+        font-size: 0.875rem;
+    }
+
+    .sidebar-bottom .nav-item {
+        padding: 10px 14px;
+        min-height: 44px;
     }
 }

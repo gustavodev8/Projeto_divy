@@ -53,9 +53,6 @@ renderLists();
     }
 }
 
-// Cores dos círculos das listas — mesmas do mobile
-const LIST_CIRCLE_COLORS = ['#4b6ef5', '#f59e0b', '#f97316', '#3b82f6', '#f43f5e', '#10b981', '#8b5cf6', '#06b6d4'];
-
 // ===== RENDERIZAR LISTAS NA SIDEBAR =====
 function renderLists() {
     const container = document.querySelector('.lists-container');
@@ -63,26 +60,21 @@ function renderLists() {
 
     container.innerHTML = '';
 
-    console.log('🎨 RENDERIZANDO LISTAS:');
+        console.log('🎨 RENDERIZANDO LISTAS:');
     console.log('   - Total:', window.userLists.length);
     console.log('   - Lista atual:', window.currentListId);
 
-    window.userLists.forEach((list, index) => {
+    window.userLists.forEach(list => {
         const isActive = list.id === window.currentListId;
-        const circleColor = list.color || LIST_CIRCLE_COLORS[index % LIST_CIRCLE_COLORS.length];
-        const initial = list.name ? list.name.charAt(0).toUpperCase() : '?';
-
+        
         const listElement = document.createElement('div');
         listElement.className = `list-item ${isActive ? 'active' : ''}`;
         listElement.dataset.listId = list.id;
-
+        
         listElement.innerHTML = `
-            <div class="list-item-content" onclick="selectList(${list.id})" style="display:flex;align-items:center;gap:14px;flex:1;min-width:0;">
-                <div class="list-circle" style="background:${circleColor};">
-                    <span class="list-circle-letter">${initial}</span>
-                </div>
+            <div class="list-item-content" onclick="selectList(${list.id})">
+                <span class="list-dot"></span>
                 <span class="list-name">${list.name}</span>
-                ${list.is_default ? '<span class="list-default-badge">Padrão</span>' : ''}
                 <span class="list-count">0</span>
             </div>
             <div class="list-item-actions">
@@ -102,7 +94,7 @@ function renderLists() {
                 ` : ''}
             </div>
         `;
-
+        
         container.appendChild(listElement);
     });
 

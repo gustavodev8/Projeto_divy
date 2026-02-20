@@ -40,7 +40,9 @@
       "Bash(cmd /c \"taskkill /F /PID 28488 /T 2>&1\")",
       "Bash(cmd /c \"wmic process where ProcessId=28488 get ProcessId,Name,CommandLine 2>&1\")",
       "Bash(cmd /c \"wmic process where \"\"ProcessId=28488\"\" get Name,ExecutablePath 2>&1\")",
-      "Bash(cmd /c:*)"
+      "Bash(cmd /c:*)",
+      "Bash(git checkout:*)",
+      "Bash(git reset:*)"
     ]
   }
 }
