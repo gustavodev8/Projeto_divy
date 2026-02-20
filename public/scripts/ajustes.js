@@ -68,10 +68,7 @@ async function loadPlanInfo() {
             planData = await window.PlanService.getMyPlan(false);
         } else {
             // Fallback: fazer requisição direta
-            const token = localStorage.getItem('nura_access_token');
-            const response = await fetch(`${API_URL}/api/plans/my-plan?user_id=${currentUser.id}`, {
-                headers: { 'Authorization': token ? `Bearer ${token}` : '' }
-            });
+            const response = await fetchWithAuth(`${API_URL}/api/plans/my-plan?user_id=${currentUser.id}`);
             planData = await response.json();
         }
 
@@ -818,10 +815,7 @@ async function loadWhatsappStatus() {
         if (window.PlanService) {
             planData = await window.PlanService.getMyPlan(false);
         } else {
-            const token = localStorage.getItem('nura_access_token');
-            const response = await fetch(`${API_URL}/api/plans/my-plan?user_id=${currentUser.id}`, {
-                headers: { 'Authorization': token ? `Bearer ${token}` : '' }
-            });
+            const response = await fetchWithAuth(`${API_URL}/api/plans/my-plan?user_id=${currentUser.id}`);
             planData = await response.json();
         }
 

@@ -162,9 +162,72 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// ===== RENOVAR ACCESS TOKEN COM REFRESH TOKEN =====
+async function refreshAccessToken() {
+    const refreshToken = localStorage.getItem('nura_refresh_token');
+    if (!refreshToken) return false;
+
+    try {
+        const API_URL = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000'
+            : window.location.origin;
+
+        const res = await fetch(`${API_URL}/v1/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken })
+        });
+        const data = await res.json();
+
+        if (data.success && data.data?.accessToken) {
+            localStorage.setItem('nura_access_token', data.data.accessToken);
+            localStorage.setItem('nura_refresh_token', data.data.refreshToken);
+            console.log('🔄 Token renovado com sucesso!');
+            return true;
+        }
+        return false;
+    } catch (err) {
+        console.warn('⚠️ Erro ao renovar token:', err);
+        return false;
+    }
+}
+
+// ===== FETCH AUTENTICADO (COM RENOVAÇÃO AUTOMÁTICA DE TOKEN) =====
+async function fetchWithAuth(url, options = {}) {
+    const token = localStorage.getItem('nura_access_token');
+    const headers = {
+        ...(options.headers || {}),
+        'Authorization': token ? `Bearer ${token}` : ''
+    };
+
+    let response = await fetch(url, { ...options, headers });
+
+    // Se 401, tenta renovar o token e repetir a request
+    if (response.status === 401) {
+        const renewed = await refreshAccessToken();
+        if (renewed) {
+            const newToken = localStorage.getItem('nura_access_token');
+            headers['Authorization'] = `Bearer ${newToken}`;
+            response = await fetch(url, { ...options, headers });
+        } else {
+            // Refresh também falhou → limpar sessão e redirecionar para login
+            console.log('❌ Refresh token inválido ou expirado, redirecionando para login...');
+            localStorage.removeItem('nura_access_token');
+            localStorage.removeItem('nura_refresh_token');
+            localStorage.removeItem('nura_user');
+            localStorage.removeItem('nura_logged_in');
+            window.location.replace('/login');
+        }
+    }
+
+    return response;
+}
+
 // ===== TORNAR FUNÇÕES GLOBAIS =====
 window.checkAuthentication = checkAuthentication;
 window.getCurrentUser = getCurrentUser;
 window.logout = logout;
+window.refreshAccessToken = refreshAccessToken;
+window.fetchWithAuth = fetchWithAuth;
 
 console.log('🔐 auth.js carregado!');
