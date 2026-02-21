@@ -255,6 +255,13 @@
                     </div>
                 </div>
 
+                <button class="btn-feedback" onclick="showFeedbackModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Enviar Feedback
+                </button>
+
                 <button class="btn-signout" onclick="showLogoutModal()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -310,6 +317,41 @@
             <div class="logout-modal-actions">
                 <button class="logout-btn-cancel" onclick="closeLogoutModal()">Cancelar</button>
                 <button class="logout-btn-confirm" onclick="confirmLogout()">Sair</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE FEEDBACK -->
+    <div class="feedback-modal-overlay" id="feedbackModalOverlay" onclick="closeFeedbackModal()">
+        <div class="feedback-modal" onclick="event.stopPropagation()">
+            <div class="feedback-modal-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+            <h3 class="feedback-modal-title">Enviar Feedback</h3>
+            <p class="feedback-modal-text">Nos ajude a melhorar o DIVY! Relate bugs, sugira melhorias ou compartilhe ideias.</p>
+
+            <div class="feedback-form">
+                <div class="feedback-field">
+                    <label for="feedbackType">Tipo</label>
+                    <select id="feedbackType" class="feedback-select">
+                        <option value="bug">🐛 Bug / Problema</option>
+                        <option value="sugestao">💡 Sugestão</option>
+                        <option value="melhoria">🚀 Melhoria</option>
+                        <option value="outro">💬 Outro</option>
+                    </select>
+                </div>
+                <div class="feedback-field">
+                    <label for="feedbackMessage">Mensagem</label>
+                    <textarea id="feedbackMessage" class="feedback-textarea" placeholder="Descreva seu feedback aqui..." rows="5" maxlength="2000"></textarea>
+                    <span class="feedback-char-count"><span id="feedbackCharCount">0</span>/2000</span>
+                </div>
+            </div>
+
+            <div class="feedback-modal-actions">
+                <button class="feedback-btn-cancel" onclick="closeFeedbackModal()">Cancelar</button>
+                <button class="feedback-btn-submit" id="btnSubmitFeedback" onclick="submitFeedback()">Enviar</button>
             </div>
         </div>
     </div>

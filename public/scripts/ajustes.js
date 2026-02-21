@@ -1192,6 +1192,101 @@ function initializeCodeInputs() {
     });
 }
 
+// ===== FEEDBACK =====
+function showFeedbackModal() {
+    const overlay = document.getElementById('feedbackModalOverlay');
+    if (overlay) {
+        // Limpar formulário
+        const typeSelect = document.getElementById('feedbackType');
+        const messageInput = document.getElementById('feedbackMessage');
+        const charCount = document.getElementById('feedbackCharCount');
+        if (typeSelect) typeSelect.value = 'bug';
+        if (messageInput) messageInput.value = '';
+        if (charCount) charCount.textContent = '0';
+
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+        // Focar no textarea
+        setTimeout(() => {
+            if (messageInput) messageInput.focus();
+        }, 300);
+    }
+}
+
+function closeFeedbackModal() {
+    const overlay = document.getElementById('feedbackModalOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+async function submitFeedback() {
+    const type = document.getElementById('feedbackType')?.value;
+    const message = document.getElementById('feedbackMessage')?.value?.trim();
+    const submitBtn = document.getElementById('btnSubmitFeedback');
+
+    // Validações
+    if (!message || message.length < 10) {
+        showNotification('A mensagem deve ter pelo menos 10 caracteres.', 'warning');
+        return;
+    }
+
+    // Desabilitar botão durante envio
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loading-spinner"></span> Enviando...';
+    }
+
+    try {
+        const response = await fetchWithAuth(`${API_URL}/v1/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type, message })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Feedback enviado com sucesso! Obrigado pela sua contribuição.', 'success');
+            closeFeedbackModal();
+        } else {
+            showNotification(data.error || 'Erro ao enviar feedback.', 'error');
+        }
+    } catch (err) {
+        console.error('Erro ao enviar feedback:', err);
+        showNotification('Erro ao enviar feedback. Verifique sua conexão.', 'error');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Enviar';
+        }
+    }
+}
+
+// Contador de caracteres do feedback
+document.addEventListener('DOMContentLoaded', () => {
+    const feedbackMessage = document.getElementById('feedbackMessage');
+    const feedbackCharCount = document.getElementById('feedbackCharCount');
+
+    if (feedbackMessage && feedbackCharCount) {
+        feedbackMessage.addEventListener('input', () => {
+            feedbackCharCount.textContent = feedbackMessage.value.length;
+        });
+    }
+});
+
+// Fechar modal de feedback com ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const feedbackOverlay = document.getElementById('feedbackModalOverlay');
+        if (feedbackOverlay && feedbackOverlay.classList.contains('active')) {
+            closeFeedbackModal();
+        }
+    }
+});
+
 // ===== EXPORTAR FUNÇÕES GLOBAIS =====
 window.showLogoutModal = showLogoutModal;
 window.closeLogoutModal = closeLogoutModal;
@@ -1202,6 +1297,9 @@ window.verifyWhatsappCode = verifyWhatsappCode;
 window.resendVerificationCode = resendVerificationCode;
 window.cancelVerification = cancelVerification;
 window.unlinkWhatsapp = unlinkWhatsapp;
+window.showFeedbackModal = showFeedbackModal;
+window.closeFeedbackModal = closeFeedbackModal;
+window.submitFeedback = submitFeedback;
 
 // ===== ANIMAÇÕES CSS =====
 const style = document.createElement('style');

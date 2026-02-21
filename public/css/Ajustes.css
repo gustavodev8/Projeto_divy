@@ -1434,3 +1434,288 @@ body {
         transform: rotate(360deg);
     }
 }
+
+/* ========================================
+   BOTÃO DE FEEDBACK
+   ======================================== */
+
+.btn-feedback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: 1px solid var(--settings-border);
+    border-radius: var(--settings-radius);
+    color: var(--settings-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 150ms ease;
+    margin-bottom: 10px;
+}
+
+.btn-feedback:hover {
+    background: hsl(217, 91%, 96%);
+    border-color: var(--settings-primary);
+}
+
+.dark-mode .btn-feedback:hover {
+    background: rgba(37, 99, 235, 0.15);
+}
+
+.btn-feedback svg {
+    width: 1rem;
+    height: 1rem;
+    stroke: currentColor;
+}
+
+/* ========================================
+   MODAL DE FEEDBACK
+   ======================================== */
+
+.feedback-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.feedback-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.feedback-modal {
+    background: var(--settings-card);
+    border: 1px solid var(--settings-border);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 420px;
+    padding: 32px 28px 24px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    animation: feedbackModalIn 0.25s ease;
+}
+
+@keyframes feedbackModalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.feedback-modal-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 20px;
+    background: hsl(217, 91%, 96%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feedback-modal-icon svg {
+    color: var(--settings-primary);
+    stroke-width: 1.75;
+}
+
+.dark-mode .feedback-modal-icon {
+    background: rgba(37, 99, 235, 0.15);
+}
+
+.feedback-modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--settings-foreground);
+    margin: 0 0 8px;
+}
+
+.feedback-modal-text {
+    font-size: 0.8125rem;
+    color: var(--settings-muted-foreground);
+    margin: 0 0 24px;
+    line-height: 1.5;
+}
+
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+    margin-bottom: 24px;
+}
+
+.feedback-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.feedback-field label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--settings-foreground);
+}
+
+.feedback-select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--settings-muted);
+    border: 1px solid var(--settings-border);
+    border-radius: 8px;
+    color: var(--settings-foreground);
+    font-size: 0.875rem;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+
+.feedback-select:focus {
+    border-color: var(--settings-primary);
+}
+
+.feedback-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--settings-muted);
+    border: 1px solid var(--settings-border);
+    border-radius: 8px;
+    color: var(--settings-foreground);
+    font-size: 0.875rem;
+    font-family: inherit;
+    outline: none;
+    resize: vertical;
+    min-height: 100px;
+    max-height: 200px;
+    transition: border-color 0.2s ease;
+    line-height: 1.5;
+    box-sizing: border-box;
+}
+
+.feedback-textarea::placeholder {
+    color: var(--settings-muted-foreground);
+    opacity: 0.6;
+}
+
+.feedback-textarea:focus {
+    border-color: var(--settings-primary);
+}
+
+.feedback-char-count {
+    font-size: 0.6875rem;
+    color: var(--settings-muted-foreground);
+    text-align: right;
+}
+
+.feedback-modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.feedback-btn-cancel,
+.feedback-btn-submit {
+    flex: 1;
+    padding: 12px 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.feedback-btn-cancel {
+    background: transparent;
+    border: 1px solid var(--settings-border);
+    color: var(--settings-foreground);
+}
+
+.feedback-btn-cancel:hover {
+    background: var(--settings-muted);
+}
+
+.feedback-btn-submit {
+    background: var(--settings-primary);
+    border: 1px solid var(--settings-primary);
+    color: white;
+}
+
+.feedback-btn-submit:hover {
+    opacity: 0.9;
+}
+
+.feedback-btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Mobile - Feedback */
+@media (max-width: 480px) {
+    .feedback-modal {
+        padding: 28px 24px 20px;
+        max-width: none;
+        margin: 0 16px;
+    }
+
+    .feedback-modal-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+    }
+
+    .feedback-modal-icon svg {
+        width: 26px;
+        height: 26px;
+    }
+
+    .feedback-modal-title {
+        font-size: 1rem;
+    }
+
+    .feedback-modal-text {
+        font-size: 0.75rem;
+        margin-bottom: 20px;
+    }
+
+    .feedback-modal-actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .feedback-btn-cancel,
+    .feedback-btn-submit {
+        padding: 14px;
+        width: 100%;
+    }
+
+    .btn-feedback {
+        padding: 14px 16px;
+        font-size: 0.875rem;
+        border-radius: 12px;
+        min-height: 48px;
+    }
+}

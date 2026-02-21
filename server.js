@@ -52,10 +52,15 @@ app.use('/v1/config', configRoutesV1);
 const whatsappRoutesV1 = require('./routes/v1/whatsapp')(db.isPostgres ? db : db, db.isPostgres);
 app.use('/v1/whatsapp', whatsappRoutesV1);
 
+// ===== ROTAS DE FEEDBACK V1 =====
+const feedbackRoutesV1 = require('./routes/v1/feedback')(db.isPostgres ? db : db, db.isPostgres);
+app.use('/v1/feedback', authenticateToken, feedbackRoutesV1);
+
 console.log('🔐 API v1 com JWT ativada em /v1/auth');
 console.log('💎 API de planos ativada em /v1/plans e /api/plans');
 console.log('⚙️ API de config ativada em /v1/config');
 console.log('📱 API de WhatsApp ativada em /v1/whatsapp');
+console.log('📬 API de feedback ativada em /v1/feedback');
 
 // ===== INICIALIZAR WHATSAPP BOT =====
 console.log('🤖 Carregando bot WhatsApp...');

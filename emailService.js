@@ -996,10 +996,201 @@ Nura - Seu assistente de produtividade
     }
 }
 
+/**
+ * Envia feedback de um usuário para o admin
+ * @param {string} tipo - Tipo do feedback (bug, sugestao, melhoria, outro)
+ * @param {string} mensagem - Mensagem do feedback
+ * @param {string} nomeUsuario - Nome do usuário
+ * @param {string} emailUsuario - Email do usuário
+ * @param {number} userId - ID do usuário
+ */
+async function enviarFeedback(tipo, mensagem, nomeUsuario, emailUsuario, userId) {
+    try {
+        console.log(`📬 Enviando feedback de ${nomeUsuario} (${emailUsuario})...`);
+
+        const tipoLabels = {
+            'bug': { label: 'Bug', emoji: '🐛', color: '#ef4444' },
+            'sugestao': { label: 'Sugestão', emoji: '💡', color: '#f59e0b' },
+            'melhoria': { label: 'Melhoria', emoji: '🚀', color: '#3b82f6' },
+            'outro': { label: 'Outro', emoji: '💬', color: '#8b5cf6' }
+        };
+
+        const tipoInfo = tipoLabels[tipo] || tipoLabels['outro'];
+        const dataFormatada = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+
+        const htmlContent = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - DIVY</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, ${tipoInfo.color} 0%, ${tipoInfo.color}dd 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 28px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 8px 0 0 0;
+            opacity: 0.85;
+            font-size: 14px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .info-row:last-of-type {
+            border-bottom: none;
+        }
+        .info-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .info-value {
+            font-size: 14px;
+            color: #1e293b;
+            font-weight: 600;
+        }
+        .message-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .message-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .message-box p {
+            margin: 0;
+            font-size: 15px;
+            color: #1e293b;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .badge {
+            display: inline-block;
+            background: ${tipoInfo.color}15;
+            color: ${tipoInfo.color};
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .footer {
+            background: #f8fafc;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">${tipoInfo.emoji}</div>
+            <h1>Novo Feedback</h1>
+            <p>${tipoInfo.label} recebido de um usuário</p>
+        </div>
+        <div class="content">
+            <div class="info-row">
+                <span class="info-label">Tipo</span>
+                <span class="badge">${tipoInfo.emoji} ${tipoInfo.label}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Usuário</span>
+                <span class="info-value">${nomeUsuario}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value">${emailUsuario}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">ID</span>
+                <span class="info-value">#${userId || 'N/A'}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Data</span>
+                <span class="info-value">${dataFormatada}</span>
+            </div>
+            <div class="message-box">
+                <h3>Mensagem</h3>
+                <p>${mensagem.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+            </div>
+        </div>
+        <div class="footer">
+            DIVY - Sistema de Tarefas | Feedback recebido automaticamente
+        </div>
+    </div>
+</body>
+</html>`;
+
+        const textContent = `Novo Feedback DIVY\n\nTipo: ${tipoInfo.label}\nUsuário: ${nomeUsuario} (${emailUsuario})\nID: #${userId || 'N/A'}\nData: ${dataFormatada}\n\nMensagem:\n${mensagem}`;
+
+        await sendEmail(
+            'gustavu.dev@gmail.com',
+            `[DIVY Feedback] ${tipoInfo.emoji} ${tipoInfo.label} - ${nomeUsuario}`,
+            htmlContent,
+            textContent
+        );
+
+        return { success: true, sent: true };
+
+    } catch (err) {
+        console.error('❌ Erro ao enviar feedback:', err.message);
+        return { success: false, error: err.message };
+    }
+}
+
 module.exports = {
     enviarResumoDiario,
     enviarResumoParaTodos,
     enviarEmail,
     enviarCodigoVerificacao,
-    enviarCodigoRecuperacao
+    enviarCodigoRecuperacao,
+    enviarFeedback
 };
