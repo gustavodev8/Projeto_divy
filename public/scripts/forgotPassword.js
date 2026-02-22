@@ -72,7 +72,7 @@ async function sendResetCode(event) {
     submitButton.value = 'Enviando...';
 
     try {
-        console.log('📧 Enviando código de recuperação...');
+// console.log('📧 Enviando código de recuperação...');
 
         const response = await fetch(`${API_URL}/v1/auth/forgot-password`, {
             method: 'POST',
@@ -83,10 +83,10 @@ async function sendResetCode(event) {
         });
 
         const data = await response.json();
-        console.log('📬 Resposta forgot-password:', data);
+// console.log('📬 Resposta forgot-password:', data);
 
         if (response.ok && data.success) {
-            console.log('✅ Código enviado!');
+// console.log('✅ Código enviado!');
             pendingEmail = email;
 
             // Mostrar email na etapa 2
@@ -102,7 +102,7 @@ async function sendResetCode(event) {
         submitButton.value = originalValue;
 
     } catch (error) {
-        console.error('💥 Erro de conexão:', error);
+// console.error('💥 Erro de conexão:', error);
         showMessage('Erro de conexão com o servidor', 'error');
         submitButton.disabled = false;
         submitButton.value = originalValue;
@@ -123,7 +123,7 @@ async function verifyCode() {
     btnVerify.textContent = 'Verificando...';
 
     try {
-        console.log('🔐 Verificando código...');
+// console.log('🔐 Verificando código...');
 
         const response = await fetch(`${API_URL}/v1/auth/verify-reset-code`, {
             method: 'POST',
@@ -137,12 +137,12 @@ async function verifyCode() {
         });
 
         const data = await response.json();
-        console.log('📬 Resposta verify-reset-code:', data);
+// console.log('📬 Resposta verify-reset-code:', data);
 
         const isVerified = data.success && (data.data?.verified || data.verified);
 
         if (response.ok && isVerified) {
-            console.log('✅ Código verificado!');
+// console.log('✅ Código verificado!');
 
             // Parar timer
             stopResendTimer();
@@ -157,7 +157,7 @@ async function verifyCode() {
         }
 
     } catch (error) {
-        console.error('💥 Erro de conexão:', error);
+// console.error('💥 Erro de conexão:', error);
         showCodeError('Erro de conexão. Tente novamente.');
         btnVerify.disabled = false;
         btnVerify.textContent = 'Verificar código';
@@ -193,7 +193,7 @@ async function resetPassword(event) {
     submitButton.value = 'Redefinindo...';
 
     try {
-        console.log('🔐 Redefinindo senha...');
+// console.log('🔐 Redefinindo senha...');
 
         const response = await fetch(`${API_URL}/v1/auth/reset-password`, {
             method: 'POST',
@@ -207,10 +207,10 @@ async function resetPassword(event) {
         });
 
         const data = await response.json();
-        console.log('📬 Resposta reset-password:', data);
+// console.log('📬 Resposta reset-password:', data);
 
         if (response.ok && data.success) {
-            console.log('✅ Senha redefinida!');
+// console.log('✅ Senha redefinida!');
 
             // Ir para etapa de sucesso
             goToStep('success');
@@ -221,7 +221,7 @@ async function resetPassword(event) {
         }
 
     } catch (error) {
-        console.error('💥 Erro de conexão:', error);
+// console.error('💥 Erro de conexão:', error);
         showPasswordError('Erro de conexão. Tente novamente.');
         submitButton.disabled = false;
         submitButton.value = originalValue;
@@ -248,7 +248,7 @@ async function resendCode() {
         const data = await response.json();
 
         if (response.ok && data.success) {
-            console.log('✅ Código reenviado!');
+// console.log('✅ Código reenviado!');
             showCodeError('Novo código enviado!', 'success');
             clearCodeInputs();
             startResendTimer();
@@ -259,7 +259,7 @@ async function resendCode() {
         }
 
     } catch (error) {
-        console.error('💥 Erro de conexão:', error);
+// console.error('💥 Erro de conexão:', error);
         showCodeError('Erro de conexão. Tente novamente.');
         btnResend.disabled = false;
         btnResend.innerHTML = 'Reenviar';
@@ -415,7 +415,7 @@ function setupCodeInputs() {
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Sistema de recuperação de senha inicializado');
+// console.log('🚀 Sistema de recuperação de senha inicializado');
 
     // Capturar o formulário de email
     const forgotForm = document.getElementById('forgot-form');
@@ -449,4 +449,4 @@ window.goToStep = goToStep;
 window.verifyCode = verifyCode;
 window.resendCode = resendCode;
 
-console.log('✅ forgotPassword.js carregado!');
+// console.log('✅ forgotPassword.js carregado!');

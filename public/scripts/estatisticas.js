@@ -19,7 +19,7 @@ function getCurrentUser() {
         const user = JSON.parse(userStr);
         return user && user.id ? user : null;
     } catch (error) {
-        console.error('❌ Erro ao buscar usuário:', error);
+// console.error('❌ Erro ao buscar usuário:', error);
         return null;
     }
 }
@@ -32,7 +32,7 @@ async function getTasks() {
     const currentUser = getCurrentUser();
     
     if (!currentUser) {
-        console.error('❌ Usuário não está logado!');
+// console.error('❌ Usuário não está logado!');
         return [];
     }
     
@@ -41,14 +41,14 @@ async function getTasks() {
         const data = await response.json();
         
         if (data.success) {
-            console.log(`📥 ${data.tasks.length} tarefas carregadas do servidor`);
+// console.log(`📥 ${data.tasks.length} tarefas carregadas do servidor`);
             return data.tasks;
         } else {
-            console.error('❌ Erro na API:', data.error);
+// console.error('❌ Erro na API:', data.error);
             return [];
         }
     } catch (error) {
-        console.error('❌ Erro ao buscar tarefas da API:', error);
+// console.error('❌ Erro ao buscar tarefas da API:', error);
         return [];
     }
 }
@@ -135,7 +135,7 @@ async function atualizarEstatisticas() {
     }
     
     // Log para debug (pode remover em produção)
-    console.log('📊 Estatísticas atualizadas:', stats);
+// console.log('📊 Estatísticas atualizadas:', stats);
 }
 
 /**
@@ -145,11 +145,11 @@ function inicializarEstatisticas() {
     const currentUser = getCurrentUser();
     
     if (!currentUser) {
-        console.warn('⚠️ Sistema de estatísticas: usuário não logado');
+// console.warn('⚠️ Sistema de estatísticas: usuário não logado');
         return;
     }
     
-    console.log(`🚀 Inicializando estatísticas para ${currentUser.username}...`);
+// console.log(`🚀 Inicializando estatísticas para ${currentUser.username}...`);
     
     // Atualizar na carga da página
     atualizarEstatisticas();
@@ -157,8 +157,8 @@ function inicializarEstatisticas() {
     // Atualizar a cada 5 segundos (servidor tem delay)
     setInterval(atualizarEstatisticas, 5000);
     
-    console.log('✅ Sistema de estatísticas inicializado!');
-    console.log('🔄 Atualização automática: 5 segundos');
+// console.log('✅ Sistema de estatísticas inicializado!');
+// console.log('🔄 Atualização automática: 5 segundos');
 }
 
 /**
@@ -166,7 +166,7 @@ function inicializarEstatisticas() {
  * Útil para chamar após adicionar/remover/atualizar tarefas
  */
 function forcarAtualizacaoEstatisticas() {
-    console.log('🔄 Forçando atualização das estatísticas...');
+// console.log('🔄 Forçando atualização das estatísticas...');
     atualizarEstatisticas();
 }
 
@@ -178,18 +178,18 @@ async function mostrarInfoEstatisticas() {
     const tasks = await getTasks();
     const currentUser = getCurrentUser();
     
-    console.log('\n📊 === INFORMAÇÕES DETALHADAS DAS ESTATÍSTICAS ===');
-    console.log('👤 Usuário:', currentUser ? currentUser.username : 'Não logado');
-    console.log('📝 Total de tarefas:', stats.totalTarefas);
-    console.log('✅ Tarefas ativas:', stats.tarefasAtivas);
-    console.log('⏳ Em andamento:', stats.tarefasEmAndamento);
-    console.log('⏸️  Pendentes:', stats.tarefasPendentes);
-    console.log('🎉 Concluídas hoje:', stats.concluidasHoje);
-    console.log('📈 Percentual concluído:', stats.percentualConcluidas + '%');
-    console.log('================================================\n');
+// console.log('\n📊 === INFORMAÇÕES DETALHADAS DAS ESTATÍSTICAS ===');
+// console.log('👤 Usuário:', currentUser ? currentUser.username : 'Não logado');
+// console.log('📝 Total de tarefas:', stats.totalTarefas);
+// console.log('✅ Tarefas ativas:', stats.tarefasAtivas);
+// console.log('⏳ Em andamento:', stats.tarefasEmAndamento);
+// console.log('⏸️  Pendentes:', stats.tarefasPendentes);
+// console.log('🎉 Concluídas hoje:', stats.concluidasHoje);
+// console.log('📈 Percentual concluído:', stats.percentualConcluidas + '%');
+// console.log('================================================\n');
     
     if (tasks.length > 0) {
-        console.log('📋 Lista de tarefas:');
+// console.log('📋 Lista de tarefas:');
         tasks.forEach((task, index) => {
             const statusEmoji = {
                 'pending': '⏸️',
@@ -203,14 +203,14 @@ async function mostrarInfoEstatisticas() {
                 'low': '🟢'
             };
             
-            console.log(
+// console.log(
                 `${index + 1}. ${statusEmoji[task.status] || '❓'} ` +
                 `${priorityEmoji[task.priority] || '⚪'} ` +
                 `${task.title} - Status: ${task.status}`
             );
         });
     } else {
-        console.log('ℹ️ Nenhuma tarefa cadastrada ainda.');
+// console.log('ℹ️ Nenhuma tarefa cadastrada ainda.');
     }
 }
 
@@ -253,7 +253,7 @@ window.mostrarInfoEstatisticas = mostrarInfoEstatisticas;
  *    forcarAtualizacaoEstatisticas();
  */
 
-console.log('📊 Sistema de Estatísticas NURA (Backend) carregado!');
-console.log('💡 Digite mostrarInfoEstatisticas() no console para ver detalhes');
-console.log('🔄 Atualização automática: a cada 5 segundos');
-console.log('🌐 Conectado ao servidor:', API_URL);
+// console.log('📊 Sistema de Estatísticas NURA (Backend) carregado!');
+// console.log('💡 Digite mostrarInfoEstatisticas() no console para ver detalhes');
+// console.log('🔄 Atualização automática: a cada 5 segundos');
+// console.log('🌐 Conectado ao servidor:', API_URL);

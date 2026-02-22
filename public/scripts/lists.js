@@ -10,13 +10,13 @@ window.currentListId = null;
 
 // ===== CARREGAR LISTAS =====
 async function loadLists() {
-    console.log('🔄 INICIANDO CARREGAMENTO DE LISTAS...');
+// console.log('🔄 INICIANDO CARREGAMENTO DE LISTAS...');
     
     const user = getCurrentUser();
-    console.log('👤 Usuário para carregar listas:', user);
+// console.log('👤 Usuário para carregar listas:', user);
     
     if (!user) {
-        console.warn('⚠️ Usuário não identificado ao carregar listas');
+// console.warn('⚠️ Usuário não identificado ao carregar listas');
         return;
     }
     try {
@@ -26,7 +26,7 @@ async function loadLists() {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('❌ Erro HTTP:', response.status, errorText);
+// console.error('❌ Erro HTTP:', response.status, errorText);
             throw new Error(`HTTP ${response.status}`);
         }
 
@@ -34,7 +34,7 @@ async function loadLists() {
 
         if (data.success) {
             window.userLists = data.lists;
-            console.log(`📋 ${window.userLists.length} listas carregadas`);
+// console.log(`📋 ${window.userLists.length} listas carregadas`);
             
             // Selecionar primeira lista ou lista padrão
             if (window.userLists.length > 0 && !window.currentListId) {
@@ -43,12 +43,12 @@ async function loadLists() {
             }
 
 renderLists();
-            console.log('✅ Listas renderizadas!');
-            console.log('📋 Lista atual selecionada:', window.currentListId);
-            console.log('📦 Total de listas:', window.userLists.length);
+// console.log('✅ Listas renderizadas!');
+// console.log('📋 Lista atual selecionada:', window.currentListId);
+// console.log('📦 Total de listas:', window.userLists.length);
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar listas:', error);
+// console.error('❌ Erro ao carregar listas:', error);
         showNotification('❌ Erro ao carregar listas');
     }
 }
@@ -60,9 +60,9 @@ function renderLists() {
 
     container.innerHTML = '';
 
-        console.log('🎨 RENDERIZANDO LISTAS:');
-    console.log('   - Total:', window.userLists.length);
-    console.log('   - Lista atual:', window.currentListId);
+// console.log('🎨 RENDERIZANDO LISTAS:');
+// console.log('   - Total:', window.userLists.length);
+// console.log('   - Lista atual:', window.currentListId);
 
     window.userLists.forEach(list => {
         const isActive = list.id === window.currentListId;
@@ -104,7 +104,7 @@ function renderLists() {
 
 // ===== SELECIONAR LISTA =====
 async function selectList(listId) {
-    console.log('📋 Selecionando lista:', listId);
+// console.log('📋 Selecionando lista:', listId);
     
     // ✅ Salvar lista atual
     window.currentListId = parseInt(listId);
@@ -129,10 +129,10 @@ async function selectList(listId) {
     // ✅ Carregar seções da lista
     if (typeof loadSections === 'function') {
         await loadSections(listId);
-        console.log('📁 Seções carregadas para lista', listId);
+// console.log('📁 Seções carregadas para lista', listId);
     } else if (typeof loadSectionsForList === 'function') {
         await loadSectionsForList(listId);
-        console.log('📁 Seções carregadas para lista', listId);
+// console.log('📁 Seções carregadas para lista', listId);
     }
     
     // ✅ Atualizar estado dos botões de adicionar tarefa
@@ -161,7 +161,7 @@ async function selectList(listId) {
         atualizarEstatisticas();
     }
 
-    console.log('✅ Lista selecionada:', listId);
+// console.log('✅ Lista selecionada:', listId);
 }
 
 // ===== CRIAR LISTA =====
@@ -206,7 +206,7 @@ async function createList(name, emoji = '📋', color = '#146551') {
             }
         }
     } catch (error) {
-        console.error('❌ Erro ao criar lista:', error);
+// console.error('❌ Erro ao criar lista:', error);
         showNotification('❌ Erro ao criar lista');
     }
     return null;
@@ -218,7 +218,7 @@ function editList(listId) {
     const list = window.userLists.find(l => l.id === listId);
     if (!list) return;
 
-    console.log('📝 Editando lista:', list);
+// console.log('📝 Editando lista:', list);
 
     // Remove foco atual
     document.activeElement?.blur();
@@ -228,7 +228,7 @@ function editList(listId) {
     const modal = document.getElementById('editListModal');
     
     if (!overlay || !modal) {
-        console.error('❌ Modal de editar lista não encontrado no HTML');
+// console.error('❌ Modal de editar lista não encontrado no HTML');
         return;
     }
 
@@ -239,7 +239,7 @@ function editList(listId) {
 
     // Guarda o ID da lista sendo editada
     window.editingListId = listId;
-    console.log('✅ window.editingListId definido como:', window.editingListId);
+// console.log('✅ window.editingListId definido como:', window.editingListId);
 
     // Abre o modal
     overlay.style.display = 'flex';
@@ -285,7 +285,7 @@ async function submitEditList(listId) {
             document.querySelector('.section-modal-overlay')?.remove();
         }
     } catch (error) {
-        console.error('❌ Erro ao editar lista:', error);
+// console.error('❌ Erro ao editar lista:', error);
         showNotification('❌ Erro ao editar lista');
     }
 }
@@ -368,7 +368,7 @@ async function confirmDeleteList() {
             await loadLists();
         }
     } catch (error) {
-        console.error('❌ Erro ao excluir lista:', error);
+// console.error('❌ Erro ao excluir lista:', error);
         showNotification('❌ Erro ao excluir lista');
     }
 }
@@ -451,7 +451,7 @@ function closeCreateListModal() {
 }
 
 async function saveNewList() {
-    console.log('💾 Salvando nova lista...');
+// console.log('💾 Salvando nova lista...');
 
     const nameInput = document.getElementById('listNameInput');
     const listName = nameInput?.value.trim();
@@ -469,7 +469,7 @@ async function saveNewList() {
     }
 
     try {
-        console.log('📤 Enviando lista para o servidor:', listName);
+// console.log('📤 Enviando lista para o servidor:', listName);
 
         const response = await fetch(`${API_URL}/api/lists`, {
             method: 'POST',
@@ -485,7 +485,7 @@ async function saveNewList() {
         const result = await response.json();
         
         if (result.success) {
-            console.log('✅ Lista criada com sucesso:', result.list);
+// console.log('✅ Lista criada com sucesso:', result.list);
 
             // Fechar modal
             closeCreateListModal();
@@ -502,7 +502,7 @@ async function saveNewList() {
             }
 
         } else {
-            console.error('❌ Erro ao criar lista:', result.error);
+// console.error('❌ Erro ao criar lista:', result.error);
 
             // Verificar se é erro de limite de plano
             if (result.code === 'PLAN_LIMIT_REACHED' && window.PlanService) {
@@ -523,7 +523,7 @@ async function saveNewList() {
         }
 
     } catch (error) {
-        console.error('❌ Erro na requisição:', error);
+// console.error('❌ Erro na requisição:', error);
         showNotification('❌ Erro ao criar lista. Verifique sua conexão.');
     }
 }
@@ -548,4 +548,4 @@ window.saveNewList = saveNewList;
 window.submitEditList = submitEditList;
 window.updateListTaskCounts = updateListTaskCounts;
 
-console.log('✅ lists.js carregado');
+// console.log('✅ lists.js carregado');

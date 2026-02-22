@@ -1,4 +1,4 @@
-console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
+// console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
 
 /* ========================================
    VISUALIZAÇÃO KANBAN PROFISSIONAL
@@ -7,7 +7,7 @@ console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
 (function() {
     'use strict';
     
-    console.log('📦 Encapsulando kanban-view.js');
+// console.log('📦 Encapsulando kanban-view.js');
     
     // Variáveis privadas
     let editingSectionId = null;
@@ -15,10 +15,10 @@ console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
 
     // ===== RENDERIZAR KANBAN =====
     function renderKanbanView(container) {
-        console.log('🎯 renderKanbanView() chamado');
+// console.log('🎯 renderKanbanView() chamado');
 
         if (!container) {
-            console.error('❌ Container não encontrado');
+// console.error('❌ Container não encontrado');
             return;
         }
 
@@ -31,7 +31,7 @@ console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
         } else {
             hideCompleted = localStorage.getItem('nura_hideCompleted') === 'true';
         }
-        console.log('👁️ Kanban - Ocultar concluídas:', hideCompleted);
+// console.log('👁️ Kanban - Ocultar concluídas:', hideCompleted);
 
         // Função auxiliar para filtrar tarefas concluídas
         const filterCompleted = (tasks) => {
@@ -51,7 +51,7 @@ console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
 
         const sections = window.currentSections || [];
 
-        console.log('📊 Kanban:', allTasks.length, 'tarefas |', sections.length, 'seções');
+// console.log('📊 Kanban:', allTasks.length, 'tarefas |', sections.length, 'seções');
 
         const columnsWrapper = document.createElement('div');
         columnsWrapper.className = 'kanban-columns';
@@ -130,7 +130,7 @@ console.log('🚀 KANBAN-VIEW.JS INICIANDO...');
             initDragDrop();
         }
 
-        console.log('✅ Kanban renderizado');
+// console.log('✅ Kanban renderizado');
     }
 
     // ===== CRIAR COLUNA POR STATUS =====
@@ -497,7 +497,7 @@ function escapeHtml(text) {
 
     // ===== TOGGLE TAREFA =====
     window.toggleTaskFromKanban = async function(taskId) {
-        console.log('🔄 Toggle task Kanban:', taskId);
+// console.log('🔄 Toggle task Kanban:', taskId);
         
         const user = getCurrentUser();
         if (!user) return;
@@ -543,7 +543,7 @@ function escapeHtml(text) {
                 if (typeof atualizarEstatisticas === 'function') atualizarEstatisticas();
             }
         } catch (error) {
-            console.error('❌ Erro:', error);
+// console.error('❌ Erro:', error);
         }
     };
 
@@ -577,12 +577,12 @@ function escapeHtml(text) {
     };
 
     window.toggleKanbanSectionMenu = function(event, sectionId) {
-        console.log('Menu da seção:', sectionId);
+// console.log('Menu da seção:', sectionId);
     };
 
     // ===== EXPORTAR =====
     window.renderKanbanView = renderKanbanView;
     
-    console.log('✅ kanban-view.js carregado');
-    console.log('✅ renderKanbanView:', typeof window.renderKanbanView);
+// console.log('✅ kanban-view.js carregado');
+// console.log('✅ renderKanbanView:', typeof window.renderKanbanView);
 })();

@@ -119,7 +119,7 @@ async function saveTaskToDatabase(taskData) {
     return result.success;
     
   } catch (error) {
-    console.error('❌ Erro ao salvar tarefa no banco:', error);
+// console.error('❌ Erro ao salvar tarefa no banco:', error);
     return false;
   }
 }
@@ -133,13 +133,13 @@ async function loadTasksFromDatabase() {
     if (data.success) {
       tasks = data.tasks;
       renderSimpleTasks();
-      console.log('✅ Tarefas carregadas do BANCO:', tasks.length);
+// console.log('✅ Tarefas carregadas do BANCO:', tasks.length);
     } else {
-      console.error('❌ Erro ao carregar tarefas:', data.error);
+// console.error('❌ Erro ao carregar tarefas:', data.error);
       tasks = [];
     }
   } catch (error) {
-    console.error('❌ Erro de conexão:', error);
+// console.error('❌ Erro de conexão:', error);
     tasks = [];
   }
 }
@@ -159,7 +159,7 @@ async function updateTaskInDatabase(taskId, updates) {
     return result.success;
     
   } catch (error) {
-    console.error('❌ Erro ao atualizar tarefa:', error);
+// console.error('❌ Erro ao atualizar tarefa:', error);
     return false;
   }
 }
@@ -175,7 +175,7 @@ async function deleteTaskFromDatabase(taskId) {
     return result.success;
     
   } catch (error) {
-    console.error('❌ Erro ao excluir tarefa:', error);
+// console.error('❌ Erro ao excluir tarefa:', error);
     return false;
   }
 }
@@ -301,7 +301,7 @@ async function importarParaTarefas() {
     }, 2000);
     
   } catch (error) {
-    console.error('Erro ao importar tarefas:', error);
+// console.error('Erro ao importar tarefas:', error);
     showNotification('❌ Erro ao importar tarefas');
   }
 }
@@ -444,7 +444,7 @@ async function gerarRotinaInteligente() {
     }
     
   } catch (error) {
-    console.error('Erro:', error);
+// console.error('Erro:', error);
     showNotification('❌ Erro ao gerar rotina: ' + error.message);
   }
 }

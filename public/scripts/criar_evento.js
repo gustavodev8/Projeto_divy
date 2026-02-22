@@ -25,7 +25,7 @@ async function getCurrentUser() {
     }
     return null;
   } catch (error) {
-    console.error('❌ Erro ao verificar autenticação:', error);
+// console.error('❌ Erro ao verificar autenticação:', error);
     return null;
   }
 }
@@ -33,7 +33,7 @@ async function getCurrentUser() {
 // ===== CARREGAR TAREFAS DO BANCO =====
 async function loadTasksFromDatabase() {
   if (!currentUser) {
-    console.error('❌ Nenhum usuário logado!');
+// console.error('❌ Nenhum usuário logado!');
     return;
   }
   
@@ -48,19 +48,19 @@ async function loadTasksFromDatabase() {
       tasks = data.tasks;
       renderAllTasks();
       updateTaskCounts();
-      console.log(`✅ ${tasks.length} tarefas carregadas do usuário: ${currentUser.nome}`);
+// console.log(`✅ ${tasks.length} tarefas carregadas do usuário: ${currentUser.nome}`);
     } else {
-      console.error('❌ Erro ao carregar tarefas:', data.error);
+// console.error('❌ Erro ao carregar tarefas:', data.error);
     }
   } catch (error) {
-    console.error('❌ Erro de conexão:', error);
+// console.error('❌ Erro de conexão:', error);
   }
 }
 
 // ===== SALVAR TAREFA NO BANCO =====
 async function saveTaskToDatabase(taskData) {
   if (!currentUser) {
-    console.error('❌ Nenhum usuário logado!');
+// console.error('❌ Nenhum usuário logado!');
     return null;
   }
   
@@ -73,8 +73,8 @@ async function saveTaskToDatabase(taskData) {
       user_id: currentUser.id
     };
     
-    console.log('📤 Enviando para API:', dataToSend);
-    console.log('👤 Usuário:', currentUser.nome);
+// console.log('📤 Enviando para API:', dataToSend);
+// console.log('👤 Usuário:', currentUser.nome);
     
     const response = await fetch(`${API_URL}/api/tasks`, {
       method: 'POST',
@@ -86,12 +86,12 @@ async function saveTaskToDatabase(taskData) {
     });
     
     const result = await response.json();
-    console.log('📥 Resposta da API:', result);
+// console.log('📥 Resposta da API:', result);
     
     return result.success ? result.taskId : null;
     
   } catch (error) {
-    console.error('❌ Erro ao salvar tarefa no banco:', error);
+// console.error('❌ Erro ao salvar tarefa no banco:', error);
     return null;
   }
 }
@@ -99,7 +99,7 @@ async function saveTaskToDatabase(taskData) {
 // ===== ATUALIZAR TAREFA NO BANCO =====
 async function updateTaskInDatabase(taskId, updates) {
   if (!currentUser) {
-    console.error('❌ Nenhum usuário logado!');
+// console.error('❌ Nenhum usuário logado!');
     return false;
   }
   
@@ -109,7 +109,7 @@ async function updateTaskInDatabase(taskId, updates) {
       user_id: currentUser.id
     };
     
-    console.log(`📝 Atualizando tarefa ${taskId} do usuário: ${currentUser.nome}`);
+// console.log(`📝 Atualizando tarefa ${taskId} do usuário: ${currentUser.nome}`);
     
     const response = await fetch(`${API_URL}/api/tasks/${taskId}`, {
       method: 'PUT',
@@ -124,7 +124,7 @@ async function updateTaskInDatabase(taskId, updates) {
     return result.success;
     
   } catch (error) {
-    console.error('❌ Erro ao atualizar tarefa:', error);
+// console.error('❌ Erro ao atualizar tarefa:', error);
     return false;
   }
 }
@@ -132,12 +132,12 @@ async function updateTaskInDatabase(taskId, updates) {
 // ===== EXCLUIR TAREFA DO BANCO =====
 async function deleteTaskFromDatabase(taskId) {
   if (!currentUser) {
-    console.error('❌ Nenhum usuário logado!');
+// console.error('❌ Nenhum usuário logado!');
     return false;
   }
   
   try {
-    console.log(`🗑️ Excluindo tarefa ${taskId} do usuário: ${currentUser.nome}`);
+// console.log(`🗑️ Excluindo tarefa ${taskId} do usuário: ${currentUser.nome}`);
     
     const response = await fetch(`${API_URL}/api/tasks/${taskId}?user_id=${currentUser.id}`, {
       method: 'DELETE',
@@ -148,7 +148,7 @@ async function deleteTaskFromDatabase(taskId) {
     return result.success;
     
   } catch (error) {
-    console.error('❌ Erro ao excluir tarefa:', error);
+// console.error('❌ Erro ao excluir tarefa:', error);
     return false;
   }
 }
@@ -176,7 +176,7 @@ function renderTask(task) {
   
   const taskGroup = document.querySelector(`.task-group[data-status="${mappedStatus}"]`);
   if (!taskGroup) {
-    console.error('❌ Grupo não encontrado para status:', mappedStatus);
+// console.error('❌ Grupo não encontrado para status:', mappedStatus);
     return;
   }
   
@@ -323,14 +323,14 @@ async function deleteTask(taskId) {
 // ===== LIMPAR TODAS AS TAREFAS =====
 async function clearAllTasks() {
   if (!currentUser) {
-    console.error('❌ Nenhum usuário logado!');
+// console.error('❌ Nenhum usuário logado!');
     return;
   }
   
   if (!confirm('⚠️ Deseja realmente excluir TODAS as suas tarefas? Esta ação não pode ser desfeita!')) return;
   
   try {
-    console.log(`🗑️ Excluindo todas as tarefas do usuário: ${currentUser.nome}`);
+// console.log(`🗑️ Excluindo todas as tarefas do usuário: ${currentUser.nome}`);
     
     for (const task of tasks) {
       await deleteTaskFromDatabase(task.id);
@@ -343,7 +343,7 @@ async function clearAllTasks() {
     showNotification('🗑️ Todas as suas tarefas foram excluídas!');
     
   } catch (error) {
-    console.error('❌ Erro ao limpar tarefas:', error);
+// console.error('❌ Erro ao limpar tarefas:', error);
     showNotification('❌ Erro ao excluir tarefas');
   }
 }
@@ -664,7 +664,7 @@ function showStatusModal() {
 // ===== SALVAR TAREFA =====
 async function saveTask() {
   if (!currentUser) {
-    console.error('❌ Nenhum usuário logado!');
+// console.error('❌ Nenhum usuário logado!');
     showNotification('❌ Você precisa estar logado');
     return;
   }
@@ -699,8 +699,8 @@ async function saveTask() {
       dueDate: currentEditingTask.dueDate
     };
 
-    console.log('💾 Salvando tarefa:', taskToSave);
-    console.log('👤 Usuário:', currentUser.nome);
+// console.log('💾 Salvando tarefa:', taskToSave);
+// console.log('👤 Usuário:', currentUser.nome);
 
     const taskId = await saveTaskToDatabase(taskToSave);
 
@@ -720,7 +720,7 @@ async function saveTask() {
     currentEditingTask = null;
 
   } catch (error) {
-    console.error('❌ Erro ao salvar tarefa:', error);
+// console.error('❌ Erro ao salvar tarefa:', error);
     showNotification('❌ Erro ao salvar tarefa');
   }
 }
@@ -840,7 +840,7 @@ async function generateRoutineFromAI() {
     }
     
   } catch (error) {
-    console.error('❌ Erro ao gerar rotina:', error);
+// console.error('❌ Erro ao gerar rotina:', error);
     loadingElement.style.display = 'none';
     resultElement.style.display = 'block';
     resultElement.innerHTML = `
@@ -890,7 +890,7 @@ async function importRoutineAsTasks(rotinaText) {
     showNotification(`✅ ${tasksCreated} tarefas salvas no banco!`);
     
   } catch (error) {
-    console.error('❌ Erro ao importar rotina:', error);
+// console.error('❌ Erro ao importar rotina:', error);
     showNotification('❌ Erro ao importar rotina');
   }
 }
@@ -1058,37 +1058,37 @@ function toggleView() {
 
 // ===== INICIALIZAÇÃO DO SISTEMA (ÚLTIMA) =====
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Iniciando sistema de tarefas...');
+// console.log('🚀 Iniciando sistema de tarefas...');
     
     currentUser = getCurrentUser();
     
     if (!currentUser) {
-        console.error('❌ Usuário não está logado!');
+// console.error('❌ Usuário não está logado!');
         window.location.href = '/login';
         return;
     }
     
-    console.log('👤 Usuário logado:', currentUser.username);
+// console.log('👤 Usuário logado:', currentUser.username);
     
     initializeTaskSystem();
     
     // ===== AGUARDAR SETTINGS CARREGAR PRIMEIRO =====
     if (window.nuraSettingsFunctions) {
-        console.log('⏳ Aguardando settings carregar...');
+// console.log('⏳ Aguardando settings carregar...');
         await window.nuraSettingsFunctions.loadSettingsFromDatabase();
-        console.log('✅ Settings carregadas:', window.nuraSettingsFunctions.getSettings());
+// console.log('✅ Settings carregadas:', window.nuraSettingsFunctions.getSettings());
     }
     
     // Carregar listas
     if (typeof loadLists === 'function') {
         await loadLists();
-        console.log('📋 Listas carregadas, lista atual:', window.currentListId);
+// console.log('📋 Listas carregadas, lista atual:', window.currentListId);
     }
     
     // Carregar seções da lista atual
     if (typeof loadSections === 'function' && window.currentListId) {
         await loadSections(window.currentListId);
-        console.log('📁 Seções da lista', window.currentListId, 'carregadas');
+// console.log('📁 Seções da lista', window.currentListId, 'carregadas');
     }
     
     // ===== CARREGAR E RENDERIZAR TAREFAS (VAI USAR AS SETTINGS JÁ CARREGADAS) =====

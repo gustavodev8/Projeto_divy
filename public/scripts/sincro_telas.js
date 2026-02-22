@@ -79,11 +79,11 @@ window.getMotivationalPhrase = getMotivationalPhrase;
 
 // ===== GERAR OU MELHORAR DESCRIÇÃO COM IA =====
 async function generateAIDescription(taskTitle, existingDescription = '') {
-    console.log('🤖 Verificando se deve processar descrição automática...');
+// console.log('🤖 Verificando se deve processar descrição automática...');
 
     // Bloquear IA para plano normal
     if (window.PlanService && window.PlanService._cachedPlanId === 'normal') {
-        console.log('⏭️ IA bloqueada para plano normal');
+// console.log('⏭️ IA bloqueada para plano normal');
         return null;
     }
 
@@ -104,13 +104,13 @@ async function generateAIDescription(taskTitle, existingDescription = '') {
                 autoSuggestions = settings.autoSuggestions || false;
                 detailLevel = settings.detailLevel || 'medio';
             } catch (e) {
-                console.error('❌ Erro ao parsear settings:', e);
+// console.error('❌ Erro ao parsear settings:', e);
             }
         }
     }
 
     if (!autoSuggestions) {
-        console.log('⏭️ Sugestões automáticas desativadas');
+// console.log('⏭️ Sugestões automáticas desativadas');
         return null;
     }
 
@@ -127,7 +127,7 @@ async function generateAIDescription(taskTitle, existingDescription = '') {
     const hasExisting = existingDescription && existingDescription.trim() !== '';
     const mode = hasExisting ? 'melhorar' : 'gerar';
 
-    console.log(`🤖 ${mode === 'melhorar' ? 'Melhorando' : 'Gerando'} descrição IA para: "${taskTitle}" (Nível: ${detailLevel})`);
+// console.log(`🤖 ${mode === 'melhorar' ? 'Melhorando' : 'Gerando'} descrição IA para: "${taskTitle}" (Nível: ${detailLevel})`);
 
     // Obter user_id para verificação de plano
     const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
@@ -150,10 +150,10 @@ async function generateAIDescription(taskTitle, existingDescription = '') {
         const data = await response.json();
 
         if (data.success && data.description) {
-            console.log(`✅ Descrição ${mode === 'melhorar' ? 'melhorada' : 'gerada'}:`, data.description);
+// console.log(`✅ Descrição ${mode === 'melhorar' ? 'melhorada' : 'gerada'}:`, data.description);
             return data.description;
         } else {
-            console.error('❌ Erro na resposta:', data.error);
+// console.error('❌ Erro na resposta:', data.error);
 
             // Verificar se é erro de limite de plano
             if (data.code === 'AI_NOT_AVAILABLE' || data.code === 'AI_LIMIT_REACHED') {
@@ -165,7 +165,7 @@ async function generateAIDescription(taskTitle, existingDescription = '') {
             return null;
         }
     } catch (error) {
-        console.error('❌ Erro ao processar descrição com IA:', error);
+// console.error('❌ Erro ao processar descrição com IA:', error);
         return null;
     }
 }
@@ -175,17 +175,17 @@ window.generateAIDescription = generateAIDescription;
 
 // ===== GARANTIR QUE KANBAN-VIEW.JS FOI CARREGADO =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('📋 Verificando scripts carregados...');
-    console.log('   renderKanbanView:', typeof window.renderKanbanView);
-    console.log('   renderListView:', typeof renderListView);
+// console.log('📋 Verificando scripts carregados...');
+// console.log('   renderKanbanView:', typeof window.renderKanbanView);
+// console.log('   renderListView:', typeof renderListView);
     
     // Se renderKanbanView não estiver disponível após 2 segundos, alertar
     setTimeout(() => {
         if (typeof window.renderKanbanView !== 'function') {
-            console.error('❌ AVISO: renderKanbanView não foi carregado em 2 segundos');
-            console.log('📁 Verifique se kanban-view.js está no local correto');
+// console.error('❌ AVISO: renderKanbanView não foi carregado em 2 segundos');
+// console.log('📁 Verifique se kanban-view.js está no local correto');
         } else {
-            console.log('✅ Todos os scripts carregados com sucesso');
+// console.log('✅ Todos os scripts carregados com sucesso');
         }
         // Esconder splash screen quando scripts carregarem
         hideSplashScreen();
@@ -198,7 +198,7 @@ function hideSplashScreen() {
     if (splash) {
         splash.classList.add('fade-out');
         setTimeout(() => splash.remove(), 500);
-        console.log('✅ Splash screen removida');
+// console.log('✅ Splash screen removida');
     }
 }
 
@@ -241,7 +241,7 @@ async function loadUserPlanBadge() {
             toggleAIFeatures(false);
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar plano:', error);
+// console.error('❌ Erro ao carregar plano:', error);
         planBadge.textContent = 'Plano Free';
         toggleAIFeatures(false);
     }
@@ -267,22 +267,22 @@ function toggleAIFeatures(show) {
         statAi.style.display = show ? '' : 'none';
     }
 
-    console.log(`🤖 Funcionalidades de IA: ${show ? 'ATIVADAS' : 'DESATIVADAS'}`);
+// console.log(`🤖 Funcionalidades de IA: ${show ? 'ATIVADAS' : 'DESATIVADAS'}`);
 }
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Iniciando sistema de tarefas...');
+// console.log('🚀 Iniciando sistema de tarefas...');
 
     currentUser = getCurrentUser();
 
     if (!currentUser) {
-        console.error('❌ Usuário não está logado!');
+// console.error('❌ Usuário não está logado!');
         window.location.href = '/login';
         return;
     }
 
-    console.log('👤 Usuário logado:', currentUser.username);
+// console.log('👤 Usuário logado:', currentUser.username);
 
     initializeTaskSystem();
 
@@ -297,13 +297,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Carregar listas primeiro
     if (typeof loadLists === 'function') {
         await loadLists();
-        console.log('📋 Listas carregadas, lista atual:', window.currentListId);
+// console.log('📋 Listas carregadas, lista atual:', window.currentListId);
     }
 
     // Carregar seções da lista atual
     if (typeof loadSections === 'function' && window.currentListId) {
         await loadSections(window.currentListId);
-        console.log('📁 Seções da lista', window.currentListId, 'carregadas');
+// console.log('📁 Seções da lista', window.currentListId, 'carregadas');
     }
 
     loadAndDisplayTasksFromDatabase();
@@ -322,14 +322,14 @@ async function initializeTaskSystem() {
     const btnCancelar = document.getElementById('btnCancelar');
     const listaTarefas = document.getElementById('listaTarefas');
 
-    console.log('🔧 Inicializando sistema de tarefas...');
-    console.log('   - btnAdicionar:', !!btnAdicionar);
-    console.log('   - btnSalvar:', !!btnSalvar);
-    console.log('   - btnCancelar:', !!btnCancelar);
-    console.log('   - listaTarefas:', !!listaTarefas);
+// console.log('🔧 Inicializando sistema de tarefas...');
+// console.log('   - btnAdicionar:', !!btnAdicionar);
+// console.log('   - btnSalvar:', !!btnSalvar);
+// console.log('   - btnCancelar:', !!btnCancelar);
+// console.log('   - listaTarefas:', !!listaTarefas);
 
     if (!btnAdicionar || !btnSalvar || !listaTarefas) {
-        console.error('❌ Elementos do sistema de tarefas não encontrados!');
+// console.error('❌ Elementos do sistema de tarefas não encontrados!');
         return;
     }
 
@@ -380,7 +380,7 @@ async function initializeTaskSystem() {
         });
     }
     
-    console.log('✅ Sistema de tarefas inicializado!');
+// console.log('✅ Sistema de tarefas inicializado!');
 }
 
 // ===== LIMPAR CAMPOS DA TAREFA =====
@@ -399,19 +399,19 @@ function limparCamposTarefa() {
 // ===== CARREGAR TAREFAS DO USUÁRIO (COM FILTRO DE LISTA) =====
 async function loadAndDisplayTasksFromDatabase() {
     if (!currentUser) {
-        console.error('❌ Usuário não identificado!');
+// console.error('❌ Usuário não identificado!');
         return;
     }
 
     try {
-        console.log(`📥 Carregando tarefas do usuário ${currentUser.username}...`);
+// console.log(`📥 Carregando tarefas do usuário ${currentUser.username}...`);
         
         const response = await fetch(`${API_URL}/api/tasks?user_id=${currentUser.id}`);
         const data = await response.json();
         
         if (data.success) {
             homeTasks = data.tasks;
-            console.log(`✅ ${homeTasks.length} tarefas carregadas`);
+// console.log(`✅ ${homeTasks.length} tarefas carregadas`);
             
             // Filtrar tarefas pela lista atual
             filterTasksByCurrentList();
@@ -429,11 +429,11 @@ async function loadAndDisplayTasksFromDatabase() {
         }
 
         } else {
-            console.error('❌ Erro:', data.error);
+// console.error('❌ Erro:', data.error);
             showEmptyState();
         }
     } catch (error) {
-        console.error('❌ Erro de conexão:', error);
+// console.error('❌ Erro de conexão:', error);
         showEmptyState();
     }
 }
@@ -456,7 +456,7 @@ function updateAddTaskButtonState() {
             addTaskInline.style.display = 'none';
         }
         
-        console.log('🔒 Criação de tarefas BLOQUEADA (visualização)');
+// console.log('🔒 Criação de tarefas BLOQUEADA (visualização)');
     } else {
         btnAdicionar.disabled = false;
         btnAdicionar.style.opacity = '1';
@@ -467,7 +467,7 @@ function updateAddTaskButtonState() {
             addTaskInline.style.display = '';
         }
         
-        console.log('✅ Criação de tarefas PERMITIDA (lista selecionada)');
+// console.log('✅ Criação de tarefas PERMITIDA (lista selecionada)');
     }
 }
 
@@ -476,14 +476,14 @@ window.updateAddTaskButtonState = updateAddTaskButtonState;
 
 // ===== FILTRAR TAREFAS PELA LISTA ATUAL =====
 function filterTasksByCurrentList() {
-    console.log('🔍 ===== INICIANDO FILTRO DE TAREFAS =====');
-    console.log('📊 Total de tarefas carregadas:', homeTasks.length);
-    console.log('📋 Lista atual (window.currentListId):', window.currentListId);
-    console.log('🎯 Filtro inteligente (window.currentSmartFilter):', window.currentSmartFilter);
+// console.log('🔍 ===== INICIANDO FILTRO DE TAREFAS =====');
+// console.log('📊 Total de tarefas carregadas:', homeTasks.length);
+// console.log('📋 Lista atual (window.currentListId):', window.currentListId);
+// console.log('🎯 Filtro inteligente (window.currentSmartFilter):', window.currentSmartFilter);
 
     // Se há filtro inteligente ativo, não filtrar por lista
     if (window.currentSmartFilter) {
-        console.log('⚡ Filtro inteligente ativo, delegando para smart-filters.js');
+// console.log('⚡ Filtro inteligente ativo, delegando para smart-filters.js');
         return; // filterAndRenderTasks() já foi chamado
     }
 
@@ -492,7 +492,7 @@ function filterTasksByCurrentList() {
     if (window.currentListId) {
         // Converter currentListId para número
         const listIdNumber = parseInt(window.currentListId);
-        console.log('🔢 Lista ID convertido para número:', listIdNumber);
+// console.log('🔢 Lista ID convertido para número:', listIdNumber);
 
         // Filtrar tarefas pela lista
         filteredTasks = homeTasks.filter(task => {
@@ -500,14 +500,14 @@ function filterTasksByCurrentList() {
             return taskListId === listIdNumber;
         });
     } else {
-        console.log('⚠️ Nenhuma lista selecionada - mostrando todas as tarefas');
+// console.log('⚠️ Nenhuma lista selecionada - mostrando todas as tarefas');
     }
 
     // NÃO aplicar hideCompleted aqui - será aplicado na renderização para manter seções visíveis
     currentListTasks = filteredTasks;
 
-    console.log(`📋 RESULTADO: ${currentListTasks.length} tarefas`);
-    console.log('🔍 ===== FIM DO FILTRO =====\n');
+// console.log(`📋 RESULTADO: ${currentListTasks.length} tarefas`);
+// console.log('🔍 ===== FIM DO FILTRO =====\n');
 }
 
 // ===== FILTRAR TAREFAS POR FILTRO INTELIGENTE =====
@@ -553,31 +553,31 @@ function filterTasksBySmartFilter(filterType) {
 }
 
 function renderAllTasks() {
-    console.log('═══════════════════════════════════');
-    console.log('🎨 RENDERIZANDO TAREFAS');
-    console.log('   window.currentViewMode:', window.currentViewMode);
-    console.log('   Tipo renderKanbanView:', typeof window.renderKanbanView);
-    console.log('═══════════════════════════════════');
+// console.log('═══════════════════════════════════');
+// console.log('🎨 RENDERIZANDO TAREFAS');
+// console.log('   window.currentViewMode:', window.currentViewMode);
+// console.log('   Tipo renderKanbanView:', typeof window.renderKanbanView);
+// console.log('═══════════════════════════════════');
     
     const container = document.getElementById('listaTarefas');
     if (!container) {
-        console.error('❌ Container #listaTarefas não encontrado');
+// console.error('❌ Container #listaTarefas não encontrado');
         return;
     }
 
     // ✅ OBTER MODO DE VISUALIZAÇÃO (com fallback para 'lista')
     const viewMode = window.currentViewMode || 'lista';
     
-    console.log('📊 Modo FINAL:', viewMode);
+// console.log('📊 Modo FINAL:', viewMode);
 
     // ✅ MODO KANBAN
     if (viewMode === 'kanban') {
-        console.log('🎯 ENTRANDO NO MODO KANBAN');
+// console.log('🎯 ENTRANDO NO MODO KANBAN');
         
         // ✅ VERIFICAR SE A FUNÇÃO EXISTE
         if (typeof window.renderKanbanView !== 'function') {
-            console.error('❌❌❌ renderKanbanView NÃO ESTÁ DISPONÍVEL!');
-            console.error('Verifique se kanban-view.js foi carregado corretamente no HTML');
+// console.error('❌❌❌ renderKanbanView NÃO ESTÁ DISPONÍVEL!');
+// console.error('Verifique se kanban-view.js foi carregado corretamente no HTML');
             
             // Voltar para modo lista
             window.currentViewMode = 'lista';
@@ -590,23 +590,23 @@ function renderAllTasks() {
             return;
         }
         
-        console.log('✅ renderKanbanView EXISTE, executando...');
+// console.log('✅ renderKanbanView EXISTE, executando...');
         window.renderKanbanView(container);
         return;
     }
 
     // ✅ MODO LISTA (PADRÃO)
-    console.log('📋 ENTRANDO NO MODO LISTA');
+// console.log('📋 ENTRANDO NO MODO LISTA');
     renderListView(container);
 }
 // ===== RENDERIZAR VISTA EM LISTA (VERSÃO CORRIGIDA) =====
 function renderListView(container) {
-    console.log('🎨 === RENDERIZANDO VISTA EM LISTA ===');
-    console.log('   Filtro inteligente ativo:', window.currentSmartFilter);
-    console.log('   Lista atual:', window.currentListId);
+// console.log('🎨 === RENDERIZANDO VISTA EM LISTA ===');
+// console.log('   Filtro inteligente ativo:', window.currentSmartFilter);
+// console.log('   Lista atual:', window.currentListId);
 
     if (!container) {
-        console.error('❌ Container não encontrado');
+// console.error('❌ Container não encontrado');
         return;
     }
 
@@ -623,7 +623,7 @@ function renderListView(container) {
     } else {
         hideCompleted = localStorage.getItem('nura_hideCompleted') === 'true';
     }
-    console.log('👁️ Ocultar concluídas:', hideCompleted);
+// console.log('👁️ Ocultar concluídas:', hideCompleted);
 
     // Função auxiliar para filtrar tarefas concluídas
     const filterCompleted = (tasks) => {
@@ -634,13 +634,13 @@ function renderListView(container) {
         });
     };
 
-    console.log('📊 Total de tarefas:', allTasks.length);
+// console.log('📊 Total de tarefas:', allTasks.length);
 
     let html = '';
 
     // ✅ SE ESTÁ EM FILTRO INTELIGENTE → SEM SEÇÕES
     if (window.currentSmartFilter) {
-        console.log('⚡ Modo: FILTRO INTELIGENTE (sem seções)');
+// console.log('⚡ Modo: FILTRO INTELIGENTE (sem seções)');
 
         const visibleTasks = filterCompleted(allTasks);
 
@@ -663,10 +663,10 @@ function renderListView(container) {
 
     } else {
         // ✅ MODO NORMAL: COM SEÇÕES
-        console.log('📁 Modo: LISTA (com seções)');
+// console.log('📁 Modo: LISTA (com seções)');
 
         const sections = window.currentSections || [];
-        console.log('   Seções disponíveis:', sections.length);
+// console.log('   Seções disponíveis:', sections.length);
 
         // Se não tem tarefas E não tem seções, mostrar estado vazio
         if (allTasks.length === 0 && sections.length === 0) {
@@ -761,20 +761,20 @@ function renderListView(container) {
     if (!window.currentSmartFilter && typeof initializeDragAndDrop === 'function') {
         initializeDragAndDrop();
     } else {
-        console.log('⚠️ Drag & drop desabilitado (filtro inteligente ou função indisponível)');
+// console.log('⚠️ Drag & drop desabilitado (filtro inteligente ou função indisponível)');
     }
     
-    console.log('✅ Lista renderizada');
-    console.log('🎨 === FIM DA RENDERIZAÇÃO ===\n');
+// console.log('✅ Lista renderizada');
+// console.log('🎨 === FIM DA RENDERIZAÇÃO ===\n');
 }
 
 
 // ===== INICIALIZAR DRAG & DROP =====
 function initializeDragAndDrop() {
-    console.log('🎯 Inicializando drag & drop');
+// console.log('🎯 Inicializando drag & drop');
     
     const taskItems = document.querySelectorAll('.task-item[draggable="true"]');
-    console.log(`📊 ${taskItems.length} tarefas com drag habilitado`);
+// console.log(`📊 ${taskItems.length} tarefas com drag habilitado`);
     
     taskItems.forEach(item => {
         item.addEventListener('dragstart', handleDragStart);
@@ -782,7 +782,7 @@ function initializeDragAndDrop() {
     });
     
     const dropZones = document.querySelectorAll('[data-section-drop]');
-    console.log(`📊 ${dropZones.length} zonas de drop`);
+// console.log(`📊 ${dropZones.length} zonas de drop`);
     
     dropZones.forEach(zone => {
         zone.addEventListener('dragover', handleDragOver);
@@ -844,11 +844,11 @@ function createSectionElement(sectionId, name, emoji, tasks, isCollapsed = false
 // ===== TOGGLE SEÇÃO LOCAL (SEM ID NO BANCO) =====
 // ===== TOGGLE COLAPSAR SEÇÃO (LOCAL) =====
 function toggleLocalSectionCollapse(sectionId) {
-    console.log('🔄 Toggle seção:', sectionId);
+// console.log('🔄 Toggle seção:', sectionId);
     
     const section = document.querySelector(`[data-section-id="${sectionId}"]`);
     if (!section) {
-        console.error('❌ Seção não encontrada:', sectionId);
+// console.error('❌ Seção não encontrada:', sectionId);
         return;
     }
     
@@ -868,7 +868,7 @@ function toggleLocalSectionCollapse(sectionId) {
     // Salvar estado no localStorage
     localStorage.setItem(`section-collapsed-${sectionId}`, isCollapsed);
     
-    console.log(`✅ Seção "${sectionId}" ${isCollapsed ? 'colapsada' : 'expandida'}`);
+// console.log(`✅ Seção "${sectionId}" ${isCollapsed ? 'colapsada' : 'expandida'}`);
 }
 
 window.toggleLocalSectionCollapse = toggleLocalSectionCollapse;
@@ -979,7 +979,7 @@ function formatDate(dateString) {
     
     // Verificar se é válida
     if (isNaN(date.getTime())) {
-        console.warn('⚠️ Data inválida:', dateString);
+// console.warn('⚠️ Data inválida:', dateString);
         return '';
     }
     
@@ -1020,7 +1020,7 @@ function initDragAndDrop() {
     const taskItems = document.querySelectorAll('.task-item[draggable="true"]');
     const dropZones = document.querySelectorAll('[data-section-drop]');
 
-    console.log('🎯 Inicializando drag para', taskItems.length, 'tarefas');
+// console.log('🎯 Inicializando drag para', taskItems.length, 'tarefas');
 
     taskItems.forEach(item => {
         // Remover listeners antigos (se houver)
@@ -1115,7 +1115,7 @@ function handleMouseUp(e) {
 function handleDragStart(e) {
     // Garantir que é uma task-item
     if (!e.target.classList.contains('task-item')) {
-        console.warn('⚠️ Tentativa de arrastar elemento inválido');
+// console.warn('⚠️ Tentativa de arrastar elemento inválido');
         e.preventDefault();
         return;
     }
@@ -1142,7 +1142,7 @@ function handleDragStart(e) {
         clickTimeout = null;
     }
     
-    console.log('🎯 Arrastando tarefa:', e.target.dataset.taskId);
+// console.log('🎯 Arrastando tarefa:', e.target.dataset.taskId);
 }
 
 function handleDragEnd(e) {
@@ -1169,7 +1169,7 @@ async function handleDrop(e) {
     const sectionId = e.currentTarget.dataset.sectionDrop;
     const targetSectionId = sectionId === 'none' ? null : parseInt(sectionId);
 
-    console.log('📥 Drop detectado:', { taskId, sectionId, targetSectionId });
+// console.log('📥 Drop detectado:', { taskId, sectionId, targetSectionId });
 
     if (draggedTask) {
         // Mover visualmente ANTES de salvar
@@ -1178,7 +1178,7 @@ async function handleDrop(e) {
         
         e.currentTarget.appendChild(draggedTask);
 
-        console.log('🎯 Tarefa movida visualmente');
+// console.log('🎯 Tarefa movida visualmente');
 
         // Salvar no banco SEM recarregar tudo
         await moveTaskToSection(taskId, targetSectionId);
@@ -1186,15 +1186,15 @@ async function handleDrop(e) {
         // Atualizar contadores de TODAS as seções
         updateSectionCounts();
         
-        console.log('✅ Tarefa movida e contadores atualizados');
+// console.log('✅ Tarefa movida e contadores atualizados');
     } else {
-        console.warn('⚠️ draggedTask está null');
+// console.warn('⚠️ draggedTask está null');
     }
 }
 
 // ===== ATUALIZAR CONTADORES DAS SEÇÕES =====
 function updateSectionCounts() {
-    console.log('🔢 Atualizando contadores das seções...');
+// console.log('🔢 Atualizando contadores das seções...');
     
     document.querySelectorAll('.task-section').forEach(section => {
         const sectionId = section.getAttribute('data-section-id');
@@ -1205,7 +1205,7 @@ function updateSectionCounts() {
         const countEl = section.querySelector('.section-count');
         if (countEl) {
             countEl.textContent = count;
-            console.log(`   Seção ${sectionId}: ${count} tarefas`);
+// console.log(`   Seção ${sectionId}: ${count} tarefas`);
         }
         
         // Atualizar mensagem de seção vazia
@@ -1230,7 +1230,7 @@ function updateSectionCounts() {
         }
     });
     
-    console.log('✅ Contadores atualizados');
+// console.log('✅ Contadores atualizados');
 }
 
 // ===== MOVER TAREFA PARA SEÇÃO =====
@@ -1254,10 +1254,10 @@ async function moveTaskToSection(taskId, sectionId, position = 0) {
                 task.section_id = sectionId;
                 task.position = position;
             }
-            console.log(`✅ Tarefa movida para seção ${sectionId}`);
+// console.log(`✅ Tarefa movida para seção ${sectionId}`);
         }
     } catch (error) {
-        console.error('❌ Erro ao mover tarefa:', error);
+// console.error('❌ Erro ao mover tarefa:', error);
     }
 }
 
@@ -1366,7 +1366,7 @@ async function changeTaskStatus(taskId, newStatus) {
             showNotification(`✅ Status alterado para: ${statusNames[newStatus]}`);
         }
     } catch (error) {
-        console.error('❌ Erro:', error);
+// console.error('❌ Erro:', error);
         showNotification('❌ Erro ao atualizar tarefa');
     }
 }
@@ -1374,23 +1374,23 @@ async function changeTaskStatus(taskId, newStatus) {
 // ===== APLICAR FILTROS DE CONFIGURAÇÃO =====
 function applyTaskFilters() {
     if (!window.nuraSettingsFunctions) {
-        console.log('⚠️ Sistema de configurações não carregado ainda');
+// console.log('⚠️ Sistema de configurações não carregado ainda');
         return;
     }
 
     const settings = window.nuraSettingsFunctions.getSettings();
-    console.log('🔍 Aplicando filtros:', settings);
+// console.log('🔍 Aplicando filtros:', settings);
 
     // 1. Filtro: Ocultar tarefas concluídas
     if (settings.hideCompleted) {
-        console.log('🙈 Ocultando tarefas concluídas');
+// console.log('🙈 Ocultando tarefas concluídas');
         document.querySelectorAll('[data-task-status="completed"]').forEach(task => {
             task.style.display = 'none';
         });
         const completedColumn = document.querySelector('[data-kanban-column="completed"]');
         if (completedColumn) completedColumn.style.display = 'none';
     } else {
-        console.log('👁️ Mostrando todas as tarefas');
+// console.log('👁️ Mostrando todas as tarefas');
         document.querySelectorAll('[data-task-status="completed"]').forEach(task => {
             task.style.display = '';
         });
@@ -1400,10 +1400,10 @@ function applyTaskFilters() {
 
     // 2. Filtro: Destacar tarefas urgentes
     if (settings.highlightUrgent) {
-        console.log('🚨 Ativando destaques urgentes');
+// console.log('🚨 Ativando destaques urgentes');
         forceApplyHighlights();
     } else {
-        console.log('➡️ Removendo destaque de tarefas');
+// console.log('➡️ Removendo destaque de tarefas');
         document.querySelectorAll('[data-task-priority], [data-priority]').forEach(task => {
             task.style.borderLeft = '';
             task.style.backgroundColor = '';
@@ -1417,17 +1417,17 @@ function applyTaskFilters() {
 // ===== FORÇAR APLICAÇÃO DE DESTAQUES =====
 // ===== FORÇAR APLICAÇÃO DE DESTAQUES =====
 function forceApplyHighlights() {
-    console.log('🎨 Forçando destaques de prioridade...');
+// console.log('🎨 Forçando destaques de prioridade...');
     
     if (!window.nuraSettingsFunctions) {
-        console.log('⚠️ Settings não carregado');
+// console.log('⚠️ Settings não carregado');
         return;
     }
     
     const settings = window.nuraSettingsFunctions.getSettings();
     
     if (!settings.highlightUrgent) {
-        console.log('❌ Destaque desativado nas configurações');
+// console.log('❌ Destaque desativado nas configurações');
         // Remover todos os destaques
         document.querySelectorAll('.task-item').forEach(task => {
             task.style.borderLeft = '';
@@ -1436,7 +1436,7 @@ function forceApplyHighlights() {
         return;
     }
     
-    console.log('✅ Destaque ATIVADO - aplicando...');
+// console.log('✅ Destaque ATIVADO - aplicando...');
     
     // Limpar destaques existentes primeiro
     document.querySelectorAll('.task-item').forEach(task => {
@@ -1469,7 +1469,7 @@ function forceApplyHighlights() {
         const selector = `[data-priority="${priority}"], [data-task-priority="${priority}"]`;
         const tasks = document.querySelectorAll(selector);
         
-        console.log(`🎨 Aplicando ${priority}:`, tasks.length, 'tarefas');
+// console.log(`🎨 Aplicando ${priority}:`, tasks.length, 'tarefas');
         
         tasks.forEach(task => {
             const style = priorities[priority];
@@ -1482,7 +1482,7 @@ function forceApplyHighlights() {
         });
     });
     
-    console.log('✅ Destaques aplicados com sucesso!');
+// console.log('✅ Destaques aplicados com sucesso!');
 }
 
 // ===== ALTERAR STATUS (LISTA) =====
@@ -1543,7 +1543,7 @@ async function toggleTaskFromHome(id) {
             showNotification(newStatus === 'completed' ? '✅ Tarefa concluída!' : '⏳ Tarefa reaberta!');
         }
     } catch (error) {
-        console.error('❌ Erro de conexão:', error);
+// console.error('❌ Erro de conexão:', error);
         showNotification('❌ Erro de conexão com o servidor');
     }
 }
@@ -1597,7 +1597,7 @@ async function confirmDeleteTaskFromHome(id) {
             }
         }
     } catch (error) {
-        console.error('❌ Erro:', error);
+// console.error('❌ Erro:', error);
         showNotification('❌ Erro ao excluir');
     }
 }
@@ -1691,7 +1691,7 @@ async function submitEditTask(id) {
             showNotification('✅ Tarefa atualizada!');
         }
     } catch (error) {
-        console.error('❌ Erro:', error);
+// console.error('❌ Erro:', error);
         showNotification('❌ Erro ao atualizar tarefa');
     }
 }
@@ -1872,7 +1872,7 @@ async function gerarRotinaInteligente() {
         }
 
     } catch (error) {
-        console.error('Erro:', error);
+// console.error('Erro:', error);
         resultadoDiv.innerHTML = '<div class="ai-error">❌ Erro de conexão</div>';
     }
 }
@@ -1884,7 +1884,7 @@ let isSavingRoutine = false;
 async function salvarTarefasDaRotina(rotinaTexto) {
     // ✅ PROTEÇÃO CONTRA CLIQUES MÚLTIPLOS
     if (isSavingRoutine) {
-        console.log('⚠️ Salvamento de rotina já em andamento');
+// console.log('⚠️ Salvamento de rotina já em andamento');
         return;
     }
     isSavingRoutine = true;
@@ -1913,11 +1913,11 @@ async function salvarTarefasDaRotina(rotinaTexto) {
     let salvas = 0;
     let sectionId = null;
 
-    console.log('🔍 Iniciando importação de', linhas.length, 'linhas');
+// console.log('🔍 Iniciando importação de', linhas.length, 'linhas');
 
     // ===== CRIAR SEÇÃO AUTOMATICAMENTE =====
     const nomeSecao = window.rotinaNomeSecao || 'Rotina do Dia';
-    console.log('📁 Criando seção:', nomeSecao);
+// console.log('📁 Criando seção:', nomeSecao);
 
     try {
         const sectionResponse = await fetch(`${API_URL}/api/sections`, {
@@ -1937,17 +1937,17 @@ async function salvarTarefasDaRotina(rotinaTexto) {
 
         if (sectionResult.success && sectionResult.section) {
             sectionId = sectionResult.section.id;
-            console.log('✅ Seção criada com ID:', sectionId);
+// console.log('✅ Seção criada com ID:', sectionId);
 
             // Atualizar lista de seções localmente
             if (!window.currentSections) window.currentSections = [];
             window.currentSections.push(sectionResult.section);
         } else {
-            console.error('❌ Erro ao criar seção:', sectionResult.error);
+// console.error('❌ Erro ao criar seção:', sectionResult.error);
             showNotification('⚠️ Erro ao criar seção, salvando sem seção');
         }
     } catch (error) {
-        console.error('❌ Erro ao criar seção:', error);
+// console.error('❌ Erro ao criar seção:', error);
     }
 
     // ===== SALVAR TAREFAS NA SEÇÃO =====
@@ -1966,7 +1966,7 @@ async function salvarTarefasDaRotina(rotinaTexto) {
             if (texto && texto.length > 2) {
                 const priority = determinarPrioridadeAutomaticaFrontend(texto);
 
-                console.log('📝', texto, '→ Prioridade:', priority, '→ Seção:', sectionId);
+// console.log('📝', texto, '→ Prioridade:', priority, '→ Seção:', sectionId);
 
                 const tarefa = {
                     title: texto.substring(0, 100),
@@ -1990,13 +1990,13 @@ async function salvarTarefasDaRotina(rotinaTexto) {
                     const result = await response.json();
                     if (result.success) salvas++;
                 } catch (error) {
-                    console.error('❌ Erro ao salvar:', error);
+// console.error('❌ Erro ao salvar:', error);
                 }
             }
         }
     }
 
-        console.log('✅ Total salvo:', salvas, 'tarefas na seção', nomeSecao);
+// console.log('✅ Total salvo:', salvas, 'tarefas na seção', nomeSecao);
         showNotification(`✅ ${salvas} tarefas salvas na seção "${nomeSecao}"!`);
 
         // Limpar nome da seção temporária
@@ -2061,7 +2061,7 @@ function formatarRotina(texto) {
 function openTaskModal() {
     // ✅ VERIFICAR SE ESTÁ EM FILTRO INTELIGENTE
     if (window.currentSmartFilter) {
-        console.log('🚫 Bloqueado: Não pode criar tarefa em filtro inteligente');
+// console.log('🚫 Bloqueado: Não pode criar tarefa em filtro inteligente');
         showNotification('⚠️ Selecione uma lista para adicionar tarefas');
         return; // ❌ PARA AQUI
     }
@@ -2070,14 +2070,14 @@ function openTaskModal() {
     const overlay = document.getElementById('taskModalOverlay');
     
     if (!modal || !overlay) {
-        console.error('❌ Modal não encontrado');
+// console.error('❌ Modal não encontrado');
         return;
     }
 
-    console.log('📋 Abrindo modal de criar tarefa');
-    console.log('📊 Lista atual:', window.currentListId);
-    console.log('📊 Seções disponíveis:', window.currentSections?.length || 0);
-    console.log('📍 Seção pré-selecionada:', window.preSelectedSectionId);
+// console.log('📋 Abrindo modal de criar tarefa');
+// console.log('📊 Lista atual:', window.currentListId);
+// console.log('📊 Seções disponíveis:', window.currentSections?.length || 0);
+// console.log('📍 Seção pré-selecionada:', window.preSelectedSectionId);
 
     // ✅ SEMPRE MOSTRAR CAMPO DE SEÇÃO SE ESTIVER EM UMA LISTA
     const sectionField = document.getElementById('taskModalSectionField');
@@ -2095,19 +2095,19 @@ function openTaskModal() {
                     option.textContent = section.name;
                     selectSecao.appendChild(option);
                     
-                    console.log('➕ Opção adicionada:', section.name, '(ID:', section.id + ')');
+// console.log('➕ Opção adicionada:', section.name, '(ID:', section.id + ')');
                 });
             }
             
             // ✅ PRÉ-SELECIONAR SEÇÃO SE HOUVER
             if (window.preSelectedSectionId) {
                 selectSecao.value = window.preSelectedSectionId;
-                console.log('✅ Seção pré-selecionada no select:', selectSecao.value);
+// console.log('✅ Seção pré-selecionada no select:', selectSecao.value);
             }
             
             // Mostrar campo
             sectionField.style.display = 'flex';
-            console.log('✅ Campo de seção visível');
+// console.log('✅ Campo de seção visível');
         }
     } else {
         // Esconder se não estiver em uma lista
@@ -2126,7 +2126,7 @@ function openTaskModal() {
         if (titleInput) titleInput.focus();
     }, 100);
     
-    console.log('✅ Modal aberto');
+// console.log('✅ Modal aberto');
 }
 
 function closeTaskModal() {
@@ -2135,7 +2135,7 @@ function closeTaskModal() {
     
     if (!modal || !overlay) return;
 
-    console.log('📋 Fechando modal');
+// console.log('📋 Fechando modal');
 
     modal.classList.remove('active');
     overlay.classList.remove('active');
@@ -2153,7 +2153,7 @@ function closeTaskModal() {
         if (selectSecao) selectSecao.value = '';
     }, 300);
     
-    console.log('✅ Modal fechado');
+// console.log('✅ Modal fechado');
 }
 
 // Flag para evitar cliques múltiplos
@@ -2175,7 +2175,7 @@ function resetSaveButton() {
 async function salvarNovaTarefa() {
     // ✅ PROTEÇÃO CONTRA CLIQUES MÚLTIPLOS
     if (isSavingTask) {
-        console.log('⚠️ Salvamento já em andamento, ignorando clique duplicado');
+// console.log('⚠️ Salvamento já em andamento, ignorando clique duplicado');
         return;
     }
 
@@ -2190,7 +2190,7 @@ async function salvarNovaTarefa() {
         btnSalvar.textContent = 'Salvando...';
     }
 
-    console.log('🚀 === INICIANDO SALVAMENTO DE TAREFA ===');
+// console.log('🚀 === INICIANDO SALVAMENTO DE TAREFA ===');
 
     const titulo = document.getElementById('inputTituloTarefa').value.trim();
     let descricao = document.getElementById('textareaDescricaoTarefa').value.trim();
@@ -2203,11 +2203,11 @@ async function salvarNovaTarefa() {
 
         if (!descricao) {
             // Sem descrição - gerar nova
-            console.log('📝 Descrição vazia, tentando gerar com IA...');
+// console.log('📝 Descrição vazia, tentando gerar com IA...');
             showNotification('🤖 Gerando descrição com IA...');
         } else {
             // Com descrição - melhorar existente
-            console.log('📝 Descrição existente, tentando melhorar com IA...');
+// console.log('📝 Descrição existente, tentando melhorar com IA...');
             showNotification('🤖 Melhorando descrição com IA...');
         }
 
@@ -2215,25 +2215,25 @@ async function salvarNovaTarefa() {
 
         if (aiDescription) {
             descricao = aiDescription;
-            console.log(`✅ Descrição ${descricaoOriginal ? 'melhorada' : 'gerada'} com sucesso pela IA`);
+// console.log(`✅ Descrição ${descricaoOriginal ? 'melhorada' : 'gerada'} com sucesso pela IA`);
             // Atualizar o campo de descrição visualmente
             const textareaDescricao = document.getElementById('textareaDescricaoTarefa');
             if (textareaDescricao) {
                 textareaDescricao.value = descricao;
             }
         } else {
-            console.log('⚠️ IA não processou descrição (desativada ou erro)');
+// console.log('⚠️ IA não processou descrição (desativada ou erro)');
         }
     }
     
     // ✅ PEGAR SEÇÃO DO SELECT
     const selectSecao = document.getElementById('selectSecaoTarefa');
     
-    console.log('🔍 === DEBUG DO SELECT ===');
-    console.log('   selectSecao existe?', !!selectSecao);
-    console.log('   selectSecao.value (string):', selectSecao?.value);
-    console.log('   selectSecao.value === "" ?', selectSecao?.value === '');
-    console.log('   Todas as options:', Array.from(selectSecao?.options || []).map(o => ({
+// console.log('🔍 === DEBUG DO SELECT ===');
+// console.log('   selectSecao existe?', !!selectSecao);
+// console.log('   selectSecao.value (string):', selectSecao?.value);
+// console.log('   selectSecao.value === "" ?', selectSecao?.value === '');
+// console.log('   Todas as options:', Array.from(selectSecao?.options || []).map(o => ({
         value: o.value, 
         text: o.text, 
         selected: o.selected
@@ -2244,16 +2244,16 @@ async function salvarNovaTarefa() {
     
     if (secaoIdString && secaoIdString !== '' && secaoIdString !== 'null') {
         secaoId = parseInt(secaoIdString);
-        console.log('✅ Seção ID convertido:', secaoId, '(tipo:', typeof secaoId + ')');
+// console.log('✅ Seção ID convertido:', secaoId, '(tipo:', typeof secaoId + ')');
     } else {
-        console.log('⚠️ Sem seção selecionada ou valor vazio');
+// console.log('⚠️ Sem seção selecionada ou valor vazio');
     }
 
-    console.log('💾 === DADOS DA TAREFA ===');
-    console.log('   Título:', titulo);
-    console.log('   Lista ID:', window.currentListId);
-    console.log('   Seção ID:', secaoId);
-    console.log('   Prioridade:', prioridade);
+// console.log('💾 === DADOS DA TAREFA ===');
+// console.log('   Título:', titulo);
+// console.log('   Lista ID:', window.currentListId);
+// console.log('   Seção ID:', secaoId);
+// console.log('   Prioridade:', prioridade);
 
     if (!titulo) {
         showNotification('❌ Por favor, insira um título');
@@ -2280,8 +2280,8 @@ async function salvarNovaTarefa() {
         section_id: secaoId
     };
 
-    console.log('📤 === OBJETO ENVIADO AO SERVIDOR ===');
-    console.log(JSON.stringify(novaTarefa, null, 2));
+// console.log('📤 === OBJETO ENVIADO AO SERVIDOR ===');
+// console.log(JSON.stringify(novaTarefa, null, 2));
 
     try {
         const response = await fetch(`${API_URL}/api/tasks`, {
@@ -2295,10 +2295,10 @@ async function salvarNovaTarefa() {
 
         const result = await response.json();
 
-        console.log('📥 === RESPOSTA DO SERVIDOR ===');
-        console.log('   Success:', result.success);
-        console.log('   Tarefa retornada:', result.task);
-        console.log('   Section ID retornado:', result.task?.section_id);
+// console.log('📥 === RESPOSTA DO SERVIDOR ===');
+// console.log('   Success:', result.success);
+// console.log('   Tarefa retornada:', result.task);
+// console.log('   Section ID retornado:', result.task?.section_id);
 
         if (result.success) {
             showNotification('✅ Tarefa criada com sucesso!');
@@ -2339,10 +2339,10 @@ async function salvarNovaTarefa() {
             } else {
                 showNotification('❌ Erro ao criar tarefa');
             }
-            console.error('❌ Erro do servidor:', result);
+// console.error('❌ Erro do servidor:', result);
         }
     } catch (error) {
-        console.error('❌ Erro ao salvar tarefa:', error);
+// console.error('❌ Erro ao salvar tarefa:', error);
         showNotification('❌ Erro de conexão');
     } finally {
         // ✅ SEMPRE RESETAR FLAG E BOTÃO (sucesso ou erro)
@@ -2362,9 +2362,9 @@ document.addEventListener('keydown', (e) => {
 
 /* ===== CONTROLE DO BOTÃO NOVA TAREFA ===== */
 function updateAddTaskButtonState() {
-    console.log('🔘 Atualizando estado dos botões de adicionar tarefa...');
-    console.log('   Filtro inteligente ativo:', window.currentSmartFilter);
-    console.log('   Lista atual:', window.currentListId);
+// console.log('🔘 Atualizando estado dos botões de adicionar tarefa...');
+// console.log('   Filtro inteligente ativo:', window.currentSmartFilter);
+// console.log('   Lista atual:', window.currentListId);
     
     // Botões de adicionar tarefa
     const btnAdicionar = document.getElementById('btnAdicionar');
@@ -2374,7 +2374,7 @@ function updateAddTaskButtonState() {
     
     // ✅ Se está em filtro inteligente → DESABILITAR
     if (window.currentSmartFilter) {
-        console.log('🔒 MODO: Filtro inteligente - Bloqueando criação de tarefas');
+// console.log('🔒 MODO: Filtro inteligente - Bloqueando criação de tarefas');
         
         // Botão da sidebar (Nova Tarefa global)
         if (btnNovaGlobal) {
@@ -2407,7 +2407,7 @@ function updateAddTaskButtonState() {
         
     } else {
         // ✅ Está em uma lista → HABILITAR
-        console.log('✅ MODO: Lista selecionada - Permitindo criação de tarefas');
+// console.log('✅ MODO: Lista selecionada - Permitindo criação de tarefas');
         
         // Botão da sidebar
         if (btnNovaGlobal) {
@@ -2439,7 +2439,7 @@ function updateAddTaskButtonState() {
         }
     }
     
-    console.log('✅ Estado dos botões atualizado');
+// console.log('✅ Estado dos botões atualizado');
 }
 
 if (document.readyState === 'loading') {
@@ -2450,7 +2450,7 @@ if (document.readyState === 'loading') {
 }
 
 function setupTaskButtonListeners() {
-    console.log('🔧 Configurando listeners dos botões de nova tarefa...');
+// console.log('🔧 Configurando listeners dos botões de nova tarefa...');
     
     const btnNovaGlobal = document.getElementById('btnNovaGlobal');
     const btnAdicionar = document.getElementById('btnAdicionar');
@@ -2465,24 +2465,24 @@ function setupTaskButtonListeners() {
             e.preventDefault();
             e.stopPropagation();
             
-            console.log('🔘 Clique no botão Nova Tarefa (sidebar)');
-            console.log('   Filtro ativo:', window.currentSmartFilter);
+// console.log('🔘 Clique no botão Nova Tarefa (sidebar)');
+// console.log('   Filtro ativo:', window.currentSmartFilter);
             
             // ✅ VERIFICAR SE ESTÁ EM FILTRO INTELIGENTE
             if (window.currentSmartFilter) {
-                console.log('🚫 BLOQUEADO: Filtro inteligente ativo');
+// console.log('🚫 BLOQUEADO: Filtro inteligente ativo');
                 showNotification('⚠️ Selecione uma lista para adicionar tarefas');
                 return; // ❌ NÃO ABRE MODAL
             }
             
             // ✅ ABRIR MODAL
-            console.log('✅ Permitido: Abrindo modal');
+// console.log('✅ Permitido: Abrindo modal');
             openTaskModal();
         });
         
-        console.log('✅ Listener configurado: btnNovaGlobal');
+// console.log('✅ Listener configurado: btnNovaGlobal');
     } else {
-        console.warn('⚠️ btnNovaGlobal não encontrado');
+// console.warn('⚠️ btnNovaGlobal não encontrado');
     }
     
     // ===== BOTÃO INLINE (Adicionar tarefa) =====
@@ -2495,27 +2495,27 @@ function setupTaskButtonListeners() {
             e.preventDefault();
             e.stopPropagation();
             
-            console.log('🔘 Clique no botão Adicionar Tarefa (inline)');
-            console.log('   Filtro ativo:', window.currentSmartFilter);
+// console.log('🔘 Clique no botão Adicionar Tarefa (inline)');
+// console.log('   Filtro ativo:', window.currentSmartFilter);
             
             // ✅ VERIFICAR SE ESTÁ EM FILTRO INTELIGENTE
             if (window.currentSmartFilter) {
-                console.log('🚫 BLOQUEADO: Filtro inteligente ativo');
+// console.log('🚫 BLOQUEADO: Filtro inteligente ativo');
                 showNotification('⚠️ Selecione uma lista para adicionar tarefas');
                 return; // ❌ NÃO ABRE MODAL
             }
             
             // ✅ ABRIR MODAL
-            console.log('✅ Permitido: Abrindo modal');
+// console.log('✅ Permitido: Abrindo modal');
             openTaskModal();
         });
         
-        console.log('✅ Listener configurado: btnAdicionar');
+// console.log('✅ Listener configurado: btnAdicionar');
     } else {
-        console.warn('⚠️ btnAdicionar não encontrado');
+// console.warn('⚠️ btnAdicionar não encontrado');
     }
     
-    console.log('✅ Event listeners dos botões configurados com sucesso!');
+// console.log('✅ Event listeners dos botões configurados com sucesso!');
 }
 
 /* ========================================
@@ -2607,7 +2607,7 @@ function updatePageTitle() {
         taskCountElement.textContent = getMotivationalPhrase(count);
     }
 
-    console.log(`📝 Título atualizado: ${emoji} ${title} (${count} tarefas)`);
+// console.log(`📝 Título atualizado: ${emoji} ${title} (${count} tarefas)`);
 }
 
 // ===== ATUALIZAR BADGE DE CONCLUÍDAS =====
@@ -2625,7 +2625,7 @@ async function updateCompletedBadge() {
             badge.textContent = tasks.length;
         }
     } catch (error) {
-        console.error('❌ Erro ao atualizar badge:', error);
+// console.error('❌ Erro ao atualizar badge:', error);
     }
 }
 
@@ -2648,7 +2648,7 @@ window.updatePageTitle = updatePageTitle;
 window.openTaskModal = openTaskModal;
 window.closeTaskModal = closeTaskModal;
 window.salvarNovaTarefa = salvarNovaTarefa;
-console.log('✅ Funções do modal exportadas');
+// console.log('✅ Funções do modal exportadas');
 
 // ===== TORNA FUNÇÕES GLOBAIS =====
 window.toggleTaskFromHome = toggleTaskFromHome;
@@ -2669,4 +2669,4 @@ window.updateSectionCounts = updateSectionCounts;
 window.renderListView = renderListView;
 window.setupTaskButtonListeners = setupTaskButtonListeners;
 
-console.log('✅ sincro_telas.js carregado com sistema de listas e seções!');
+// console.log('✅ sincro_telas.js carregado com sistema de listas e seções!');

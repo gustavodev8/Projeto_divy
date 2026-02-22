@@ -20,7 +20,7 @@ async function login(event) {
     submitButton.classList.add('loading');
     
     try {
-        console.log('🔐 Tentando login...');
+// console.log('🔐 Tentando login...');
         
         const response = await fetch(`${API_URL}/api/login`, {
             method: 'POST',
@@ -36,7 +36,7 @@ async function login(event) {
         const data = await response.json();
         
         if (response.ok && data.success) {
-            console.log('✅ Login bem-sucedido!');
+// console.log('✅ Login bem-sucedido!');
 
             localStorage.setItem('nura_user', JSON.stringify(data.user));
             localStorage.setItem('nura_logged_in', 'true');
@@ -45,7 +45,7 @@ async function login(event) {
             if (data.accessToken) {
                 localStorage.setItem('nura_access_token', data.accessToken);
                 localStorage.setItem('nura_refresh_token', data.refreshToken);
-                console.log('🔐 Tokens JWT salvos');
+// console.log('🔐 Tokens JWT salvos');
             }
 
             showMessage('Login realizado com sucesso! Redirecionando...', 'success');
@@ -56,7 +56,7 @@ async function login(event) {
             }, 1000);
 
         } else {
-            console.error('❌ Erro no login:', data.error);
+// console.error('❌ Erro no login:', data.error);
 
             // Verificar se é conta Google que precisa definir senha
             if (data.code === 'NEEDS_PASSWORD') {
@@ -74,7 +74,7 @@ async function login(event) {
         }
         
     } catch (error) {
-        console.error('💥 Erro de conexão:', error);
+// console.error('💥 Erro de conexão:', error);
         showMessage('Erro de conexão com o servidor', 'error');
         submitButton.disabled = false;
         submitButton.classList.remove('loading');
@@ -103,14 +103,14 @@ function checkIfAlreadyLoggedIn() {
     
     // ✅ CORRIGIDO: usar /inicial
     if (isLoggedIn === 'true' && userData) {
-        console.log('✅ Usuário já está logado, redirecionando...');
+// console.log('✅ Usuário já está logado, redirecionando...');
         window.location.href = '/inicial';
     }
 }
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Sistema de login inicializado');
+// console.log('🚀 Sistema de login inicializado');
     
     // ❌ COMENTAR ESTA LINHA TEMPORARIAMENTE PARA TESTAR
     // checkIfAlreadyLoggedIn();
@@ -118,9 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', login);
-        console.log('✅ Event listener adicionado ao formulário');
+// console.log('✅ Event listener adicionado ao formulário');
     } else {
-        console.error('❌ Formulário de login não encontrado!');
+// console.error('❌ Formulário de login não encontrado!');
     }
     
     const passwordInput = document.getElementById('isenha');
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(err => {
-                console.log('ℹ️ Google Client ID não disponível');
+// console.log('ℹ️ Google Client ID não disponível');
             });
     }
 });
@@ -154,20 +154,20 @@ document.addEventListener('DOMContentLoaded', function() {
 // Inicializar Google Sign-In
 function initGoogleSignIn() {
     if (typeof google === 'undefined' || !google.accounts) {
-        console.log('⏳ Aguardando carregamento da biblioteca Google...');
+// console.log('⏳ Aguardando carregamento da biblioteca Google...');
         setTimeout(initGoogleSignIn, 100);
         return;
     }
 
     const clientId = window.NURA_GOOGLE_CLIENT_ID;
     if (!clientId) {
-        console.log('⚠️ Google Client ID não configurado');
+// console.log('⚠️ Google Client ID não configurado');
         const googleBtn = document.getElementById('google-signin-btn');
         if (googleBtn) googleBtn.style.display = 'none';
         return;
     }
 
-    console.log('🔑 Inicializando Google Sign-In...');
+// console.log('🔑 Inicializando Google Sign-In...');
 
     try {
         const googleBtn = document.getElementById('google-signin-btn');
@@ -183,38 +183,38 @@ function initGoogleSignIn() {
 
             // Ao clicar no botão, mostrar o prompt do Google
             googleBtn.addEventListener('click', () => {
-                console.log('📱 Abrindo Google Sign-In...');
+// console.log('📱 Abrindo Google Sign-In...');
                 googleBtn.classList.add('loading');
 
                 // Tentar One Tap primeiro
                 google.accounts.id.prompt((notification) => {
-                    console.log('📋 Google prompt notification:', notification);
+// console.log('📋 Google prompt notification:', notification);
 
                     if (notification.isNotDisplayed()) {
-                        console.log('⚠️ One Tap não exibido, usando método alternativo...');
+// console.log('⚠️ One Tap não exibido, usando método alternativo...');
                         // Fallback: usar OAuth2 com redirect
                         useOAuth2Redirect(clientId);
                     } else if (notification.isSkippedMoment()) {
-                        console.log('⚠️ Usuário pulou o One Tap');
+// console.log('⚠️ Usuário pulou o One Tap');
                         googleBtn.classList.remove('loading');
                     } else if (notification.isDismissedMoment()) {
-                        console.log('⚠️ One Tap foi fechado');
+// console.log('⚠️ One Tap foi fechado');
                         googleBtn.classList.remove('loading');
                     }
                 });
             });
         }
 
-        console.log('✅ Google Sign-In inicializado!');
+// console.log('✅ Google Sign-In inicializado!');
 
     } catch (error) {
-        console.error('❌ Erro ao inicializar Google Sign-In:', error);
+// console.error('❌ Erro ao inicializar Google Sign-In:', error);
     }
 }
 
 // Callback para resposta do Google ID Token
 async function handleGoogleCredentialResponse(response) {
-    console.log('✅ Credential response recebido');
+// console.log('✅ Credential response recebido');
     const googleBtn = document.getElementById('google-signin-btn');
 
     try {
@@ -237,7 +237,7 @@ async function handleGoogleCredentialResponse(response) {
             showMessage(data.error || 'Erro ao fazer login com Google', 'error');
         }
     } catch (error) {
-        console.error('❌ Erro no login Google:', error);
+// console.error('❌ Erro no login Google:', error);
         showMessage('Erro de conexão. Tente novamente.', 'error');
     } finally {
         if (googleBtn) googleBtn.classList.remove('loading');
@@ -261,13 +261,13 @@ function useOAuth2Redirect(clientId) {
         `&state=${state}` +
         `&prompt=select_account`;
 
-    console.log('🔄 Redirecionando para Google OAuth...');
+// console.log('🔄 Redirecionando para Google OAuth...');
     window.location.href = authUrl;
 }
 
 // Login com informações do Google
 async function handleGoogleUserInfo(userInfo) {
-    console.log('🔐 Processando login Google...');
+// console.log('🔐 Processando login Google...');
 
     const googleBtn = document.getElementById('google-signin-btn');
     if (googleBtn) googleBtn.classList.add('loading');
@@ -295,7 +295,7 @@ async function handleGoogleUserInfo(userInfo) {
         }
 
     } catch (error) {
-        console.error('❌ Erro no login Google:', error);
+// console.error('❌ Erro no login Google:', error);
         showMessage('Erro de conexão. Tente novamente.', 'error');
     } finally {
         if (googleBtn) googleBtn.classList.remove('loading');
@@ -304,7 +304,7 @@ async function handleGoogleUserInfo(userInfo) {
 
 // Processar sucesso do login Google
 function handleGoogleSuccess(data) {
-    console.log('✅ Login Google bem sucedido!');
+// console.log('✅ Login Google bem sucedido!');
 
     const userData = data.data?.user || data.user;
     const accessToken = data.data?.accessToken || data.accessToken;
@@ -332,7 +332,7 @@ function handleGoogleSuccess(data) {
     }, 1000);
 }
 
-console.log('✅ login.js carregado!');
+// console.log('✅ login.js carregado!');
 
 // ===== MODAL PARA DEFINIR SENHA EM CONTA GOOGLE =====
 function showSetPasswordModal(email) {
@@ -536,7 +536,7 @@ async function submitSetPassword() {
             errorDiv.style.display = 'block';
         }
     } catch (error) {
-        console.error('Erro:', error);
+// console.error('Erro:', error);
         errorDiv.textContent = 'Erro de conexão. Tente novamente.';
         errorDiv.style.display = 'block';
     }

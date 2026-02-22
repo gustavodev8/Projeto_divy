@@ -19,7 +19,7 @@ function getCurrentUserId() {
         try {
             return JSON.parse(userData).id;
         } catch (e) {
-            console.error('❌ Erro ao obter usuário:', e);
+// console.error('❌ Erro ao obter usuário:', e);
             return null;
         }
     }
@@ -31,7 +31,7 @@ async function loadAISettings() {
     const userId = getCurrentUserId();
 
     if (!userId) {
-        console.warn('⚠️ Usuário não identificado, usando localStorage');
+// console.warn('⚠️ Usuário não identificado, usando localStorage');
         return loadAISettingsFromLocalStorage();
     }
 
@@ -54,16 +54,16 @@ async function loadAISettings() {
                     detailLevel: data.settings.aiDetailLevel || 'medio',
                     optimizationEnabled: data.settings.aiOptimizationEnabled !== false
                 };
-                console.log('✅ Configurações de IA carregadas do banco:', aiSettings);
+// console.log('✅ Configurações de IA carregadas do banco:', aiSettings);
                 return aiSettings;
             }
         } else if (response.status === 404) {
-            console.log('📝 Criando configurações de IA padrão no banco...');
+// console.log('📝 Criando configurações de IA padrão no banco...');
             await saveAISettings();
             return aiSettings;
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar configurações de IA do banco:', error);
+// console.error('❌ Erro ao carregar configurações de IA do banco:', error);
     }
 
     // Fallback para localStorage
@@ -77,7 +77,7 @@ function loadAISettingsFromLocalStorage() {
         try {
             aiSettings = JSON.parse(saved);
         } catch (e) {
-            console.error('Erro ao carregar configurações de IA do localStorage:', e);
+// console.error('Erro ao carregar configurações de IA do localStorage:', e);
         }
     }
     return aiSettings;
@@ -88,7 +88,7 @@ async function saveAISettings() {
     const userId = getCurrentUserId();
 
     if (!userId) {
-        console.warn('⚠️ Usuário não identificado, salvando no localStorage');
+// console.warn('⚠️ Usuário não identificado, salvando no localStorage');
         localStorage.setItem('aiSettings', JSON.stringify(aiSettings));
         return false;
     }
@@ -151,18 +151,18 @@ async function saveAISettings() {
         if (response.ok) {
             const data = await response.json();
             if (data.success) {
-                console.log('✅ Configurações de IA salvas no banco');
+// console.log('✅ Configurações de IA salvas no banco');
                 localStorage.setItem('aiSettings', JSON.stringify(aiSettings));
                 return true;
             }
         }
 
         const errorData = await response.json();
-        console.error('❌ Erro ao salvar configurações de IA:', errorData);
+// console.error('❌ Erro ao salvar configurações de IA:', errorData);
         return false;
 
     } catch (error) {
-        console.error('❌ Erro ao salvar configurações de IA:', error);
+// console.error('❌ Erro ao salvar configurações de IA:', error);
         localStorage.setItem('aiSettings', JSON.stringify(aiSettings));
         return false;
     }
@@ -176,7 +176,7 @@ async function generateTaskDescription(taskTitle) {
     }
 
     try {
-        console.log(`🤖 Solicitando descrição IA para: "${taskTitle}"`);
+// console.log(`🤖 Solicitando descrição IA para: "${taskTitle}"`);
 
         const response = await fetch(`${AI_SETTINGS_API_URL}/api/ai/generate-description`, {
             method: 'POST',
@@ -192,15 +192,15 @@ async function generateTaskDescription(taskTitle) {
         const data = await response.json();
 
         if (data.success) {
-            console.log('✅ Descrição gerada:', data.description);
+// console.log('✅ Descrição gerada:', data.description);
             return data.description;
         } else {
-            console.error('❌ Erro ao gerar descrição:', data.error);
+// console.error('❌ Erro ao gerar descrição:', data.error);
             return null;
         }
 
     } catch (error) {
-        console.error('💥 Erro na requisição de descrição:', error);
+// console.error('💥 Erro na requisição de descrição:', error);
         return null;
     }
 }

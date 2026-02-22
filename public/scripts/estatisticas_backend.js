@@ -20,7 +20,7 @@ function getCurrentUser() {
         const user = JSON.parse(userStr);
         return user && user.id ? user : null;
     } catch (error) {
-        console.error('❌ Erro ao buscar usuário:', error);
+// console.error('❌ Erro ao buscar usuário:', error);
         return null;
     }
 }
@@ -33,7 +33,7 @@ async function getTasks() {
     const currentUser = getCurrentUser();
 
     if (!currentUser) {
-        console.error('❌ Usuário não está logado!');
+// console.error('❌ Usuário não está logado!');
         return [];
     }
 
@@ -44,11 +44,11 @@ async function getTasks() {
         if (data.success) {
             return data.tasks;
         } else {
-            console.error('❌ Erro na API:', data.error);
+// console.error('❌ Erro na API:', data.error);
             return [];
         }
     } catch (error) {
-        console.error('❌ Erro ao buscar tarefas da API:', error);
+// console.error('❌ Erro ao buscar tarefas da API:', error);
         return [];
     }
 }
@@ -165,11 +165,11 @@ function inicializarEstatisticas() {
     const currentUser = getCurrentUser();
 
     if (!currentUser) {
-        console.warn('⚠️ Sistema de estatísticas: usuário não logado');
+// console.warn('⚠️ Sistema de estatísticas: usuário não logado');
         return;
     }
 
-    console.log(`✅ Sistema de estatísticas ativo para ${currentUser.username}`);
+// console.log(`✅ Sistema de estatísticas ativo para ${currentUser.username}`);
 
     // Atualizar na carga da página
     atualizarEstatisticas();
@@ -183,7 +183,7 @@ function inicializarEstatisticas() {
  * Útil para chamar após adicionar/remover/atualizar tarefas
  */
 function forcarAtualizacaoEstatisticas() {
-    console.log('🔄 Atualizando estatísticas...');
+// console.log('🔄 Atualizando estatísticas...');
     atualizarEstatisticas();
 }
 
@@ -195,13 +195,13 @@ async function mostrarInfoEstatisticas() {
     const tasks = await getTasks();
     const currentUser = getCurrentUser();
 
-    console.log('\n📊 === INFORMAÇÕES DETALHADAS DAS ESTATÍSTICAS ===');
-    console.log('👤 Usuário:', currentUser ? currentUser.username : 'Não logado');
-    console.log('📍 Contexto:', window.currentSmartFilter || window.currentListId || 'Geral');
-    console.log('📝 Total de tarefas (contexto):', stats.totalTarefas);
-    console.log('⏸️  Pendentes:', stats.tarefasPendentes);
-    console.log('✅ Concluídas:', stats.tarefasConcluidas);
-    console.log('================================================\n');
+// console.log('\n📊 === INFORMAÇÕES DETALHADAS DAS ESTATÍSTICAS ===');
+// console.log('👤 Usuário:', currentUser ? currentUser.username : 'Não logado');
+// console.log('📍 Contexto:', window.currentSmartFilter || window.currentListId || 'Geral');
+// console.log('📝 Total de tarefas (contexto):', stats.totalTarefas);
+// console.log('⏸️  Pendentes:', stats.tarefasPendentes);
+// console.log('✅ Concluídas:', stats.tarefasConcluidas);
+// console.log('================================================\n');
 }
 
 // ==========================================

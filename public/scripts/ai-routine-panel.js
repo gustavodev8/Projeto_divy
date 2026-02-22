@@ -15,7 +15,7 @@
 
 // ===== ABRIR PAINEL DE IA =====
 function openAIRoutinePanel() {
-    console.log('🤖 Abrindo painel de IA');
+// console.log('🤖 Abrindo painel de IA');
 
     // Verificar se o plano permite IA
     if (window.PlanService && typeof window.PlanService.getMyPlan === 'function') {
@@ -38,7 +38,7 @@ function openAIRoutinePanel() {
     const overlay = document.getElementById('aiRoutinePanelOverlay');
 
     if (!panel || !overlay) {
-        console.error('❌ Elementos do painel não encontrados');
+// console.error('❌ Elementos do painel não encontrados');
         return;
     }
 
@@ -53,12 +53,12 @@ function openAIRoutinePanel() {
         if (descInput) descInput.focus();
     }, 300);
     
-    console.log('✅ Painel de IA aberto');
+// console.log('✅ Painel de IA aberto');
 }
 
 // ===== FECHAR PAINEL DE IA =====
 function closeAIRoutinePanel() {
-    console.log('🚪 Fechando painel de IA');
+// console.log('🚪 Fechando painel de IA');
     
     const panel = document.getElementById('aiRoutinePanel');
     const overlay = document.getElementById('aiRoutinePanelOverlay');
@@ -78,13 +78,13 @@ function closeAIRoutinePanel() {
         document.getElementById('aiRoutineResult').style.display = 'none';
     }, 300);
     
-    console.log('✅ Painel de IA fechado');
+// console.log('✅ Painel de IA fechado');
 }
 
 // ===== GERAR ROTINA COM IA =====
 async function generateAIRoutine() {
     if (isGeneratingAIRoutine) {
-        console.log('⏳ Já está gerando uma rotina');
+// console.log('⏳ Já está gerando uma rotina');
         return;
     }
     
@@ -94,9 +94,9 @@ async function generateAIRoutine() {
     const resultDiv = document.getElementById('aiRoutineResult');
     const generateBtn = document.querySelector('.btn-generate-routine');
     
-    console.log('🤖 Iniciando geração de rotina');
-    console.log('   Descrição:', description);
-    console.log('   Horário:', startTime, 'às', endTime);
+// console.log('🤖 Iniciando geração de rotina');
+// console.log('   Descrição:', description);
+// console.log('   Horário:', startTime, 'às', endTime);
     
     // Validações
     if (!description) {
@@ -129,7 +129,7 @@ async function generateAIRoutine() {
             </div>
         `;
         
-        console.log('📤 Enviando requisição para API Gemini...');
+// console.log('📤 Enviando requisição para API Gemini...');
 
         // Obter user_id para verificação de plano
         const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
@@ -151,14 +151,14 @@ async function generateAIRoutine() {
         
         const result = await response.json();
         
-        console.log('📥 Resposta recebida:', result.success);
+// console.log('📥 Resposta recebida:', result.success);
         
         if (result.success) {
-            console.log('✅ Rotina gerada com sucesso');
+// console.log('✅ Rotina gerada com sucesso');
 
             // Armazenar o nome da seção gerado pela IA
             window.aiRoutineSectionName = result.nomeSecao || 'Rotina do Dia';
-            console.log('📁 Nome da seção:', window.aiRoutineSectionName);
+// console.log('📁 Nome da seção:', window.aiRoutineSectionName);
 
             // Mostrar resultado com nome da seção
             resultDiv.innerHTML = `
@@ -198,7 +198,7 @@ async function generateAIRoutine() {
 
             showNotification('✅ Rotina gerada com sucesso!');
         } else {
-            console.error('❌ Erro ao gerar rotina:', result.error);
+// console.error('❌ Erro ao gerar rotina:', result.error);
 
             // ===== VERIFICAR SE É ERRO DE LIMITE DE PLANO =====
             if (result.code === 'AI_NOT_AVAILABLE' || result.code === 'AI_LIMIT_REACHED') {
@@ -233,7 +233,7 @@ async function generateAIRoutine() {
         }
         
     } catch (error) {
-        console.error('❌ Erro de conexão:', error);
+// console.error('❌ Erro de conexão:', error);
         
         resultDiv.innerHTML = `
             <div class="ai-error">
@@ -271,12 +271,12 @@ let isSavingAIRoutine = false;
 async function saveRoutineAsTasks(routineText) {
     // ✅ PROTEÇÃO CONTRA CLIQUES MÚLTIPLOS
     if (isSavingAIRoutine) {
-        console.log('⚠️ Salvamento de rotina já em andamento');
+// console.log('⚠️ Salvamento de rotina já em andamento');
         return;
     }
     isSavingAIRoutine = true;
 
-    console.log('💾 Salvando rotina como tarefas');
+// console.log('💾 Salvando rotina como tarefas');
 
     const user = getCurrentUser();
     if (!user) {
@@ -303,7 +303,7 @@ async function saveRoutineAsTasks(routineText) {
     const sectionName = window.aiRoutineSectionName || 'Rotina do Dia';
     let targetSectionId = null;
 
-    console.log('📁 Criando seção:', sectionName);
+// console.log('📁 Criando seção:', sectionName);
 
     try {
         const sectionResponse = await fetch(`${AI_PANEL_API_URL}/api/sections`, {
@@ -323,17 +323,17 @@ async function saveRoutineAsTasks(routineText) {
 
         if (sectionResult.success && sectionResult.section) {
             targetSectionId = sectionResult.section.id;
-            console.log('✅ Seção criada com ID:', targetSectionId);
+// console.log('✅ Seção criada com ID:', targetSectionId);
 
             // Atualizar lista de seções localmente
             if (!window.currentSections) window.currentSections = [];
             window.currentSections.push(sectionResult.section);
         } else {
-            console.error('❌ Erro ao criar seção:', sectionResult.error);
+// console.error('❌ Erro ao criar seção:', sectionResult.error);
             showNotification('⚠️ Erro ao criar seção, salvando sem seção');
         }
     } catch (error) {
-        console.error('❌ Erro ao criar seção:', error);
+// console.error('❌ Erro ao criar seção:', error);
     }
 
     // Atualizar botão
@@ -371,7 +371,7 @@ async function saveRoutineAsTasks(routineText) {
                     section_id: targetSectionId
                 });
 
-                console.log(`📝 Tarefa extraída: "${taskText}" (${priority}) → Seção: ${targetSectionId}`);
+// console.log(`📝 Tarefa extraída: "${taskText}" (${priority}) → Seção: ${targetSectionId}`);
             }
         }
     }
@@ -392,7 +392,7 @@ async function saveRoutineAsTasks(routineText) {
         return;
     }
 
-    console.log(`📤 Salvando ${tasks.length} tarefas na seção "${sectionName}"...`);
+// console.log(`📤 Salvando ${tasks.length} tarefas na seção "${sectionName}"...`);
 
     let savedCount = 0;
 
@@ -412,14 +412,14 @@ async function saveRoutineAsTasks(routineText) {
             if (result.success) {
                 savedCount++;
             } else {
-                console.error('❌ Erro ao salvar tarefa:', result.error);
+// console.error('❌ Erro ao salvar tarefa:', result.error);
             }
         } catch (error) {
-            console.error('❌ Erro de conexão:', error);
+// console.error('❌ Erro de conexão:', error);
         }
     }
 
-    console.log(`✅ ${savedCount}/${tasks.length} tarefas salvas na seção "${sectionName}"`);
+// console.log(`✅ ${savedCount}/${tasks.length} tarefas salvas na seção "${sectionName}"`);
 
     // Limpar nome da seção temporária
     window.aiRoutineSectionName = null;
@@ -535,6 +535,6 @@ window.generateAIRoutine = generateAIRoutine;
 window.saveRoutineAsTasks = saveRoutineAsTasks;
 window.clearRoutineAndGenerate = clearRoutineAndGenerate;
 
-console.log('✅ ai-routine-panel.js carregado');
+// console.log('✅ ai-routine-panel.js carregado');
 
 })(); // Fechamento da IIFE

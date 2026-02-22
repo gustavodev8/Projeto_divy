@@ -1,15 +1,15 @@
 // ===== APLICAR FILTRO INTELIGENTE =====
 function applySmartFilter(filterType) {
-    console.log('🔍 ===== APLICANDO FILTRO INTELIGENTE =====');
-    console.log('   Tipo:', filterType);
-    console.log('   Total de tarefas (homeTasks):', window.homeTasks?.length || 0);
+// console.log('🔍 ===== APLICANDO FILTRO INTELIGENTE =====');
+// console.log('   Tipo:', filterType);
+// console.log('   Total de tarefas (homeTasks):', window.homeTasks?.length || 0);
     
     // ✅ Marcar filtro atual
     window.currentSmartFilter = filterType;
     
     // ✅ LIMPAR lista selecionada
     window.currentListId = null;
-    console.log('   Lista atual limpa (null)');
+// console.log('   Lista atual limpa (null)');
     
     // ✅ LIMPAR SELEÇÃO VISUAL DAS LISTAS
     clearListSelection();
@@ -33,22 +33,22 @@ function applySmartFilter(filterType) {
         atualizarEstatisticas();
     }
 
-    console.log('✅ Filtro aplicado com sucesso');
-    console.log('🔍 ===== FIM DO FILTRO INTELIGENTE =====\n');
+// console.log('✅ Filtro aplicado com sucesso');
+// console.log('🔍 ===== FIM DO FILTRO INTELIGENTE =====\n');
 }
 
 // ===== LIMPAR SELEÇÃO VISUAL DAS LISTAS =====
 function clearListSelection() {
-    console.log('🧹 Limpando seleção visual das listas...');
+// console.log('🧹 Limpando seleção visual das listas...');
     document.querySelectorAll('.list-item').forEach(item => {
         item.classList.remove('active');
     });
-    console.log('✅ Seleção de listas limpa');
+// console.log('✅ Seleção de listas limpa');
 }
 
 // ===== MARCAR FILTRO ATIVO NA SIDEBAR =====
 function markActiveFilter(filterType) {
-    console.log('🎯 Marcando filtro ativo:', filterType);
+// console.log('🎯 Marcando filtro ativo:', filterType);
     
     // Remover active de todos os nav-items
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -59,7 +59,7 @@ function markActiveFilter(filterType) {
     const activeFilter = document.querySelector(`[data-filter="${filterType}"]`);
     if (activeFilter) {
         activeFilter.classList.add('active');
-        console.log('✅ Filtro marcado como ativo:', filterType);
+// console.log('✅ Filtro marcado como ativo:', filterType);
     }
     
     // ✅ Remover active das listas (garantia extra)
@@ -68,10 +68,10 @@ function markActiveFilter(filterType) {
 
 // ===== FILTRAR E RENDERIZAR TAREFAS =====
 function filterAndRenderTasks(filterType) {
-    console.log('📊 Filtrando tarefas por:', filterType);
+// console.log('📊 Filtrando tarefas por:', filterType);
     
     const allTasks = window.homeTasks || [];
-    console.log('   Total de tarefas disponíveis:', allTasks.length);
+// console.log('   Total de tarefas disponíveis:', allTasks.length);
     
     let filteredTasks = [];
     
@@ -88,7 +88,7 @@ function filterAndRenderTasks(filterType) {
                 const noList = !task.list_id;
                 return noDate || noList;
             });
-            console.log('   📥 Caixa de Entrada:', filteredTasks.length, 'tarefas');
+// console.log('   📥 Caixa de Entrada:', filteredTasks.length, 'tarefas');
             break;
             
         case 'today':
@@ -98,7 +98,7 @@ function filterAndRenderTasks(filterType) {
                 taskDate.setHours(0, 0, 0, 0);
                 return taskDate.getTime() === today.getTime();
             });
-            console.log('   📅 Hoje:', filteredTasks.length, 'tarefas');
+// console.log('   📅 Hoje:', filteredTasks.length, 'tarefas');
             break;
             
         case 'next7days':
@@ -108,29 +108,29 @@ function filterAndRenderTasks(filterType) {
                 taskDate.setHours(0, 0, 0, 0);
                 return taskDate >= today && taskDate <= in7Days;
             });
-            console.log('   📆 Próximos 7 dias:', filteredTasks.length, 'tarefas');
+// console.log('   📆 Próximos 7 dias:', filteredTasks.length, 'tarefas');
             break;
             
         case 'all':
             filteredTasks = allTasks;
-            console.log('   📋 Todas:', filteredTasks.length, 'tarefas');
+// console.log('   📋 Todas:', filteredTasks.length, 'tarefas');
             break;
             
         default:
-            console.warn('⚠️ Filtro desconhecido:', filterType);
+// console.warn('⚠️ Filtro desconhecido:', filterType);
             filteredTasks = allTasks;
     }
     
     window.currentListTasks = filteredTasks;
-    console.log('✅ currentListTasks atualizado:', window.currentListTasks.length, 'tarefas');
+// console.log('✅ currentListTasks atualizado:', window.currentListTasks.length, 'tarefas');
     
     window.currentSections = [];
-    console.log('✅ Seções limpas (filtro inteligente não usa seções)');
+// console.log('✅ Seções limpas (filtro inteligente não usa seções)');
     
     if (typeof renderAllTasks === 'function') {
         renderAllTasks();
     } else {
-        console.error('❌ renderAllTasks não disponível');
+// console.error('❌ renderAllTasks não disponível');
     }
     
     if (typeof applyTaskFilters === 'function') {
@@ -169,17 +169,17 @@ function updatePageTitle(filterType) {
         }
     }
 
-    console.log('✅ Título atualizado:', config.text);
+// console.log('✅ Título atualizado:', config.text);
 }
 
 // ===== ATUALIZAR BADGES DOS FILTROS =====
 function updateSmartFilterBadges() {
     if (!window.homeTasks) {
-        console.log('⚠️ homeTasks não disponível ainda');
+// console.log('⚠️ homeTasks não disponível ainda');
         return;
     }
     
-    console.log('🔢 Atualizando badges dos filtros inteligentes...');
+// console.log('🔢 Atualizando badges dos filtros inteligentes...');
     
     const allTasks = window.homeTasks;
     const today = new Date();
@@ -237,16 +237,16 @@ function updateSmartFilterBadges() {
         allBadge.style.display = allCount > 0 ? '' : 'none';
     }
     
-    console.log('✅ Badges atualizados:');
-    console.log('   📥 Inbox:', inboxCount);
-    console.log('   📅 Hoje:', todayCount);
-    console.log('   📆 Próximos 7 dias:', next7DaysCount);
-    console.log('   📋 Todas:', allCount);
+// console.log('✅ Badges atualizados:');
+// console.log('   📥 Inbox:', inboxCount);
+// console.log('   📅 Hoje:', todayCount);
+// console.log('   📆 Próximos 7 dias:', next7DaysCount);
+// console.log('   📋 Todas:', allCount);
 }
 
 // ===== LIMPAR FILTRO INTELIGENTE =====
 function clearSmartFilter() {
-    console.log('🧹 Limpando filtro inteligente');
+// console.log('🧹 Limpando filtro inteligente');
     
     window.currentSmartFilter = null;
     
@@ -258,7 +258,7 @@ function clearSmartFilter() {
         updateAddTaskButtonState();
     }
     
-    console.log('✅ Filtro limpo');
+// console.log('✅ Filtro limpo');
 }
 
 // Localize a função applySmartFilter e adicione no final:
@@ -271,4 +271,4 @@ window.clearSmartFilter = clearSmartFilter;
 window.clearListSelection = clearListSelection;
 window.filterAndRenderTasks = filterAndRenderTasks;
 
-console.log('✅ smart-filters.js carregado');
+// console.log('✅ smart-filters.js carregado');

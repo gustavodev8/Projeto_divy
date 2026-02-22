@@ -4,7 +4,7 @@
 (function() {
     'use strict';
 
-    console.log('🔧 Iniciando fix do modal de editar lista...');
+// console.log('🔧 Iniciando fix do modal de editar lista...');
 
     // ID da lista sendo editada
     let editingListId = null;
@@ -31,7 +31,7 @@
 
     // ===== FUNÇÃO DE ABRIR MODAL =====
     window.openEditListModal = function(listId, listName, listColor, listEmoji) {
-        console.log('📝 Abrindo modal de editar lista:', listId);
+// console.log('📝 Abrindo modal de editar lista:', listId);
 
         editingListId = listId;
 
@@ -54,7 +54,7 @@
         const modal = document.getElementById('editListModal');
 
         if (!overlay || !modal) {
-            console.error('❌ Elementos do modal não encontrados!');
+// console.error('❌ Elementos do modal não encontrados!');
             alert('Erro: Modal não encontrado');
             return;
         }
@@ -74,12 +74,12 @@
             }
         }, 200);
 
-        console.log('✅ Modal aberto com sucesso');
+// console.log('✅ Modal aberto com sucesso');
     };
 
     // ===== FUNÇÃO DE FECHAR MODAL =====
     window.closeEditListModal = function() {
-        console.log('❌ Fechando modal de editar lista');
+// console.log('❌ Fechando modal de editar lista');
 
         const overlay = document.getElementById('editListModalOverlay');
         const modal = document.getElementById('editListModal');
@@ -98,13 +98,13 @@
         // Limpa o ID
         editingListId = null;
 
-        console.log('✅ Modal fechado');
+// console.log('✅ Modal fechado');
     };
 
     // ===== FUNÇÃO DE SALVAR =====
     window.saveEditedList = async function() {
         if (!editingListId) {
-            console.error('❌ Nenhuma lista selecionada');
+// console.error('❌ Nenhuma lista selecionada');
             return;
         }
 
@@ -118,7 +118,7 @@
             return;
         }
 
-        console.log('💾 Salvando lista editada:', { id: editingListId, name, color, emoji });
+// console.log('💾 Salvando lista editada:', { id: editingListId, name, color, emoji });
 
         try {
             const userId = typeof getUserId === 'function' ? getUserId() : null;
@@ -145,7 +145,7 @@
             const data = await response.json();
 
             if (data.success) {
-                console.log('✅ Lista atualizada com sucesso');
+// console.log('✅ Lista atualizada com sucesso');
 
                 // Fecha o modal
                 window.closeEditListModal();
@@ -163,7 +163,7 @@
                 throw new Error(data.error || 'Erro ao atualizar lista');
             }
         } catch (error) {
-            console.error('❌ Erro ao salvar lista:', error);
+// console.error('❌ Erro ao salvar lista:', error);
             alert('❌ Erro ao atualizar lista: ' + error.message);
         }
     };
@@ -197,5 +197,5 @@
         }
     });
 
-    console.log('✅ Fix do modal de editar lista carregado!');
+// console.log('✅ Fix do modal de editar lista carregado!');
 })();

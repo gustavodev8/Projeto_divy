@@ -17,7 +17,7 @@ async function loadSubtasks(taskId) {
     currentTaskIdForSubtasks = taskId;
     
     try {
-        console.log(`📋 Carregando subtarefas da tarefa ${taskId}`);
+// console.log(`📋 Carregando subtarefas da tarefa ${taskId}`);
         
         const response = await fetch(`${SUBTASKS_API_URL}/subtasks/${taskId}`);
         
@@ -26,14 +26,14 @@ async function loadSubtasks(taskId) {
         }
         
         const subtasks = await response.json();
-        console.log(`✅ ${subtasks.length} subtarefas carregadas:`, subtasks);
+// console.log(`✅ ${subtasks.length} subtarefas carregadas:`, subtasks);
         
         currentTaskSubtasks = subtasks;
         renderSubtasks(subtasks);
         updateSubtasksProgress();
         
     } catch (error) {
-        console.error('❌ Erro ao carregar subtarefas:', error);
+// console.error('❌ Erro ao carregar subtarefas:', error);
         showNotification('Erro ao carregar subtarefas', 'error');
     }
 }
@@ -140,7 +140,7 @@ async function toggleSubtask(checkbox) {
     const isReadOnly = !!window.currentSmartFilter;
     
     if (isReadOnly) {
-        console.log('🔒 Não é possível marcar subtarefas em modo somente leitura');
+// console.log('🔒 Não é possível marcar subtarefas em modo somente leitura');
         checkbox.checked = !checkbox.checked;
         if (typeof showNotification === 'function') {
             showNotification('🔒 Não é possível modificar subtarefas nesta visualização', 'error');
@@ -153,7 +153,7 @@ async function toggleSubtask(checkbox) {
     const completed = checkbox.checked;
     
     try {
-        console.log(`🔄 Toggle subtarefa ${subtaskId}: ${completed}`);
+// console.log(`🔄 Toggle subtarefa ${subtaskId}: ${completed}`);
         
         const response = await fetch(`${SUBTASKS_API_URL}/subtasks/${subtaskId}`, {
             method: 'PUT',
@@ -181,10 +181,10 @@ async function toggleSubtask(checkbox) {
         // Atualizar progresso
         updateSubtasksProgress();
         
-        console.log('✅ Subtarefa atualizada');
+// console.log('✅ Subtarefa atualizada');
         
     } catch (error) {
-        console.error('❌ Erro ao toggle subtarefa:', error);
+// console.error('❌ Erro ao toggle subtarefa:', error);
         checkbox.checked = !completed; // Reverter
         showNotification('Erro ao atualizar subtarefa', 'error');
     }
@@ -196,7 +196,7 @@ function showSubtaskInput() {
     const isReadOnly = !!window.currentSmartFilter;
     
     if (isReadOnly) {
-        console.log('🔒 Não é possível adicionar subtarefas em modo somente leitura');
+// console.log('🔒 Não é possível adicionar subtarefas em modo somente leitura');
         if (typeof showNotification === 'function') {
             showNotification('🔒 Não é possível adicionar subtarefas nesta visualização', 'error');
         }
@@ -242,7 +242,7 @@ async function saveNewSubtask() {
     const isReadOnly = !!window.currentSmartFilter;
     
     if (isReadOnly) {
-        console.log('🔒 Não é possível adicionar subtarefas em modo somente leitura');
+// console.log('🔒 Não é possível adicionar subtarefas em modo somente leitura');
         hideSubtaskInput();
         if (typeof showNotification === 'function') {
             showNotification('🔒 Não é possível adicionar subtarefas nesta visualização', 'error');
@@ -264,7 +264,7 @@ async function saveNewSubtask() {
     }
     
     try {
-        console.log(`💾 Salvando nova subtarefa: "${title}"`);
+// console.log(`💾 Salvando nova subtarefa: "${title}"`);
         
         const position = currentTaskSubtasks.length;
         
@@ -302,7 +302,7 @@ async function saveNewSubtask() {
             throw new Error(result.error || 'Erro ao criar subtarefa');
         }
 
-        console.log('✅ Subtarefa criada:', result);
+// console.log('✅ Subtarefa criada:', result);
 
         // Adicionar ao array local
         currentTaskSubtasks.push(result);
@@ -317,7 +317,7 @@ async function saveNewSubtask() {
         showNotification('Subtarefa adicionada!', 'success');
 
     } catch (error) {
-        console.error('❌ Erro ao salvar subtarefa:', error);
+// console.error('❌ Erro ao salvar subtarefa:', error);
         showNotification('Erro ao adicionar subtarefa', 'error');
     }
 }
@@ -328,7 +328,7 @@ async function editSubtask(button) {
     const isReadOnly = !!window.currentSmartFilter;
     
     if (isReadOnly) {
-        console.log('🔒 Não é possível editar subtarefas em modo somente leitura');
+// console.log('🔒 Não é possível editar subtarefas em modo somente leitura');
         if (typeof showNotification === 'function') {
             showNotification('🔒 Não é possível editar subtarefas nesta visualização', 'error');
         }
@@ -369,7 +369,7 @@ async function editSubtask(button) {
         }
         
         try {
-            console.log(`✏️ Editando subtarefa ${subtaskId}: "${newTitle}"`);
+// console.log(`✏️ Editando subtarefa ${subtaskId}: "${newTitle}"`);
             
             const response = await fetch(`${SUBTASKS_API_URL}/subtasks/${subtaskId}`, {
                 method: 'PUT',
@@ -390,10 +390,10 @@ async function editSubtask(button) {
             // Atualizar visualmente
             content.innerHTML = `<span class="subtask-text">${escapeHtml(newTitle)}</span>`;
             
-            console.log('✅ Subtarefa editada');
+// console.log('✅ Subtarefa editada');
             
         } catch (error) {
-            console.error('❌ Erro ao editar subtarefa:', error);
+// console.error('❌ Erro ao editar subtarefa:', error);
             content.innerHTML = `<span class="subtask-text">${escapeHtml(currentText)}</span>`;
             showNotification('Erro ao editar subtarefa', 'error');
         }
@@ -415,7 +415,7 @@ async function deleteSubtask(button) {
     const isReadOnly = !!window.currentSmartFilter;
     
     if (isReadOnly) {
-        console.log('🔒 Não é possível excluir subtarefas em modo somente leitura');
+// console.log('🔒 Não é possível excluir subtarefas em modo somente leitura');
         if (typeof showNotification === 'function') {
             showNotification('🔒 Não é possível excluir subtarefas nesta visualização', 'error');
         }
@@ -430,7 +430,7 @@ async function deleteSubtask(button) {
     }
     
     try {
-        console.log(`🗑️ Deletando subtarefa ${subtaskId}`);
+// console.log(`🗑️ Deletando subtarefa ${subtaskId}`);
         
         const response = await fetch(`${SUBTASKS_API_URL}/subtasks/${subtaskId}`, {
             method: 'DELETE'
@@ -447,11 +447,11 @@ async function deleteSubtask(button) {
         renderSubtasks(currentTaskSubtasks);
         updateSubtasksProgress();
         
-        console.log('✅ Subtarefa deletada');
+// console.log('✅ Subtarefa deletada');
         showNotification('Subtarefa excluída', 'success');
         
     } catch (error) {
-        console.error('❌ Erro ao deletar subtarefa:', error);
+// console.error('❌ Erro ao deletar subtarefa:', error);
         showNotification('Erro ao excluir subtarefa', 'error');
     }
 }
@@ -488,7 +488,7 @@ async function generateSubtasksWithAI() {
     const isReadOnly = !!window.currentSmartFilter;
     
     if (isReadOnly) {
-        console.log('🔒 Não é possível gerar subtarefas em modo somente leitura');
+// console.log('🔒 Não é possível gerar subtarefas em modo somente leitura');
         if (typeof showNotification === 'function') {
             showNotification('🔒 Não é possível gerar subtarefas nesta visualização', 'error');
         }
@@ -520,9 +520,9 @@ async function generateSubtasksWithAI() {
     }
     
     try {
-        console.log('🤖 Gerando subtarefas com IA...');
-        console.log(`Tarefa: "${taskTitle}"`);
-        console.log(`Descrição: "${taskDescription}"`);
+// console.log('🤖 Gerando subtarefas com IA...');
+// console.log(`Tarefa: "${taskTitle}"`);
+// console.log(`Descrição: "${taskDescription}"`);
         
         const prompt = `Quebre a seguinte tarefa em subtarefas específicas e acionáveis:
 
@@ -551,7 +551,7 @@ Exemplo de formato:
         const data = await response.json();
         const generatedText = data.text || '';
         
-        console.log('✅ Resposta da IA:', generatedText);
+// console.log('✅ Resposta da IA:', generatedText);
         
         // Parsear subtarefas
         const subtaskTitles = parseSubtasksFromAI(generatedText);
@@ -560,7 +560,7 @@ Exemplo de formato:
             throw new Error('Nenhuma subtarefa gerada');
         }
         
-        console.log(`📋 ${subtaskTitles.length} subtarefas parseadas:`, subtaskTitles);
+// console.log(`📋 ${subtaskTitles.length} subtarefas parseadas:`, subtaskTitles);
         
         // Salvar todas as subtarefas
         const createdSubtasks = [];
@@ -594,7 +594,7 @@ Exemplo de formato:
         showNotification(`${createdSubtasks.length} subtarefas geradas com IA!`, 'success');
         
     } catch (error) {
-        console.error('❌ Erro ao gerar subtarefas:', error);
+// console.error('❌ Erro ao gerar subtarefas:', error);
         showNotification('Erro ao gerar subtarefas com IA', 'error');
     } finally {
         if (btn) {
@@ -649,4 +649,4 @@ window.editSubtask = editSubtask;
 window.deleteSubtask = deleteSubtask;
 window.generateSubtasksWithAI = generateSubtasksWithAI;
 
-console.log('✅ subtasks.js carregado com proteção read-only');
+// console.log('✅ subtasks.js carregado com proteção read-only');

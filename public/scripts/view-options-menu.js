@@ -36,7 +36,7 @@ function openViewOptionsMenu() {
     // ✅ Atualizar estado dos checkboxes com dados reais
     updateMenuState();
     
-    console.log('📋 Menu de opções aberto');
+// console.log('📋 Menu de opções aberto');
 }
 
 function closeViewOptionsMenu() {
@@ -48,28 +48,28 @@ function closeViewOptionsMenu() {
     btn?.classList.remove('active');
     if (overlay) overlay.classList.remove('active');
 
-    console.log('📋 Menu de opções fechado');
+// console.log('📋 Menu de opções fechado');
 }
 
 // ===== ATUALIZAR ESTADO DO MENU =====
 function updateMenuState() {
-    console.log('🔄 Atualizando estado do menu...');
+// console.log('🔄 Atualizando estado do menu...');
     
     // ✅ Tentar pegar do settings.js PRIMEIRO
     let settings = null;
     
     if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.getSettings === 'function') {
         settings = window.nuraSettingsFunctions.getSettings();
-        console.log('✅ Settings do nuraSettingsFunctions:', settings);
+// console.log('✅ Settings do nuraSettingsFunctions:', settings);
     } else {
         // ✅ FALLBACK: localStorage
         const stored = localStorage.getItem('nura_settings');
         if (stored) {
             try {
                 settings = JSON.parse(stored);
-                console.log('✅ Settings do localStorage:', settings);
+// console.log('✅ Settings do localStorage:', settings);
             } catch (e) {
-                console.error('❌ Erro ao parsear localStorage:', e);
+// console.error('❌ Erro ao parsear localStorage:', e);
             }
         }
     }
@@ -82,7 +82,7 @@ function updateMenuState() {
             showDetails: true,
             highlightUrgent: false
         };
-        console.log('⚠️ Usando settings padrão:', settings);
+// console.log('⚠️ Usando settings padrão:', settings);
     }
     
     // Atualizar modo de visualização ativo
@@ -102,7 +102,7 @@ function updateMenuState() {
     const activeViewBtn = document.querySelector(`[data-view="${currentView}"]`);
     if (activeViewBtn) {
         activeViewBtn.classList.add('active');
-        console.log('✅ Modo ativo:', currentView);
+// console.log('✅ Modo ativo:', currentView);
     } else {
         // Se não encontrou, marcar 'lista' como padrão
         const listaBtn = document.querySelector('[data-view="lista"]');
@@ -119,20 +119,20 @@ function updateMenuState() {
             : (settings.hideCompleted || false);
 
         hideCompletedCheckbox.checked = hideCompletedValue;
-        console.log('✅ Esconder concluídas:', hideCompletedValue);
+// console.log('✅ Esconder concluídas:', hideCompletedValue);
     }
     
     // ✅ Atualizar checkbox "Mostrar detalhes"
     const showDetailsCheckbox = document.getElementById('toggleShowDetailsCheckbox');
     if (showDetailsCheckbox) {
         showDetailsCheckbox.checked = settings.showDetails !== false; // padrão true
-        console.log('✅ Mostrar detalhes:', settings.showDetails);
+// console.log('✅ Mostrar detalhes:', settings.showDetails);
     }
 }
 
 // ===== MUDAR MODO DE VISUALIZAÇÃO =====
 async function changeViewMode(mode) {
-    console.log('🔄 Mudando modo de visualização para:', mode);
+// console.log('🔄 Mudando modo de visualização para:', mode);
 
     // Atualizar variável global
     window.currentViewMode = mode;
@@ -140,7 +140,7 @@ async function changeViewMode(mode) {
     // Salvar nas configurações via settings.js (salva no banco de dados)
     if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.setViewMode === 'function') {
         await window.nuraSettingsFunctions.setViewMode(mode);
-        console.log('✅ Modo salvo no banco de dados:', mode);
+// console.log('✅ Modo salvo no banco de dados:', mode);
     } else {
         // Fallback: salvar no localStorage
         localStorage.setItem('nura_viewMode', mode);
@@ -151,7 +151,7 @@ async function changeViewMode(mode) {
             settings.viewMode = mode;
         }
 
-        console.log('⚠️ Modo salvo apenas no localStorage:', mode);
+// console.log('⚠️ Modo salvo apenas no localStorage:', mode);
     }
 
     // Atualizar indicadores visuais no menu
@@ -168,13 +168,13 @@ async function changeViewMode(mode) {
     closeViewOptionsMenu();
 
     // Renderizar com o novo modo
-    console.log('📊 Chamando renderAllTasks com modo:', mode);
+// console.log('📊 Chamando renderAllTasks com modo:', mode);
     if (typeof renderAllTasks === 'function') {
         renderAllTasks();
     } else if (typeof window.renderAllTasks === 'function') {
         window.renderAllTasks();
     } else {
-        console.error('❌ renderAllTasks não encontrado!');
+// console.error('❌ renderAllTasks não encontrado!');
     }
 }
 
@@ -183,7 +183,7 @@ window.changeViewMode = changeViewMode;
 
 // ===== ESCONDER CONCLUÍDAS =====
 async function toggleHideCompleted() {
-    console.log('👁️ Toggle: Esconder concluídas (menu 3 pontinhos)');
+// console.log('👁️ Toggle: Esconder concluídas (menu 3 pontinhos)');
 
     // Pegar valor atual
     let currentValue = false;
@@ -196,8 +196,8 @@ async function toggleHideCompleted() {
     }
 
     const newValue = !currentValue;
-    console.log('   Valor atual:', currentValue);
-    console.log('   Novo valor:', newValue);
+// console.log('   Valor atual:', currentValue);
+// console.log('   Novo valor:', newValue);
 
     // Usar settings.js se disponível
     if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.toggleHideCompleted === 'function') {
@@ -233,15 +233,15 @@ async function toggleHideCompleted() {
 
 // ===== MOSTRAR DETALHES =====
 async function toggleShowDetails() {
-    console.log('👁️ Toggle: Mostrar detalhes');
+// console.log('👁️ Toggle: Mostrar detalhes');
     
     // ✅ Salvar via settings.js
     if (window.nuraSettingsFunctions && typeof window.nuraSettingsFunctions.getSettings === 'function') {
         const settings = window.nuraSettingsFunctions.getSettings();
         const newValue = !settings.showDetails;
         
-        console.log('   Valor atual:', settings.showDetails);
-        console.log('   Novo valor:', newValue);
+// console.log('   Valor atual:', settings.showDetails);
+// console.log('   Novo valor:', newValue);
         
         // Atualizar localmente PRIMEIRO
         settings.showDetails = newValue;
@@ -250,38 +250,38 @@ async function toggleShowDetails() {
         // Salvar no banco
         try {
             await window.nuraSettingsFunctions.saveSettingsToDatabase();
-            console.log('✅ Settings salvas no banco');
+// console.log('✅ Settings salvas no banco');
             
             // Aguardar 200ms para garantir
             await new Promise(resolve => setTimeout(resolve, 200));
             
             // Verificar se salvou
             const verificacao = window.nuraSettingsFunctions.getSettings();
-            console.log('🔍 Verificação após salvar:', verificacao.showDetails);
+// console.log('🔍 Verificação após salvar:', verificacao.showDetails);
             
             // Atualizar checkbox visualmente
             const checkbox = document.getElementById('toggleShowDetailsCheckbox');
             if (checkbox) {
                 checkbox.checked = newValue;
-                console.log('✅ Checkbox atualizado para:', newValue);
+// console.log('✅ Checkbox atualizado para:', newValue);
             }
             
             // Atualizar estado do menu
             updateMenuState();
             
             // RE-RENDERIZAR tarefas
-            console.log('🎨 Iniciando re-renderização...');
+// console.log('🎨 Iniciando re-renderização...');
             if (typeof renderAllTasks === 'function') {
                 renderAllTasks();
             } else {
-                console.error('❌ renderAllTasks não disponível');
+// console.error('❌ renderAllTasks não disponível');
             }
             
             const message = newValue ? 'Detalhes visíveis' : 'Apenas títulos';
             showNotification(`✅ ${message}`);
             
         } catch (error) {
-            console.error('❌ Erro ao salvar settings:', error);
+// console.error('❌ Erro ao salvar settings:', error);
             showNotification('❌ Erro ao salvar configuração');
         }
     } else {
@@ -313,7 +313,7 @@ function openSettings() {
     closeViewOptionsMenu();
     
     // ✅ Redirecionar para tela de ajustes
-    console.log('⚙️ Redirecionando para Tela de Ajustes...');
+// console.log('⚙️ Redirecionando para Tela de Ajustes...');
     window.location.href = 'Tela_Ajustes.html';
 }
 
@@ -326,7 +326,7 @@ function printList() {
 // ===== SINCRONIZAÇÃO COM SETTINGS.JS =====
 // Ouvir mudanças do settings.js
 window.addEventListener('settingsUpdated', (event) => {
-    console.log('🔔 Settings atualizados externamente:', event.detail);
+// console.log('🔔 Settings atualizados externamente:', event.detail);
     updateMenuState();
 });
 
@@ -334,7 +334,7 @@ window.addEventListener('settingsUpdated', (event) => {
 window.addEventListener('storage', (event) => {
     // Detectar mudança no hideCompleted
     if (event.key === 'nura_hideCompleted') {
-        console.log('📢 Detectada mudança de hideCompleted em outra aba:', event.newValue);
+// console.log('📢 Detectada mudança de hideCompleted em outra aba:', event.newValue);
 
         // Atualizar settings global
         if (window.nuraSettingsFunctions) {
@@ -353,8 +353,8 @@ window.addEventListener('storage', (event) => {
     }
 
     if (event.key === 'nura_settings_update_trigger') {
-        console.log('📢 Detectada mudança de settings em outra aba!');
-        console.log('   Timestamp:', event.newValue);
+// console.log('📢 Detectada mudança de settings em outra aba!');
+// console.log('   Timestamp:', event.newValue);
 
         // Aguardar 300ms para localStorage estar atualizado
         setTimeout(() => {
@@ -363,13 +363,13 @@ window.addEventListener('storage', (event) => {
             if (stored) {
                 try {
                     const newSettings = JSON.parse(stored);
-                    console.log('📥 Novos settings:', newSettings);
+// console.log('📥 Novos settings:', newSettings);
 
                     // ✅ Atualizar objeto global se existe
                     if (window.nuraSettingsFunctions) {
                         const currentSettings = window.nuraSettingsFunctions.getSettings();
                         Object.assign(currentSettings, newSettings);
-                        console.log('✅ Settings globais atualizados');
+// console.log('✅ Settings globais atualizados');
                     }
                     
                     // ✅ Atualizar menu
@@ -377,13 +377,13 @@ window.addEventListener('storage', (event) => {
                     
                     // ✅ RE-RENDERIZAR tarefas
                     if (typeof renderAllTasks === 'function') {
-                        console.log('🎨 Re-renderizando tarefas...');
+// console.log('🎨 Re-renderizando tarefas...');
                         renderAllTasks();
                     }
                     
-                    console.log('✅ Sincronização completa!');
+// console.log('✅ Sincronização completa!');
                 } catch (e) {
-                    console.error('❌ Erro ao parsear settings:', e);
+// console.error('❌ Erro ao parsear settings:', e);
                 }
             }
         }, 300);
@@ -392,7 +392,7 @@ window.addEventListener('storage', (event) => {
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('⚙️ view-options-menu.js inicializando...');
+// console.log('⚙️ view-options-menu.js inicializando...');
     
     // Atualizar estado inicial após settings.js carregar
     setTimeout(() => {
@@ -412,4 +412,4 @@ window.openSettings = openSettings;
 window.printList = printList;
 window.updateMenuState = updateMenuState;
 
-console.log('✅ view-options-menu.js carregado e integrado com settings.js');
+// console.log('✅ view-options-menu.js carregado e integrado com settings.js');

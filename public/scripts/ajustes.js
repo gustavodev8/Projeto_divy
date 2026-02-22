@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentUser = getCurrentUser();
 
     if (!currentUser) {
-        console.error('Usuário não autenticado');
+// console.error('Usuário não autenticado');
         window.location.href = 'Tela_Login.html';
         return;
     }
@@ -169,10 +169,10 @@ async function loadPlanInfo() {
         // Adicionar estilos específicos para a seção de plano
         addPlanSectionStyles();
 
-        console.log('✅ Informações do plano carregadas');
+// console.log('✅ Informações do plano carregadas');
 
     } catch (error) {
-        console.error('❌ Erro ao carregar plano:', error);
+// console.error('❌ Erro ao carregar plano:', error);
         container.innerHTML = `<div class="plan-error">Erro ao carregar informações do plano</div>`;
     }
 }
@@ -369,7 +369,7 @@ function addPlanSectionStyles() {
 
 // ===== CARREGAR CONFIGURAÇÕES DO SERVIDOR =====
 async function loadSettings() {
-    console.log('📥 Carregando configurações do servidor...');
+// console.log('📥 Carregando configurações do servidor...');
     
     try {
         const response = await fetch(`${API_URL}/api/settings/${currentUser.id}`, {
@@ -381,19 +381,19 @@ async function loadSettings() {
         const data = await response.json();
         
         if (data.success && data.settings && Object.keys(data.settings).length > 0) {
-            console.log('✅ Configurações do servidor:', data.settings);
+// console.log('✅ Configurações do servidor:', data.settings);
             applySettings(data.settings);
             
             // Salvar no localStorage também
             saveToLocalStorage(data.settings);
         } else {
-            console.log('⚠️ Sem configurações no servidor, tentando localStorage...');
+// console.log('⚠️ Sem configurações no servidor, tentando localStorage...');
             loadFromLocalStorage();
         }
         
     } catch (error) {
-        console.error('❌ Erro ao carregar do servidor:', error);
-        console.log('⚠️ Carregando do localStorage como fallback...');
+// console.error('❌ Erro ao carregar do servidor:', error);
+// console.log('⚠️ Carregando do localStorage como fallback...');
         loadFromLocalStorage();
     }
 }
@@ -405,14 +405,14 @@ function loadFromLocalStorage() {
     if (stored) {
         try {
             const settings = JSON.parse(stored);
-            console.log('📦 Configurações do localStorage:', settings);
+// console.log('📦 Configurações do localStorage:', settings);
             applySettings(settings);
         } catch (error) {
-            console.error('❌ Erro ao parsear localStorage:', error);
+// console.error('❌ Erro ao parsear localStorage:', error);
             applyDefaultSettings();
         }
     } else {
-        console.log('⚠️ Nenhuma configuração salva, usando padrões');
+// console.log('⚠️ Nenhuma configuração salva, usando padrões');
         applyDefaultSettings();
     }
 }
@@ -421,9 +421,9 @@ function loadFromLocalStorage() {
 function saveToLocalStorage(settings) {
     try {
         localStorage.setItem('nura_settings', JSON.stringify(settings));
-        console.log('💾 Configurações salvas no localStorage');
+// console.log('💾 Configurações salvas no localStorage');
     } catch (error) {
-        console.error('❌ Erro ao salvar no localStorage:', error);
+// console.error('❌ Erro ao salvar no localStorage:', error);
     }
 }
 
@@ -476,7 +476,7 @@ function updateDetailLevelVisibility(isEnabled) {
     const detailLevelItem = document.getElementById('aiDetailLevelItem');
     if (detailLevelItem) {
         detailLevelItem.style.display = isEnabled ? 'flex' : 'none';
-        console.log('🎛️ Nível de detalhamento:', isEnabled ? 'visível' : 'oculto');
+// console.log('🎛️ Nível de detalhamento:', isEnabled ? 'visível' : 'oculto');
     }
 }
 
@@ -501,18 +501,18 @@ function applyDarkMode(enabled) {
         document.body.classList.add('dark-mode');
         document.documentElement.setAttribute('data-theme', 'dark');
         localStorage.setItem('nura_dark_mode', 'true');
-        console.log('🌙 Dark mode ativado');
+// console.log('🌙 Dark mode ativado');
     } else {
         document.body.classList.remove('dark-mode');
         document.documentElement.removeAttribute('data-theme');
         localStorage.setItem('nura_dark_mode', 'false');
-        console.log('☀️ Dark mode desativado');
+// console.log('☀️ Dark mode desativado');
     }
 }
 
 // ===== SALVAR TODAS AS CONFIGURAÇÕES =====
 async function saveAllSettings() {
-    console.log('💾 Salvando todas as configurações...');
+// console.log('💾 Salvando todas as configurações...');
     
     const settings = {
         darkMode: document.getElementById('darkModeToggle')?.checked || false,
@@ -524,18 +524,18 @@ async function saveAllSettings() {
         viewMode: 'lista' // padrão
     };
     
-    console.log('📦 Settings a enviar:', settings);
+// console.log('📦 Settings a enviar:', settings);
     
     // ✅ Salvar no localStorage primeiro (instantâneo)
     saveToLocalStorage(settings);
     
     // ✅ NOTIFICAR OUTRAS ABAS/PÁGINAS VIA localStorage
     localStorage.setItem('nura_settings_update_trigger', Date.now().toString());
-    console.log('📢 Trigger de atualização enviado para outras páginas');
+// console.log('📢 Trigger de atualização enviado para outras páginas');
     
     // Depois salvar no servidor
     try {
-        console.log('📤 Settings enviados:', settings);
+// console.log('📤 Settings enviados:', settings);
 
         const response = await fetch(`${API_URL}/api/settings/${currentUser.id}`, {
             method: 'POST',
@@ -548,26 +548,26 @@ async function saveAllSettings() {
         
         const data = await response.json();
         
-        console.log('📥 Resposta do servidor:', data);
+// console.log('📥 Resposta do servidor:', data);
         
         if (data.success) {
-            console.log('✅ Configurações salvas no servidor');
+// console.log('✅ Configurações salvas no servidor');
             return true;
         } else {
-            console.error('❌ Erro ao salvar no servidor:', data.error);
+// console.error('❌ Erro ao salvar no servidor:', data.error);
             return false;
         }
         
     } catch (error) {
-        console.error('❌ Erro de conexão ao salvar:', error);
-        console.error('Stack:', error.stack);
+// console.error('❌ Erro de conexão ao salvar:', error);
+// console.error('Stack:', error.stack);
         return false;
     }
 }
 
 // ===== INICIALIZAR EVENT LISTENERS =====
 function initializeEventListeners() {
-    console.log('🔧 Inicializando event listeners...');
+// console.log('🔧 Inicializando event listeners...');
     
     // Dark Mode Toggle
     const darkModeToggle = document.getElementById('darkModeToggle');
@@ -591,7 +591,7 @@ function initializeEventListeners() {
         showDetailsToggle.addEventListener('change', async (e) => {
             const enabled = e.target.checked;
             
-            console.log('👁️ Show Details Toggle clicado:', enabled);
+// console.log('👁️ Show Details Toggle clicado:', enabled);
             
             await saveAllSettings();
             showNotification('✅ ' + (enabled ? 'Detalhes visíveis' : 'Apenas títulos'));
@@ -601,7 +601,7 @@ function initializeEventListeners() {
                 detail: { showDetails: enabled } 
             }));
             
-            console.log('✅ Evento settingsUpdated disparado');
+// console.log('✅ Evento settingsUpdated disparado');
         });
     }
     
@@ -673,7 +673,7 @@ function initializeEventListeners() {
         });
     }
     
-    console.log('✅ Event listeners configurados');
+// console.log('✅ Event listeners configurados');
 }
 
 // ===== MODAL DE LOGOUT =====
@@ -692,7 +692,7 @@ function closeLogoutModal() {
 }
 
 function confirmLogout() {
-    console.log('👋 Fazendo logout...');
+// console.log('👋 Fazendo logout...');
 
     // Limpar dados do usuário
     localStorage.removeItem('nura_user');
@@ -796,14 +796,14 @@ function getCurrentUser() {
     try {
         return JSON.parse(userStr);
     } catch (error) {
-        console.error('❌ Erro ao parsear usuário:', error);
+// console.error('❌ Erro ao parsear usuário:', error);
         return null;
     }
 }
 
 // ===== WHATSAPP: CARREGAR STATUS =====
 async function loadWhatsappStatus() {
-    console.log('📱 Verificando status do WhatsApp...');
+// console.log('📱 Verificando status do WhatsApp...');
 
     const whatsappSection = document.getElementById('whatsapp-section');
     if (!whatsappSection) return;
@@ -820,7 +820,7 @@ async function loadWhatsappStatus() {
         }
 
         if (!planData || !planData.success || planData.plan.id !== 'promax') {
-            console.log('📱 WhatsApp: Plano não é ProMax, escondendo seção');
+// console.log('📱 WhatsApp: Plano não é ProMax, escondendo seção');
             whatsappSection.style.display = 'none';
             return;
         }
@@ -830,7 +830,7 @@ async function loadWhatsappStatus() {
 
         // Buscar status de vinculação
         const token = localStorage.getItem('nura_access_token');
-        console.log('🔑 Token WhatsApp:', token ? 'encontrado' : 'NÃO ENCONTRADO');
+// console.log('🔑 Token WhatsApp:', token ? 'encontrado' : 'NÃO ENCONTRADO');
 
         const response = await fetch(`${API_URL}/v1/whatsapp/status`, {
             headers: {
@@ -840,11 +840,11 @@ async function loadWhatsappStatus() {
         });
 
         const data = await response.json();
-        console.log('📱 Resposta status WhatsApp:', data);
+// console.log('📱 Resposta status WhatsApp:', data);
 
         // Verificar se resposta é válida
         if (!response.ok || !data.success) {
-            console.log('⚠️ WhatsApp status não disponível, mostrando estado não vinculado');
+// console.log('⚠️ WhatsApp status não disponível, mostrando estado não vinculado');
             showWhatsappNotLinkedState();
             return;
         }
@@ -861,10 +861,10 @@ async function loadWhatsappStatus() {
             showWhatsappNotLinkedState();
         }
 
-        console.log('✅ Status WhatsApp carregado');
+// console.log('✅ Status WhatsApp carregado');
 
     } catch (error) {
-        console.error('❌ Erro ao carregar status WhatsApp:', error);
+// console.error('❌ Erro ao carregar status WhatsApp:', error);
         // Mostrar estado não vinculado em caso de erro
         showWhatsappNotLinkedState();
     }
@@ -927,7 +927,7 @@ async function requestWhatsappVerification() {
 
     try {
         const token = localStorage.getItem('nura_access_token');
-        console.log('🔑 Token para verificação:', token ? `${token.substring(0, 20)}...` : 'NÃO ENCONTRADO');
+// console.log('🔑 Token para verificação:', token ? `${token.substring(0, 20)}...` : 'NÃO ENCONTRADO');
 
         if (!token) {
             showNotification('Sessão expirada. Faça login novamente.', 'error');
@@ -946,7 +946,7 @@ async function requestWhatsappVerification() {
         });
 
         const data = await response.json();
-        console.log('📱 Resposta WhatsApp:', data);
+// console.log('📱 Resposta WhatsApp:', data);
 
         if (response.status === 401) {
             showNotification('Sessão expirada. Faça login novamente.', 'error');
@@ -966,7 +966,7 @@ async function requestWhatsappVerification() {
         }
 
     } catch (error) {
-        console.error('❌ Erro ao solicitar verificação:', error);
+// console.error('❌ Erro ao solicitar verificação:', error);
         showNotification('Erro ao enviar código. Tente novamente.', 'error');
     } finally {
         btn.disabled = false;
@@ -1028,7 +1028,7 @@ async function verifyWhatsappCode() {
         }
 
     } catch (error) {
-        console.error('❌ Erro ao verificar código:', error);
+// console.error('❌ Erro ao verificar código:', error);
         showNotification('Erro ao verificar código. Tente novamente.', 'error');
     } finally {
         btn.disabled = false;
@@ -1070,7 +1070,7 @@ async function resendVerificationCode() {
         }
 
     } catch (error) {
-        console.error('❌ Erro ao reenviar código:', error);
+// console.error('❌ Erro ao reenviar código:', error);
         showNotification('Erro ao reenviar código. Tente novamente.', 'error');
     }
 }
@@ -1123,7 +1123,7 @@ async function confirmUnlinkWhatsapp() {
         }
 
     } catch (error) {
-        console.error('❌ Erro ao desvincular WhatsApp:', error);
+// console.error('❌ Erro ao desvincular WhatsApp:', error);
         showNotification('Erro ao desvincular. Tente novamente.', 'error');
     }
 }
@@ -1267,7 +1267,7 @@ async function submitFeedback() {
             showNotification(data.error || 'Erro ao enviar feedback.', 'error');
         }
     } catch (err) {
-        console.error('Erro ao enviar feedback:', err);
+// console.error('Erro ao enviar feedback:', err);
         showNotification('Erro ao enviar feedback. Verifique sua conexão.', 'error');
     } finally {
         if (submitBtn) {
@@ -1343,4 +1343,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-console.log('✅ ajustes.js carregado e integrado com servidor');
+// console.log('✅ ajustes.js carregado e integrado com servidor');

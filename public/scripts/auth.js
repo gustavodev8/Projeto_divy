@@ -52,7 +52,7 @@ function isPublicPage(pathname) {
         document.documentElement.style.opacity = '0';
         document.documentElement.style.background = '#0a0a0a';
 
-        console.log('❌ Usuário não autenticado, redirecionando...');
+// console.log('❌ Usuário não autenticado, redirecionando...');
         window.location.replace('/login');
         return;
     }
@@ -80,17 +80,17 @@ function checkAuthentication() {
 
     // Se não estiver logado, redirecionar para login
     if (isLoggedIn !== 'true' || !userData) {
-        console.log('❌ Usuário não autenticado, redirecionando...');
+// console.log('❌ Usuário não autenticado, redirecionando...');
         window.location.replace('/login');
         return false;
     }
 
     try {
         const user = JSON.parse(userData);
-        console.log('✅ Usuário autenticado:', user.username);
+// console.log('✅ Usuário autenticado:', user.username);
         return true;
     } catch (error) {
-        console.error('❌ Erro ao verificar autenticação:', error);
+// console.error('❌ Erro ao verificar autenticação:', error);
         localStorage.clear();
         window.location.replace('/login');
         return false;
@@ -106,7 +106,7 @@ function getCurrentUser() {
     try {
         return JSON.parse(userData);
     } catch (error) {
-        console.error('❌ Erro ao obter dados do usuário:', error);
+// console.error('❌ Erro ao obter dados do usuário:', error);
         return null;
     }
 }
@@ -114,7 +114,7 @@ function getCurrentUser() {
 // ===== FAZER LOGOUT =====
 async function logout() {
     if (confirm('⚠️ Tem certeza que deseja sair?')) {
-        console.log('🚪 Realizando logout...');
+// console.log('🚪 Realizando logout...');
 
         // Tentar invalidar refresh token no servidor
         const refreshToken = localStorage.getItem('nura_refresh_token');
@@ -130,7 +130,7 @@ async function logout() {
                     body: JSON.stringify({ refreshToken })
                 });
             } catch (err) {
-                console.log('⚠️ Erro ao invalidar token no servidor (não crítico)');
+// console.log('⚠️ Erro ao invalidar token no servidor (não crítico)');
             }
         }
 
@@ -182,12 +182,12 @@ async function refreshAccessToken() {
         if (data.success && data.data?.accessToken) {
             localStorage.setItem('nura_access_token', data.data.accessToken);
             localStorage.setItem('nura_refresh_token', data.data.refreshToken);
-            console.log('🔄 Token renovado com sucesso!');
+// console.log('🔄 Token renovado com sucesso!');
             return true;
         }
         return false;
     } catch (err) {
-        console.warn('⚠️ Erro ao renovar token:', err);
+// console.warn('⚠️ Erro ao renovar token:', err);
         return false;
     }
 }
@@ -211,7 +211,7 @@ async function fetchWithAuth(url, options = {}) {
             response = await fetch(url, { ...options, headers });
         } else {
             // Refresh também falhou → limpar sessão e redirecionar para login
-            console.log('❌ Refresh token inválido ou expirado, redirecionando para login...');
+// console.log('❌ Refresh token inválido ou expirado, redirecionando para login...');
             localStorage.removeItem('nura_access_token');
             localStorage.removeItem('nura_refresh_token');
             localStorage.removeItem('nura_user');
@@ -230,4 +230,4 @@ window.logout = logout;
 window.refreshAccessToken = refreshAccessToken;
 window.fetchWithAuth = fetchWithAuth;
 
-console.log('🔐 auth.js carregado!');
+// console.log('🔐 auth.js carregado!');

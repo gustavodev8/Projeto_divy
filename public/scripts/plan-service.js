@@ -26,7 +26,7 @@ async function getMyPlan(forceRefresh = false) {
         const userId = userData.id;
 
         if (!userId) {
-            console.warn('⚠️ Usuário não logado');
+// console.warn('⚠️ Usuário não logado');
             return null;
         }
 
@@ -46,7 +46,7 @@ async function getMyPlan(forceRefresh = false) {
         return null;
 
     } catch (error) {
-        console.error('❌ Erro ao obter plano:', error);
+// console.error('❌ Erro ao obter plano:', error);
         return null;
     }
 }
@@ -67,7 +67,7 @@ async function canCreate(resource) {
         return data;
 
     } catch (error) {
-        console.error('❌ Erro ao verificar limite:', error);
+// console.error('❌ Erro ao verificar limite:', error);
         return { canCreate: true }; // Em caso de erro, não bloqueia
     }
 }
@@ -88,7 +88,7 @@ async function canUseFeature(feature) {
         return data;
 
     } catch (error) {
-        console.error('❌ Erro ao verificar feature:', error);
+// console.error('❌ Erro ao verificar feature:', error);
         return { canUse: true };
     }
 }
@@ -580,4 +580,4 @@ window.PlanService = {
     handlePlanLimitError
 };
 
-console.log('💎 Plan Service carregado!');
+// console.log('💎 Plan Service carregado!');

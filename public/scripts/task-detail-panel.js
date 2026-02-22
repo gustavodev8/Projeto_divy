@@ -12,16 +12,16 @@ let taskToDelete = null;
 async function openTaskDetailPanel(taskId) {
     const task = window.homeTasks.find(t => t.id === taskId);
     if (!task) {
-        console.error('❌ Tarefa não encontrada:', taskId);
+// console.error('❌ Tarefa não encontrada:', taskId);
         return;
     }
 
-    console.log('📋 Abrindo painel de detalhes da tarefa:', task.title);
+// console.log('📋 Abrindo painel de detalhes da tarefa:', task.title);
 
     const isReadOnly = !!window.currentSmartFilter;
     
     if (isReadOnly) {
-        console.log('🔒 Modo somente leitura - edição bloqueada');
+// console.log('🔒 Modo somente leitura - edição bloqueada');
     }
 
     currentDetailTaskId = taskId;
@@ -78,7 +78,7 @@ function closeTaskDetailPanel() {
     document.body.style.overflow = '';
     currentDetailTaskId = null;
 
-    console.log('🚪 Painel de detalhes fechado');
+// console.log('🚪 Painel de detalhes fechado');
 }
 
 // ===== AUTO RESIZE TEXTAREA =====
@@ -109,7 +109,7 @@ function setupTitleAutoSave() {
             
             if (!taskId || !newTitle) return;
             
-            console.log('💾 Auto-salvando título:', newTitle);
+// console.log('💾 Auto-salvando título:', newTitle);
             
             const user = getCurrentUser();
             if (!user) return;
@@ -142,7 +142,7 @@ function setupTitleAutoSave() {
                         currentTask.name = newTitle;
                     }
                     
-                    console.log('✅ Título salvo automaticamente');
+// console.log('✅ Título salvo automaticamente');
                     
                     if (typeof renderAllTasks === 'function') {
                         renderAllTasks();
@@ -153,10 +153,10 @@ function setupTitleAutoSave() {
                     }
                     
                 } else {
-                    console.error('❌ Erro ao salvar título:', result);
+// console.error('❌ Erro ao salvar título:', result);
                 }
             } catch (error) {
-                console.error('❌ Erro na requisição:', error);
+// console.error('❌ Erro na requisição:', error);
             }
         }, 300);
     });
@@ -184,7 +184,7 @@ function setupDescriptionAutoSave() {
             
             if (!taskId) return;
             
-            console.log('💾 Auto-salvando descrição:', newDescription);
+// console.log('💾 Auto-salvando descrição:', newDescription);
             
             const user = getCurrentUser();
             if (!user) return;
@@ -215,17 +215,17 @@ function setupDescriptionAutoSave() {
                         currentTask.description = newDescription;
                     }
                     
-                    console.log('✅ Descrição salva automaticamente');
+// console.log('✅ Descrição salva automaticamente');
                     
                     if (typeof renderAllTasks === 'function') {
                         renderAllTasks();
                     }
                     
                 } else {
-                    console.error('❌ Erro ao salvar descrição:', result);
+// console.error('❌ Erro ao salvar descrição:', result);
                 }
             } catch (error) {
-                console.error('❌ Erro na requisição:', error);
+// console.error('❌ Erro na requisição:', error);
             }
         }, 300);
     });
@@ -240,7 +240,7 @@ function updateTaskDueDate() {
 // ===== ATUALIZAR PRIORIDADE =====
 function updateTaskPriority() {
     const priority = document.getElementById('detailTaskPriority').value;
-    console.log('🎯 Mudando prioridade para:', priority);
+// console.log('🎯 Mudando prioridade para:', priority);
     
     const task = window.homeTasks.find(t => t.id === currentDetailTaskId);
     if (task) {
@@ -254,16 +254,16 @@ function updateTaskPriority() {
 // ===== ATUALIZAR CAMPO =====
 async function updateTaskField(field, value) {
     if (!currentDetailTaskId || !currentUser) {
-        console.error('❌ Falta currentDetailTaskId ou currentUser');
+// console.error('❌ Falta currentDetailTaskId ou currentUser');
         return;
     }
 
-    console.log('🔄 Atualizando campo:', field, '=', value);
+// console.log('🔄 Atualizando campo:', field, '=', value);
 
     const task = window.homeTasks.find(t => t.id === currentDetailTaskId);
     if (task) {
         task[field] = value;
-        console.log(`⚡ Atualização otimista: ${field} = ${value}`);
+// console.log(`⚡ Atualização otimista: ${field} = ${value}`);
         updateTaskVisualInList(currentDetailTaskId);
     }
 
@@ -272,7 +272,7 @@ async function updateTaskField(field, value) {
     }
 
     updateTimeout = setTimeout(async () => {
-        console.log(`💾 Salvando ${field} no servidor:`, value);
+// console.log(`💾 Salvando ${field} no servidor:`, value);
 
         try {
             const response = await fetch(`${API_URL}/api/tasks/${currentDetailTaskId}`, {
@@ -287,16 +287,16 @@ async function updateTaskField(field, value) {
             const result = await response.json();
 
             if (result.success) {
-                console.log(`✅ ${field} sincronizado com servidor`);
+// console.log(`✅ ${field} sincronizado com servidor`);
                 
                 if (field === 'due_date' && typeof updateSmartFilterBadges === 'function') {
                     updateSmartFilterBadges();
                 }
             } else {
-                console.error('❌ Erro ao salvar:', result.error);
+// console.error('❌ Erro ao salvar:', result.error);
             }
         } catch (error) {
-            console.error('❌ Erro de conexão:', error);
+// console.error('❌ Erro de conexão:', error);
         }
     }, 500);
 }
@@ -306,7 +306,7 @@ async function toggleTaskFromDetail() {
     const isChecked = document.getElementById('detailTaskCheckbox').checked;
     const newStatus = isChecked ? 'completed' : 'pending';
 
-    console.log(`✅ Alterando status para: ${newStatus}`);
+// console.log(`✅ Alterando status para: ${newStatus}`);
 
     const task = window.homeTasks.find(t => t.id === currentDetailTaskId);
     if (task) {
@@ -327,7 +327,7 @@ async function toggleTaskFromDetail() {
         const result = await response.json();
 
         if (result.success) {
-            console.log('✅ Status sincronizado com servidor');
+// console.log('✅ Status sincronizado com servidor');
             showNotification(newStatus === 'completed' ? '✅ Tarefa concluída!' : '⏳ Tarefa reaberta!');
             
             if (typeof updateSmartFilterBadges === 'function') {
@@ -341,7 +341,7 @@ async function toggleTaskFromDetail() {
             }
         }
     } catch (error) {
-        console.error('❌ Erro:', error);
+// console.error('❌ Erro:', error);
         if (task) {
             task.status = isChecked ? 'pending' : 'completed';
             updateTaskVisualInList(currentDetailTaskId);
@@ -360,11 +360,11 @@ async function deleteTaskFromDetail() {
 
 // ===== ATUALIZAR VISUAL =====
 function updateTaskVisualInList(taskId) {
-    console.log('🔄 updateTaskVisualInList chamada para tarefa:', taskId);
+// console.log('🔄 updateTaskVisualInList chamada para tarefa:', taskId);
     
     if (typeof renderAllTasks === 'function') {
         renderAllTasks();
-        console.log('✅ Lista/Kanban re-renderizado');
+// console.log('✅ Lista/Kanban re-renderizado');
     }
 }
 
@@ -394,7 +394,7 @@ function setTaskDetailReadOnly(readOnly) {
         
         panel.classList.add('read-only');
         
-        console.log('🔒 Painel em modo somente leitura');
+// console.log('🔒 Painel em modo somente leitura');
     } else {
         if (checkbox) checkbox.disabled = false;
         if (title) {
@@ -411,7 +411,7 @@ function setTaskDetailReadOnly(readOnly) {
         
         panel.classList.remove('read-only');
         
-        console.log('✏️ Painel em modo edição');
+// console.log('✏️ Painel em modo edição');
     }
 }
 
@@ -420,7 +420,7 @@ function setTaskDetailReadOnly(readOnly) {
    ======================================== */
 
 function showConfirmDeleteModal(taskId, taskName) {
-    console.log('🎯 showConfirmDeleteModal chamada!', taskId, taskName);
+// console.log('🎯 showConfirmDeleteModal chamada!', taskId, taskName);
     
     taskToDelete = taskId;
     
@@ -428,9 +428,9 @@ function showConfirmDeleteModal(taskId, taskName) {
     const taskNameElement = document.getElementById('confirmModalTaskName');
     const confirmBtn = document.getElementById('confirmDeleteBtn');
     
-    console.log('   overlay:', !!overlay);
-    console.log('   taskNameElement:', !!taskNameElement);
-    console.log('   confirmBtn:', !!confirmBtn);
+// console.log('   overlay:', !!overlay);
+// console.log('   taskNameElement:', !!taskNameElement);
+// console.log('   confirmBtn:', !!confirmBtn);
     
     if (taskNameElement) {
         taskNameElement.textContent = taskName || 'Esta tarefa';
@@ -440,9 +440,9 @@ function showConfirmDeleteModal(taskId, taskName) {
         overlay.classList.add('active');
         overlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-        console.log('✅ Modal ABERTO!');
+// console.log('✅ Modal ABERTO!');
     } else {
-        console.error('❌ Overlay não encontrado!');
+// console.error('❌ Overlay não encontrado!');
     }
     
     if (confirmBtn) {
@@ -472,7 +472,7 @@ function handleConfirmModalEscape(e) {
 }
 
 async function confirmDeleteTask() {
-    console.log('🗑️ Confirmando exclusão da tarefa:', taskToDelete);
+// console.log('🗑️ Confirmando exclusão da tarefa:', taskToDelete);
     
     if (!taskToDelete) return;
     
@@ -518,7 +518,7 @@ async function confirmDeleteTask() {
             showNotification('🗑️ Tarefa excluída!');
         }
     } catch (error) {
-        console.error('❌ Erro:', error);
+// console.error('❌ Erro:', error);
         showNotification('❌ Erro ao excluir tarefa');
     }
 }
@@ -546,4 +546,4 @@ window.showConfirmDeleteModal = showConfirmDeleteModal;
 window.closeConfirmModal = closeConfirmModal;
 window.confirmDeleteTask = confirmDeleteTask;
 
-console.log('✅ task-detail-panel.js carregado');
+// console.log('✅ task-detail-panel.js carregado');

@@ -55,7 +55,7 @@
             return saved === 'true';
             
         } catch (err) {
-            console.error('❌ Erro ao carregar:', err);
+// console.error('❌ Erro ao carregar:', err);
             const saved = localStorage.getItem('darkMode');
             return saved === 'true';
         }
@@ -119,7 +119,7 @@
             
             if (isDark !== currentState) {
                 applyDarkMode(isDark);
-                console.log('🔄 Sincronizado entre abas');
+// console.log('🔄 Sincronizado entre abas');
             }
         }
     });
@@ -136,7 +136,7 @@
         if (isInitializing) return;
         isInitializing = true;
         
-        console.log('🚀 Inicializando darkMode.js...');
+// console.log('🚀 Inicializando darkMode.js...');
         
         // Carregar estado do banco
         const isDark = await loadDarkModeFromDatabase();
@@ -155,10 +155,10 @@
                 toggleDarkMode();
             });
             newToggle.style.transition = 'transform 0.3s ease';
-            console.log('✅ Toggle da navbar inicializado');
+// console.log('✅ Toggle da navbar inicializado');
         }
         
-        console.log('✅ darkMode.js pronto!');
+// console.log('✅ darkMode.js pronto!');
         isInitializing = false;
     }
     

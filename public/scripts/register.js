@@ -49,7 +49,7 @@ async function register(event) {
     submitButton.classList.add('loading');
 
     try {
-        console.log('📧 Enviando código de verificação...');
+// console.log('📧 Enviando código de verificação...');
 
         const response = await fetch(`${API_URL}/v1/auth/send-code`, {
             method: 'POST',
@@ -66,14 +66,14 @@ async function register(event) {
         const data = await response.json();
 
         if (response.ok && data.success) {
-            console.log('✅ Código enviado!');
+// console.log('✅ Código enviado!');
             pendingEmail = email;
             showVerificationModal(email);
             submitButton.innerHTML = originalHTML;
             submitButton.classList.remove('loading');
             submitButton.disabled = false;
         } else {
-            console.error('❌ Erro ao enviar código:', data.error);
+// console.error('❌ Erro ao enviar código:', data.error);
             showMessage(data.error || 'Erro ao enviar código de verificação', 'error');
             submitButton.disabled = false;
             submitButton.classList.remove('loading');
@@ -81,7 +81,7 @@ async function register(event) {
         }
 
     } catch (error) {
-        console.error('💥 Erro de conexão:', error);
+// console.error('💥 Erro de conexão:', error);
         showMessage('Erro de conexão com o servidor', 'error');
         submitButton.disabled = false;
         submitButton.classList.remove('loading');
@@ -143,7 +143,7 @@ async function verifyCode() {
     btnVerify.textContent = 'Verificando...';
 
     try {
-        console.log('🔐 Verificando código...');
+// console.log('🔐 Verificando código...');
 
         const response = await fetch(`${API_URL}/v1/auth/verify-code`, {
             method: 'POST',
@@ -157,19 +157,19 @@ async function verifyCode() {
         });
 
         const data = await response.json();
-        console.log('📬 Resposta verify-code:', data);
+// console.log('📬 Resposta verify-code:', data);
 
         // Verificar se o código foi validado (data.data?.verified ou apenas data.success)
         const isVerified = data.success && (data.data?.verified || data.verified);
 
         if (response.ok && isVerified) {
-            console.log('✅ Código verificado!');
+// console.log('✅ Código verificado!');
 
             // Criar conta
             await completeRegistration();
 
         } else {
-            console.error('❌ Código inválido:', data.error);
+// console.error('❌ Código inválido:', data.error);
             showVerificationError(data.error || 'Código inválido ou expirado');
             btnVerify.disabled = false;
             btnVerify.textContent = 'Verificar';
@@ -177,7 +177,7 @@ async function verifyCode() {
         }
 
     } catch (error) {
-        console.error('💥 Erro de conexão:', error);
+// console.error('💥 Erro de conexão:', error);
         showVerificationError('Erro de conexão. Tente novamente.');
         btnVerify.disabled = false;
         btnVerify.textContent = 'Verificar';
@@ -201,10 +201,10 @@ async function completeRegistration() {
         });
 
         const data = await response.json();
-        console.log('📬 Resposta register-verified:', data);
+// console.log('📬 Resposta register-verified:', data);
 
         if (response.ok && data.success) {
-            console.log('✅ Conta criada com sucesso!');
+// console.log('✅ Conta criada com sucesso!');
 
             // A resposta pode vir como data.data.user ou data.user
             const userData = data.data?.user || data.user;
@@ -232,14 +232,14 @@ async function completeRegistration() {
             }, 1500);
 
         } else {
-            console.error('❌ Erro ao criar conta:', data.error);
+// console.error('❌ Erro ao criar conta:', data.error);
             showVerificationError(data.error || 'Erro ao criar conta');
             btnVerify.disabled = false;
             btnVerify.textContent = 'Verificar';
         }
 
     } catch (error) {
-        console.error('💥 Erro de conexão:', error);
+// console.error('💥 Erro de conexão:', error);
         showVerificationError('Erro de conexão. Tente novamente.');
         btnVerify.disabled = false;
         btnVerify.textContent = 'Verificar';
@@ -266,19 +266,19 @@ async function resendCode() {
         const data = await response.json();
 
         if (response.ok && data.success) {
-            console.log('✅ Código reenviado!');
+// console.log('✅ Código reenviado!');
             showVerificationError('Novo código enviado!', 'success');
             clearCodeInputs();
             startResendTimer();
         } else {
-            console.error('❌ Erro ao reenviar:', data.error);
+// console.error('❌ Erro ao reenviar:', data.error);
             showVerificationError(data.error || 'Erro ao reenviar código');
             btnResend.disabled = false;
             btnResend.innerHTML = 'Reenviar';
         }
 
     } catch (error) {
-        console.error('💥 Erro de conexão:', error);
+// console.error('💥 Erro de conexão:', error);
         showVerificationError('Erro de conexão. Tente novamente.');
         btnResend.disabled = false;
         btnResend.innerHTML = 'Reenviar';
@@ -420,7 +420,7 @@ function checkIfAlreadyLoggedIn() {
     const userData = localStorage.getItem('nura_user');
 
     if (isLoggedIn === 'true' && userData) {
-        console.log('✅ Usuário já está logado, redirecionando...');
+// console.log('✅ Usuário já está logado, redirecionando...');
         window.location.href = '/inicial';
     }
 }
@@ -488,7 +488,7 @@ function setupCodeInputs() {
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Sistema de registro com verificação inicializado');
+// console.log('🚀 Sistema de registro com verificação inicializado');
 
     // Verificar se já está logado
     checkIfAlreadyLoggedIn();
@@ -499,9 +499,9 @@ document.addEventListener('DOMContentLoaded', function() {
         registerForm.removeAttribute('action');
         registerForm.removeAttribute('method');
         registerForm.addEventListener('submit', register);
-        console.log('✅ Event listener adicionado ao formulário de registro');
+// console.log('✅ Event listener adicionado ao formulário de registro');
     } else {
-        console.error('❌ Formulário de registro não encontrado!');
+// console.error('❌ Formulário de registro não encontrado!');
     }
 
     // Configurar inputs de código
@@ -530,7 +530,7 @@ window.resendCode = resendCode;
 function initGoogleSignIn() {
     // Verificar se a biblioteca do Google está carregada
     if (typeof google === 'undefined' || !google.accounts) {
-        console.log('⏳ Aguardando carregamento da biblioteca Google...');
+// console.log('⏳ Aguardando carregamento da biblioteca Google...');
         setTimeout(initGoogleSignIn, 100);
         return;
     }
@@ -540,7 +540,7 @@ function initGoogleSignIn() {
 
     // Se não tiver Client ID configurado, esconder botão
     if (!clientId) {
-        console.log('⚠️ Google Client ID não configurado');
+// console.log('⚠️ Google Client ID não configurado');
         const googleBtn = document.getElementById('google-signin-btn');
         if (googleBtn) {
             googleBtn.style.display = 'none';
@@ -548,7 +548,7 @@ function initGoogleSignIn() {
         return;
     }
 
-    console.log('🔑 Inicializando Google Sign-In...');
+// console.log('🔑 Inicializando Google Sign-In...');
 
     try {
         // Usar diretamente o OAuth2 Token Client (mais confiável)
@@ -560,7 +560,7 @@ function initGoogleSignIn() {
                 scope: 'email profile',
                 callback: async (response) => {
                     if (response.access_token) {
-                        console.log('✅ Token recebido, buscando info do usuário...');
+// console.log('✅ Token recebido, buscando info do usuário...');
                         try {
                             const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                                 headers: { Authorization: `Bearer ${response.access_token}` }
@@ -568,36 +568,36 @@ function initGoogleSignIn() {
 
                             await handleGoogleLogin(userInfo);
                         } catch (err) {
-                            console.error('❌ Erro ao buscar info:', err);
+// console.error('❌ Erro ao buscar info:', err);
                             showMessage('Erro ao obter dados do Google', 'error');
                         }
                     }
                     googleBtn.classList.remove('loading');
                 },
                 error_callback: (error) => {
-                    console.error('❌ Erro Google OAuth:', error);
+// console.error('❌ Erro Google OAuth:', error);
                     showMessage('Erro na autenticação Google', 'error');
                     googleBtn.classList.remove('loading');
                 }
             });
 
             googleBtn.addEventListener('click', () => {
-                console.log('📱 Abrindo popup do Google...');
+// console.log('📱 Abrindo popup do Google...');
                 googleBtn.classList.add('loading');
                 tokenClient.requestAccessToken();
             });
         }
 
-        console.log('✅ Google Sign-In inicializado!');
+// console.log('✅ Google Sign-In inicializado!');
 
     } catch (error) {
-        console.error('❌ Erro ao inicializar Google Sign-In:', error);
+// console.error('❌ Erro ao inicializar Google Sign-In:', error);
     }
 }
 
 // Login com informações do Google
 async function handleGoogleLogin(userInfo) {
-    console.log('🔐 Processando login Google...');
+// console.log('🔐 Processando login Google...');
 
     const googleBtn = document.getElementById('google-signin-btn');
     if (googleBtn) googleBtn.classList.add('loading');
@@ -626,7 +626,7 @@ async function handleGoogleLogin(userInfo) {
         }
 
     } catch (error) {
-        console.error('❌ Erro no login Google:', error);
+// console.error('❌ Erro no login Google:', error);
         showMessage('Erro de conexão. Tente novamente.', 'error');
     } finally {
         if (googleBtn) googleBtn.classList.remove('loading');
@@ -635,7 +635,7 @@ async function handleGoogleLogin(userInfo) {
 
 // Processar sucesso do login Google
 function handleGoogleSuccess(data) {
-    console.log('✅ Login Google bem sucedido!');
+// console.log('✅ Login Google bem sucedido!');
 
     // Extrair dados (podem vir em data.data ou diretamente)
     const userData = data.data?.user || data.user;
@@ -683,9 +683,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(err => {
-                console.log('ℹ️ Google Client ID não disponível');
+// console.log('ℹ️ Google Client ID não disponível');
             });
     }
 });
 
-console.log('✅ register.js carregado!');
+// console.log('✅ register.js carregado!');

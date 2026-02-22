@@ -10,19 +10,19 @@ window.userSections = [];
 // ===== CARREGAR SEÇÕES (COM FILTRO DE LISTA) =====
 async function loadSections(listId) {
     if (!listId) {
-        console.warn('⚠️ loadSections: listId não fornecido');
+// console.warn('⚠️ loadSections: listId não fornecido');
         window.currentSections = [];
         return [];
     }
 
     const userId = getCurrentUser()?.id;
     if (!userId) {
-        console.error('❌ Usuário não logado');
+// console.error('❌ Usuário não logado');
         window.currentSections = [];
         return [];
     }
 
-    console.log('📡 Carregando seções:', `${API_URL}/api/sections?user_id=${userId}&list_id=${listId}`);
+// console.log('📡 Carregando seções:', `${API_URL}/api/sections?user_id=${userId}&list_id=${listId}`);
 
     try {
         const response = await fetch(`${API_URL}/api/sections?user_id=${userId}&list_id=${listId}`);
@@ -32,17 +32,17 @@ async function loadSections(listId) {
             // ✅ EXPORTAR GLOBALMENTE
             window.currentSections = data.sections;
             
-            console.log(`✅ ${data.sections.length} seções carregadas (lista ${listId})`);
-            console.log('📊 Seções:', data.sections);
+// console.log(`✅ ${data.sections.length} seções carregadas (lista ${listId})`);
+// console.log('📊 Seções:', data.sections);
             
             return data.sections;
         } else {
-            console.warn('⚠️ Nenhuma seção encontrada');
+// console.warn('⚠️ Nenhuma seção encontrada');
             window.currentSections = [];
             return [];
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar seções:', error);
+// console.error('❌ Erro ao carregar seções:', error);
         window.currentSections = [];
         return [];
     }
@@ -66,11 +66,11 @@ async function createSection(sectionName) {
     
     if (!currentListId) {
         showNotification('❌ Nenhuma lista selecionada');
-        console.error('❌ currentListId não definido');
+// console.error('❌ currentListId não definido');
         return;
     }
 
-    console.log('📂 Criando seção:', sectionName, 'na lista:', currentListId);
+// console.log('📂 Criando seção:', sectionName, 'na lista:', currentListId);
 
     try {
         const response = await fetch(`${API_URL}/api/sections`, {
@@ -90,7 +90,7 @@ async function createSection(sectionName) {
         const result = await response.json();
 
         if (result.success) {
-            console.log('✅ Seção criada:', result.section);
+// console.log('✅ Seção criada:', result.section);
             
             // Adicionar à lista local
             if (!window.currentSections) {
@@ -106,7 +106,7 @@ async function createSection(sectionName) {
             }
 
         } else {
-            console.error('❌ Erro do servidor:', result);
+// console.error('❌ Erro do servidor:', result);
 
             // Verificar se é erro de limite de plano
             if (result.code === 'PLAN_LIMIT_REACHED' && window.PlanService) {
@@ -129,7 +129,7 @@ async function createSection(sectionName) {
         }
 
     } catch (error) {
-        console.error('❌ Erro ao criar seção:', error);
+// console.error('❌ Erro ao criar seção:', error);
         showNotification('❌ Erro de conexão');
     }
 }
@@ -139,7 +139,7 @@ let pendingDeleteSectionId = null;
 
 // ===== MOSTRAR MODAL DE EXCLUIR SEÇÃO =====
 function showDeleteSectionModal(sectionId, sectionName) {
-    console.log('🗑️ Abrindo modal de excluir seção:', sectionId, sectionName);
+// console.log('🗑️ Abrindo modal de excluir seção:', sectionId, sectionName);
 
     pendingDeleteSectionId = sectionId;
 
@@ -211,7 +211,7 @@ async function confirmDeleteSection() {
             showNotification('❌ Erro ao excluir seção');
         }
     } catch (error) {
-        console.error('❌ Erro ao excluir seção:', error);
+// console.error('❌ Erro ao excluir seção:', error);
         showNotification('❌ Erro de conexão');
     }
 }
@@ -242,7 +242,7 @@ async function deleteSection(sectionId) {
             }
         }
     } catch (error) {
-        console.error('❌ Erro ao excluir seção:', error);
+// console.error('❌ Erro ao excluir seção:', error);
     }
 }
 
@@ -277,7 +277,7 @@ async function toggleSectionCollapse(sectionId) {
             sectionElement.classList.toggle('collapsed', newState);
         }
     } catch (error) {
-        console.error('❌ Erro ao toggle seção:', error);
+// console.error('❌ Erro ao toggle seção:', error);
     }
 }
 
@@ -345,13 +345,13 @@ async function submitEditSection(sectionId) {
             document.querySelector('.section-modal-overlay')?.remove();
         }
     } catch (error) {
-        console.error('❌ Erro ao editar seção:', error);
+// console.error('❌ Erro ao editar seção:', error);
     }
 }
 
 // ===== MODAL CRIAR SEÇÃO =====
 function showCreateSectionModal() {
-    console.log('🎨 Abrindo modal de criar seção');
+// console.log('🎨 Abrindo modal de criar seção');
     
     const modal = document.createElement('div');
     modal.className = 'modal-overlay active';
@@ -414,7 +414,7 @@ function showCreateSectionModal() {
         if (input) input.focus();
     }, 100);
     
-    console.log('✅ Modal de criar seção aberto');
+// console.log('✅ Modal de criar seção aberto');
 }
 
 function handleCreateSectionEscape(e) {
@@ -466,7 +466,7 @@ async function submitCreateSection() {
         const result = await response.json();
         
         if (result.success) {
-            console.log('✅ Seção criada:', result.section);
+// console.log('✅ Seção criada:', result.section);
             
             // Adicionar à lista local
             if (!window.currentSections) {
@@ -500,7 +500,7 @@ async function submitCreateSection() {
             }
         }
     } catch (error) {
-        console.error('❌ Erro:', error);
+// console.error('❌ Erro:', error);
         showNotification('❌ Erro de conexão');
     }
 }
@@ -510,18 +510,18 @@ async function submitCreateSection() {
 function renderSections(sections, listId) {
     // Esta função é chamada em modo lista, mas não no Kanban
     // No Kanban, a renderização é feita por renderKanbanView()
-    console.log('📋 renderSections chamada (modo lista)');
+// console.log('📋 renderSections chamada (modo lista)');
     
     // Se estiver no modo Kanban, não fazer nada
     const settings = window.nuraSettingsFunctions?.getSettings() || {};
     if (settings.viewMode === 'kanban') {
-        console.log('⏭️ Pulando renderSections (modo Kanban)');
+// console.log('⏭️ Pulando renderSections (modo Kanban)');
         return;
     }
     
     // Aqui viria a lógica de renderizar seções no modo lista
     // Por enquanto, apenas log
-    console.log(`📊 Renderizar ${sections.length} seções para lista ${listId}`);
+// console.log(`📊 Renderizar ${sections.length} seções para lista ${listId}`);
 }
 
 // ===== VARIÁVEL GLOBAL PARA ARMAZENAR ID DA SEÇÃO SENDO EDITADA =====
@@ -529,12 +529,12 @@ let currentEditingSectionId = null;
 
 // ===== ABRIR MODAL DE EDITAR SEÇÃO =====
 function openEditSectionModal(sectionId) {
-    console.log('✏️ Abrindo modal de editar seção:', sectionId);
+// console.log('✏️ Abrindo modal de editar seção:', sectionId);
     
     const section = window.currentSections?.find(s => s.id === sectionId);
     
     if (!section) {
-        console.error('❌ Seção não encontrada:', sectionId);
+// console.error('❌ Seção não encontrada:', sectionId);
         showNotification('❌ Seção não encontrada');
         return;
     }
@@ -546,7 +546,7 @@ function openEditSectionModal(sectionId) {
     const input = document.getElementById('editSectionNameInput');
     
     if (!modal || !overlay || !input) {
-        console.error('❌ Elementos do modal não encontrados');
+// console.error('❌ Elementos do modal não encontrados');
         return;
     }
 
@@ -563,7 +563,7 @@ function openEditSectionModal(sectionId) {
         input.select();
     }, 100);
     
-    console.log('✅ Modal de editar seção aberto');
+// console.log('✅ Modal de editar seção aberto');
 }
 
 // ===== FECHAR MODAL =====
@@ -582,13 +582,13 @@ function closeEditSectionModal() {
         currentEditingSectionId = null;
     }, 300);
     
-    console.log('✅ Modal de editar seção fechado');
+// console.log('✅ Modal de editar seção fechado');
 }
 
 // ===== SALVAR NOME EDITADO =====
 async function saveEditedSectionName() {
     if (!currentEditingSectionId) {
-        console.error('❌ Nenhuma seção sendo editada');
+// console.error('❌ Nenhuma seção sendo editada');
         return;
     }
 
@@ -606,7 +606,7 @@ async function saveEditedSectionName() {
         return;
     }
 
-    console.log('💾 Salvando novo nome:', newName);
+// console.log('💾 Salvando novo nome:', newName);
 
     try {
         const response = await fetch(`${API_URL}/api/sections/${currentEditingSectionId}`, {
@@ -638,13 +638,13 @@ async function saveEditedSectionName() {
                 renderAllTasks();
             }
             
-            console.log('✅ Seção renomeada com sucesso');
+// console.log('✅ Seção renomeada com sucesso');
         } else {
             showNotification('❌ Erro ao renomear seção');
-            console.error('Erro:', result);
+// console.error('Erro:', result);
         }
     } catch (error) {
-        console.error('❌ Erro ao salvar:', error);
+// console.error('❌ Erro ao salvar:', error);
         showNotification('❌ Erro de conexão');
     }
 }
@@ -673,19 +673,19 @@ async function saveEditedSection() {
     const newName = document.getElementById('editSectionNameInput')?.value?.trim();
     
     if (!sectionId) {
-        console.error('❌ ID da seção não encontrado');
+// console.error('❌ ID da seção não encontrado');
         showNotification('Erro ao identificar seção', 'error');
         return;
     }
     
     if (!newName) {
-        console.error('❌ Nome da seção vazio');
+// console.error('❌ Nome da seção vazio');
         showNotification('Digite um nome para a seção', 'error');
         return;
     }
     
     try {
-        console.log(`📝 Salvando edição da seção ${sectionId}: "${newName}"`);
+// console.log(`📝 Salvando edição da seção ${sectionId}: "${newName}"`);
         
         const baseUrl = window.location.hostname === 'localhost'
             ? 'http://localhost:3000'
@@ -699,7 +699,7 @@ async function saveEditedSection() {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
         const result = await response.json();
-        console.log('✅ Seção atualizada:', result);
+// console.log('✅ Seção atualizada:', result);
         
         const section = window.sections?.find(s => s.id === sectionId);
         if (section) {
@@ -717,7 +717,7 @@ async function saveEditedSection() {
         }
         
     } catch (error) {
-        console.error('❌ Erro:', error);
+// console.error('❌ Erro:', error);
         if (typeof showNotification === 'function') {
             showNotification('Erro ao atualizar seção', 'error');
         }
@@ -731,7 +731,7 @@ window.openEditSectionModal = openEditSectionModal;
 window.closeEditSectionModal = closeEditSectionModal;
 window.saveEditedSectionName = saveEditedSectionName;
 
-console.log('✅ Funções de edição de seção exportadas');
+// console.log('✅ Funções de edição de seção exportadas');
 
 // Exportar
 window.renderSections = renderSections;
@@ -751,4 +751,4 @@ window.showDeleteSectionModal = showDeleteSectionModal;
 window.closeDeleteSectionModal = closeDeleteSectionModal;
 window.confirmDeleteSection = confirmDeleteSection;
 
-console.log('✅ sections.js carregado');
+// console.log('✅ sections.js carregado');

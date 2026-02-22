@@ -19,7 +19,7 @@ async function loadCompletedTasks() {
     }
 
     try {
-        console.log('📋 Carregando tarefas concluídas...');
+// console.log('📋 Carregando tarefas concluídas...');
 
         // Usa rota alternativa "done" para evitar bloqueio de ad blockers
         // A palavra "completed" é frequentemente bloqueada por extensões
@@ -33,7 +33,7 @@ async function loadCompletedTasks() {
         
         if (data.success) {
             completedTasks = data.tasks || [];
-            console.log(`✅ ${completedTasks.length} tarefas concluídas carregadas`);
+// console.log(`✅ ${completedTasks.length} tarefas concluídas carregadas`);
             
             updateStats();
             renderCompletedTasks();
@@ -42,7 +42,7 @@ async function loadCompletedTasks() {
         }
         
     } catch (error) {
-        console.error('❌ Erro ao carregar tarefas:', error);
+// console.error('❌ Erro ao carregar tarefas:', error);
         document.getElementById('emptyState').style.display = 'flex';
         document.getElementById('completedCount').textContent = '0';
     }
@@ -252,7 +252,7 @@ async function reactivateTask(taskId) {
             showNotification('Tarefa reativada com sucesso');
         }
     } catch (error) {
-        console.error('❌ Erro:', error);
+// console.error('❌ Erro:', error);
         showNotification('Erro ao reativar tarefa');
     }
 }
@@ -280,7 +280,7 @@ async function deleteTask(taskId) {
             showNotification('Tarefa excluída permanentemente');
         }
     } catch (error) {
-        console.error('❌ Erro:', error);
+// console.error('❌ Erro:', error);
         showNotification('Erro ao excluir tarefa');
     }
 }
@@ -418,11 +418,11 @@ async function openTaskModal(taskId) {
     const task = completedTasks.find(t => t.id === taskId);
     
     if (!task) {
-        console.error('Tarefa não encontrada');
+// console.error('Tarefa não encontrada');
         return;
     }
     
-    console.log('📋 Abrindo detalhes da tarefa:', task);
+// console.log('📋 Abrindo detalhes da tarefa:', task);
     
     // Preencher título
     document.getElementById('modalTaskTitle').textContent = task.title;
@@ -506,7 +506,7 @@ async function loadSubtasks(taskId) {
         }
         
     } catch (error) {
-        console.error('❌ Erro ao carregar subtarefas:', error);
+// console.error('❌ Erro ao carregar subtarefas:', error);
         document.getElementById('modalSubtasksSection').style.display = 'none';
     }
 }

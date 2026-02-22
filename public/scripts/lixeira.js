@@ -15,7 +15,7 @@ let currentTaskId = null;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🗑️ Iniciando página da lixeira...');
+// console.log('🗑️ Iniciando página da lixeira...');
     loadTrashTasks();
 
     // Event listener para busca
@@ -32,11 +32,11 @@ async function loadTrashTasks() {
         const userId = userData.id;
 
         if (!userId) {
-            console.warn('⚠️ Usuário não logado');
+// console.warn('⚠️ Usuário não logado');
             return;
         }
 
-        console.log('📡 Carregando lixeira...');
+// console.log('📡 Carregando lixeira...');
 
         const response = await fetch(`${API_URL}/api/trash?user_id=${userId}`);
         const data = await response.json();
@@ -45,7 +45,7 @@ async function loadTrashTasks() {
             trashTasks = data.tasks || [];
             filteredTasks = [...trashTasks];
 
-            console.log(`✅ ${trashTasks.length} tarefas na lixeira`);
+// console.log(`✅ ${trashTasks.length} tarefas na lixeira`);
 
             updateStats();
             renderTasks();
@@ -53,7 +53,7 @@ async function loadTrashTasks() {
         }
 
     } catch (error) {
-        console.error('❌ Erro ao carregar lixeira:', error);
+// console.error('❌ Erro ao carregar lixeira:', error);
         showToast('Erro ao carregar lixeira', 'error');
     }
 }
@@ -324,7 +324,7 @@ async function restoreTask(taskId) {
         const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
         const userId = userData.id;
 
-        console.log(`♻️ Restaurando tarefa ${taskId}...`);
+// console.log(`♻️ Restaurando tarefa ${taskId}...`);
 
         const response = await fetch(`${API_URL}/api/trash/${taskId}/restore?user_id=${userId}`, {
             method: 'POST',
@@ -344,7 +344,7 @@ async function restoreTask(taskId) {
         }
 
     } catch (error) {
-        console.error('❌ Erro ao restaurar tarefa:', error);
+// console.error('❌ Erro ao restaurar tarefa:', error);
         showToast('Erro ao restaurar tarefa', 'error');
     }
 }
@@ -376,7 +376,7 @@ async function deleteTaskPermanently(taskId) {
         const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
         const userId = userData.id;
 
-        console.log(`🗑️ Excluindo permanentemente tarefa ${taskId}...`);
+// console.log(`🗑️ Excluindo permanentemente tarefa ${taskId}...`);
 
         const response = await fetch(`${API_URL}/api/tasks/${taskId}?user_id=${userId}&permanent=true`, {
             method: 'DELETE',
@@ -397,7 +397,7 @@ async function deleteTaskPermanently(taskId) {
         }
 
     } catch (error) {
-        console.error('❌ Erro ao excluir tarefa:', error);
+// console.error('❌ Erro ao excluir tarefa:', error);
         showToast('Erro ao excluir tarefa', 'error');
     }
 }
@@ -417,7 +417,7 @@ async function emptyTrash() {
         const userData = JSON.parse(localStorage.getItem('nura_user') || '{}');
         const userId = userData.id;
 
-        console.log('🗑️ Esvaziando lixeira...');
+// console.log('🗑️ Esvaziando lixeira...');
 
         const response = await fetch(`${API_URL}/api/trash/empty?user_id=${userId}`, {
             method: 'DELETE',
@@ -437,7 +437,7 @@ async function emptyTrash() {
         }
 
     } catch (error) {
-        console.error('❌ Erro ao esvaziar lixeira:', error);
+// console.error('❌ Erro ao esvaziar lixeira:', error);
         showToast('Erro ao esvaziar lixeira', 'error');
     }
 }
@@ -623,4 +623,4 @@ window.closeTaskModal = closeTaskModal;
 window.restoreTaskFromModal = restoreTaskFromModal;
 window.deleteTaskPermanentlyFromModal = deleteTaskPermanentlyFromModal;
 
-console.log('✅ lixeira.js carregado');
+// console.log('✅ lixeira.js carregado');
