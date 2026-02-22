@@ -429,14 +429,20 @@ async function handleMessage(from, text, msg) {
                 const statusNotif = intervalo ? `✅ A cada ${intervalo}min` : '❌ Desativado';
 
                 await sock.sendMessage(from, {
-                    text: `*DIVY* 📋\n\n` +
-                          `━━━━━━━━━━━━━━━\n` +
-                          `📝 *tarefas* - Ver pendentes\n` +
-                          `➕ *adicionar* [tarefa]\n` +
-                          `📅 *hoje* - Tarefas de hoje\n` +
-                          `🔔 *notificar* - Config lembretes\n` +
-                          `━━━━━━━━━━━━━━━\n` +
-                          `🔔 Lembretes: ${statusNotif}`
+                    text: `╔═══════════════════╗\n` +
+                          `     *DIVY* — Assistente\n` +
+                          `╚═══════════════════╝\n\n` +
+                          `Olá! O que deseja fazer hoje?\n\n` +
+                          `*📋 Tarefas*\n` +
+                          `› *tarefas* — Ver pendentes\n` +
+                          `› *hoje* — Tarefas de hoje\n` +
+                          `› *adicionar* [nome] — Nova tarefa\n\n` +
+                          `*🔔 Lembretes*\n` +
+                          `› *notificar* — Configurar lembretes\n` +
+                          `› *testar* — Enviar lembrete agora\n\n` +
+                          `*⚙️ Status*\n` +
+                          `› Lembretes: ${statusNotif}\n\n` +
+                          `_Digite qualquer comando acima para começar._`
                 });
             } else {
                 await sock.sendMessage(from, {
@@ -723,12 +729,17 @@ async function handleMessage(from, text, msg) {
 
             if (estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: `*DIVY* 📋\n\n` +
-                          `📝 *tarefas* - Ver pendentes\n` +
-                          `➕ *adicionar* [tarefa]\n` +
-                          `📅 *hoje* - Tarefas de hoje\n` +
-                          `🔔 *notificar* - Config lembretes\n` +
-                          `🧪 *testar* - Testar notificação`
+                    text: `╔═══════════════════╗\n` +
+                          `     *DIVY* — Ajuda\n` +
+                          `╚═══════════════════╝\n\n` +
+                          `*📋 Tarefas*\n` +
+                          `› *tarefas* — Ver tarefas pendentes\n` +
+                          `› *hoje* — Tarefas com prazo hoje\n` +
+                          `› *adicionar* [nome] — Criar nova tarefa\n\n` +
+                          `*🔔 Lembretes*\n` +
+                          `› *notificar* — Configurar intervalo\n` +
+                          `› *testar* — Enviar lembrete agora\n\n` +
+                          `_Acesse divy.online para gerenciar tudo pelo app._`
                 });
             } else {
                 await sock.sendMessage(from, {
