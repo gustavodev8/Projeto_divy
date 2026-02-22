@@ -43,32 +43,9 @@ module.exports = function(db, isPostgres) {
                 return badRequest(res, 'A mensagem deve ter no máximo 2000 caracteres.');
             }
 
-            // Buscar dados do usuário
-            let userName = 'Usuário';
-            let userEmail = 'não informado';
-
-            if (userId) {
-                try {
-                    const query = isPostgres
-                        ? 'SELECT username, email FROM users WHERE id = $1'
-                        : 'SELECT username, email FROM users WHERE id = ?';
-                    const params = [userId];
-
-                    const result = isPostgres
-                        ? await db.query(query, params)
-                        : await new Promise((resolve, reject) => {
-                            db.get(query, params, (err, row) => err ? reject(err) : resolve(row));
-                        });
-
-                    const user = isPostgres ? result.rows[0] : result;
-                    if (user) {
-                        userName = user.username || 'Usuário';
-                        userEmail = user.email || 'não informado';
-                    }
-                } catch (dbErr) {
-                    console.error('⚠️ Erro ao buscar usuário para feedback:', dbErr.message);
-                }
-            }
+            // Pegar dados do usuário diretamente do JWT (já vem no token)
+            const userName = req.user?.username || 'Usuário';
+            const userEmail = req.user?.email || 'não informado';
 
             // Enviar email
             const emailResult = await enviarFeedback(type, message.trim(), userName, userEmail, userId);
