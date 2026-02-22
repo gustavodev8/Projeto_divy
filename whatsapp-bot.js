@@ -1360,7 +1360,8 @@ function escolherFraseMotivacional(tipo) {
 // Busca tarefas de alta e média prioridade do usuário
 async function getTarefasPorPrioridade(userId) {
     try {
-        const result = await db.query(`
+        // Contagens por prioridade
+        const counts = await db.query(`
             SELECT
                 COUNT(*) FILTER (WHERE priority = 'high') as alta,
                 COUNT(*) FILTER (WHERE priority = 'medium') as media,
@@ -1371,14 +1372,26 @@ async function getTarefasPorPrioridade(userId) {
               AND deleted_at IS NULL
         `, [userId]);
 
+        // Nomes das tarefas de alta prioridade (máx 5)
+        const altaLista = await db.query(`
+            SELECT title FROM tasks
+            WHERE user_id = $1
+              AND priority = 'high'
+              AND status NOT IN ('completed', 'concluido')
+              AND deleted_at IS NULL
+            ORDER BY created_at ASC
+            LIMIT 5
+        `, [userId]);
+
         return {
-            alta: parseInt(result[0]?.alta || 0),
-            media: parseInt(result[0]?.media || 0),
-            total: parseInt(result[0]?.total || 0)
+            alta: parseInt(counts[0]?.alta || 0),
+            media: parseInt(counts[0]?.media || 0),
+            total: parseInt(counts[0]?.total || 0),
+            altaLista: altaLista.map(t => t.title)
         };
     } catch (error) {
         console.error('Erro ao buscar tarefas por prioridade:', error);
-        return { alta: 0, media: 0, total: 0 };
+        return { alta: 0, media: 0, total: 0, altaLista: [] };
     }
 }
 
@@ -1393,22 +1406,35 @@ function formatarMensagemMotivacional(nome, tarefas) {
     }
 
     const frase = escolherFraseMotivacional(tipo);
-
     let msg = `${frase}\n\n`;
 
+    // Lista as tarefas de alta prioridade
     if (tarefas.alta > 0) {
-        msg += `🔴 *${tarefas.alta}* tarefa${tarefas.alta > 1 ? 's' : ''} de prioridade ALTA\n`;
-    }
-    if (tarefas.media > 0) {
-        msg += `🟡 *${tarefas.media}* tarefa${tarefas.media > 1 ? 's' : ''} de prioridade MÉDIA\n`;
+        msg += `🔴 *Prioridade Alta (${tarefas.alta})*\n`;
+        tarefas.altaLista.forEach((titulo, i) => {
+            msg += `  ${i + 1}. ${titulo}\n`;
+        });
+        if (tarefas.alta > tarefas.altaLista.length) {
+            msg += `  _...e mais ${tarefas.alta - tarefas.altaLista.length} tarefa(s)_\n`;
+        }
+        msg += '\n';
     }
 
-    const outras = tarefas.total - tarefas.alta - tarefas.media;
-    if (outras > 0) {
-        msg += `🟢 *${outras}* outra${outras > 1 ? 's' : ''} pendente${outras > 1 ? 's' : ''}\n`;
+    // Aviso sobre demais prioridades
+    const outras = tarefas.total - tarefas.alta;
+    if (tarefas.media > 0 || outras > 0) {
+        msg += `📋 *Outras pendentes*\n`;
+        if (tarefas.media > 0) {
+            msg += `  🟡 ${tarefas.media} de prioridade média\n`;
+        }
+        const baixa = tarefas.total - tarefas.alta - tarefas.media;
+        if (baixa > 0) {
+            msg += `  🟢 ${baixa} de prioridade baixa\n`;
+        }
+        msg += '\n';
     }
 
-    msg += `\n💬 Responda *tarefas* para ver a lista completa!`;
+    msg += `💬 Digite *tarefas* para ver a lista completa.`;
 
     return msg;
 }
