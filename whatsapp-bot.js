@@ -442,7 +442,7 @@ async function handleMessage(from, text, msg) {
                 await sock.sendMessage(from, {
                     text: `*DIVY* 📋\n\n` +
                           `Para usar o bot, vincule seu WhatsApp nas configurações do app:\n\n` +
-                          `1️⃣ Acesse *nura.app*\n` +
+                          `1️⃣ Acesse *divy.online*\n` +
                           `2️⃣ Vá em *Configurações*\n` +
                           `3️⃣ Na seção *WhatsApp*, insira seu número\n` +
                           `4️⃣ Digite o código recebido\n\n` +
@@ -458,7 +458,7 @@ async function handleMessage(from, text, msg) {
 
             if (!estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app nura.app'
+                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app divy.online'
                 });
                 return;
             }
@@ -497,7 +497,7 @@ async function handleMessage(from, text, msg) {
 
             if (!estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app nura.app'
+                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app divy.online'
                 });
                 return;
             }
@@ -527,7 +527,7 @@ async function handleMessage(from, text, msg) {
 
             if (!estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app nura.app'
+                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app divy.online'
                 });
                 return;
             }
@@ -567,7 +567,7 @@ async function handleMessage(from, text, msg) {
 
             if (!estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app nura.app'
+                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app divy.online'
                 });
                 return;
             }
@@ -684,7 +684,7 @@ async function handleMessage(from, text, msg) {
 
             if (!estaVinculado) {
                 await sock.sendMessage(from, {
-                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app nura.app'
+                    text: '❌ Vincule seu WhatsApp primeiro!\n\nAcesse as *Configurações* no app divy.online'
                 });
                 return;
             }
@@ -734,7 +734,7 @@ async function handleMessage(from, text, msg) {
                 await sock.sendMessage(from, {
                     text: `*DIVY* 📋\n\n` +
                           `Para usar o bot, vincule seu WhatsApp nas configurações do app:\n\n` +
-                          `🌐 Acesse *nura.app*\n` +
+                          `🌐 Acesse *divy.online*\n` +
                           `⚙️ Vá em *Configurações > WhatsApp*`
                 });
             }
