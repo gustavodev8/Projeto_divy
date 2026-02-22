@@ -2234,10 +2234,10 @@ async function salvarNovaTarefa() {
 // console.log('   selectSecao.value (string):', selectSecao?.value);
 // console.log('   selectSecao.value === "" ?', selectSecao?.value === '');
 // console.log('   Todas as options:', Array.from(selectSecao?.options || []).map(o => ({
-        value: o.value, 
-        text: o.text, 
-        selected: o.selected
-    })));
+//         value: o.value,
+//         text: o.text,
+//         selected: o.selected
+//     })));
     
     const secaoIdString = selectSecao?.value;
     let secaoId = null;

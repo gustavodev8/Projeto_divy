@@ -204,10 +204,10 @@ async function mostrarInfoEstatisticas() {
             };
             
 // console.log(
-                `${index + 1}. ${statusEmoji[task.status] || '❓'} ` +
-                `${priorityEmoji[task.priority] || '⚪'} ` +
-                `${task.title} - Status: ${task.status}`
-            );
+//                 `${index + 1}. ${statusEmoji[task.status] || '❓'} ` +
+//                 `${priorityEmoji[task.priority] || '⚪'} ` +
+//                 `${task.title} - Status: ${task.status}`
+//             );
         });
     } else {
 // console.log('ℹ️ Nenhuma tarefa cadastrada ainda.');
