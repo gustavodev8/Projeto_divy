@@ -1086,10 +1086,22 @@ function cancelVerification() {
 }
 
 // ===== WHATSAPP: DESVINCULAR =====
+function showUnlinkModal() {
+    const overlay = document.getElementById('unlinkModalOverlay');
+    if (overlay) overlay.classList.add('active');
+}
+
+function closeUnlinkModal() {
+    const overlay = document.getElementById('unlinkModalOverlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
 async function unlinkWhatsapp() {
-    if (!confirm('Tem certeza que deseja desvincular o WhatsApp?')) {
-        return;
-    }
+    showUnlinkModal();
+}
+
+async function confirmUnlinkWhatsapp() {
+    closeUnlinkModal();
 
     try {
         const token = localStorage.getItem('nura_access_token');
@@ -1297,6 +1309,9 @@ window.verifyWhatsappCode = verifyWhatsappCode;
 window.resendVerificationCode = resendVerificationCode;
 window.cancelVerification = cancelVerification;
 window.unlinkWhatsapp = unlinkWhatsapp;
+window.showUnlinkModal = showUnlinkModal;
+window.closeUnlinkModal = closeUnlinkModal;
+window.confirmUnlinkWhatsapp = confirmUnlinkWhatsapp;
 window.showFeedbackModal = showFeedbackModal;
 window.closeFeedbackModal = closeFeedbackModal;
 window.submitFeedback = submitFeedback;
