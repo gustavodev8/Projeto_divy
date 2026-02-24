@@ -1,4 +1,4 @@
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers } = require('@whiskeysockets/baileys');
 const qrcode = require('qrcode-terminal');
 const db = require('./database'); // Usar o módulo de banco de dados
 
@@ -36,10 +36,13 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 
 async function connectToWhatsApp() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
+    const { version } = await fetchLatestBaileysVersion();
 
     sock = makeWASocket({
-        auth: state
-        // printQRInTerminal removido (deprecado)
+        auth: state,
+        version,
+        browser: Browsers.ubuntu('Chrome'),
+        printQRInTerminal: true
     });
 
     sock.ev.on('creds.update', saveCreds);
